@@ -1,109 +1,109 @@
-# RAG Service
+# RAG 服务
 
-Production-grade RAG (Retrieval-Augmented Generation) service with Qdrant vector store.
+生产级 RAG（检索增强生成）服务，基于 Qdrant 向量数据库。
 
-## Features
+## 功能特性
 
-- **Multi-format Document Support**: Markdown, PDF, Web pages, Plain text
-- **Vector Search**: Qdrant-powered semantic search
-- **Flexible LLM Support**: OpenAI GPT, Anthropic Claude, Ollama (local)
-- **Streaming Responses**: Real-time token streaming
-- **Conversation History**: Session-based chat history
-- **Docker Ready**: One-click deployment with Qdrant
+- **多格式文档支持**：Markdown、PDF、网页、纯文本
+- **向量检索**：Qdrant 驱动的语义搜索
+- **灵活的 LLM 支持**：OpenAI GPT、Anthropic Claude、Ollama（本地）
+- **流式响应**：实时令牌流输出
+- **对话历史**：基于会话的聊天历史记录
+- **Docker 部署**：一键部署 Qdrant
 
-## Architecture
+## 架构设计
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    RAG Service                      │
-│                     Port 8001                        │
+│                    RAG 服务                          │
+│                     端口 8001                         │
 ├─────────────────────────────────────────────────────┤
-│  API Layer                                          │
-│  ├── /documents (upload, list, delete, stats)      │
-│  └── /chat (query, stream, history)                │
+│  API 层                                              │
+│  ├── /documents (上传、列表、删除、统计)             │
+│  └── /chat (查询、流式响应、历史记录)                │
 ├─────────────────────────────────────────────────────┤
-│  Core Components                                    │
-│  ├── LLM Gateway (OpenAI/Claude/Ollama)           │
-│  ├── Embedding Model (Sentence Transformers)      │
-│  └── Vector Store (Qdrant)                        │
+│  核心组件                                            │
+│  ├── LLM 网关 (OpenAI/Claude/Ollama)               │
+│  ├── Embedding 模型 (Sentence Transformers)         │
+│  └── 向量存储 (Qdrant)                              │
 ├─────────────────────────────────────────────────────┤
-│  Document Processing                                │
-│  ├── Document Loaders (PDF, MD, Web, Text)        │
-│  └── Ingestion Service (chunking, embedding)      │
+│  文档处理                                            │
+│  ├── 文档加载器 (PDF、MD、网页、文本)               │
+│  └── 数据摄取服务 (分块、嵌入)                       │
 └─────────────────────────────────────────────────────┘
                     │
                     ▼
          ┌─────────────────────┐
-         │  Qdrant Vector DB   │
-         │     Port 6333       │
+         │  Qdrant 向量数据库   │
+         │     端口 6333        │
          └─────────────────────┘
 ```
 
-## Quick Start
+## 快速开始
 
-### 1. Clone and Setup
+### 1. 克隆并配置
 
 ```bash
 cd services/rag
 
-# Create virtual environment
+# 创建虚拟环境
 python -m venv .venv
 source .venv/bin/activate
 
-# Install dependencies
+# 安装依赖
 pip install -e .
 ```
 
-### 2. Configuration
+### 2. 配置
 
 ```bash
 cp .env.example .env
 
-# Edit .env with your settings
+# 编辑 .env 文件
 vim .env
 ```
 
-Required environment variables:
+必需的环境变量：
 
 ```env
-# Qdrant (if not using Docker)
+# Qdrant（非 Docker 模式）
 QDRANT_HOST=localhost
 QDRANT_PORT=6333
 
-# LLM Provider
+# LLM 提供商
 LLM_PROVIDER=openai
 LLM_MODEL=gpt-4o-mini
 OPENAI_API_KEY=your-api-key
 
-# Or for Ollama
+# 或使用 Ollama
 LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=qwen2.5:7b
 ```
 
-### 3. Start Qdrant (with Docker)
+### 3. 启动 Qdrant（使用 Docker）
 
 ```bash
 docker compose up qdrant -d
 ```
 
-### 4. Run the Service
+### 4. 运行服务
 
 ```bash
 uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
-### 5. Verify
+### 5. 验证
 
 ```bash
 curl http://localhost:8001/health
 ```
 
-## API Reference
+## API 参考
 
-### Document Management
+### 文档管理
 
-#### Upload Document
+#### 上传文档
 
 ```bash
 curl -X POST http://localhost:8001/documents/upload \
@@ -111,27 +111,27 @@ curl -X POST http://localhost:8001/documents/upload \
   -F "title=My Document"
 ```
 
-#### Ingest from URL
+#### 从 URL 摄取
 
 ```bash
 curl -X POST "http://localhost:8001/documents/ingest-url?url=https://example.com&title=Example"
 ```
 
-#### List Documents
+#### 列出文档
 
 ```bash
 curl http://localhost:8001/documents/
 ```
 
-#### Delete Document
+#### 删除文档
 
 ```bash
 curl -X DELETE http://localhost:8001/documents/{doc_id}
 ```
 
-### Chat
+### 对话
 
-#### Query
+#### 查询
 
 ```bash
 curl -X POST http://localhost:8001/chat/ \
@@ -143,7 +143,7 @@ curl -X POST http://localhost:8001/chat/ \
   }'
 ```
 
-#### Stream Response
+#### 流式响应
 
 ```bash
 curl -X POST http://localhost:8001/chat/stream \
@@ -151,44 +151,44 @@ curl -X POST http://localhost:8001/chat/stream \
   -d '{"query": "Explain RAG", "session_id": "stream-test"}'
 ```
 
-#### Get Chat History
+#### 获取对话历史
 
 ```bash
 curl http://localhost:8001/chat/history/my-session
 ```
 
-### Ingest Text Directly
+### 直接摄取文本
 
 ```bash
 curl -X POST "http://localhost:8001/chat/ingest-text?text=Hello%20World&title=Test"
 ```
 
-## Configuration Options
+## 配置选项
 
-| Variable | Default | Description |
+| 变量 | 默认值 | 说明 |
 |----------|---------|-------------|
-| `HOST` | 0.0.0.0 | Service host |
-| `PORT` | 8001 | Service port |
-| `QDRANT_HOST` | localhost | Qdrant server host |
-| `QDRANT_PORT` | 6333 | Qdrant server port |
-| `COLLECTION_NAME` | ai_test_docs | Vector collection name |
-| `VECTOR_DIM` | 384 | Embedding dimension |
-| `EMBEDDING_MODEL` | all-MiniLM-L6-v2 | Sentence transformer model |
-| `EMBEDDING_DEVICE` | cuda | cuda or cpu |
-| `LLM_PROVIDER` | openai | openai, anthropic, or ollama |
-| `LLM_MODEL` | gpt-4o-mini | Model name |
-| `CHUNK_SIZE` | 500 | Text chunk size (tokens) |
-| `CHUNK_OVERLAP` | 50 | Overlap between chunks |
+| `HOST` | 0.0.0.0 | 服务主机地址 |
+| `PORT` | 8001 | 服务端口 |
+| `QDRANT_HOST` | localhost | Qdrant 服务器地址 |
+| `QDRANT_PORT` | 6333 | Qdrant 服务器端口 |
+| `COLLECTION_NAME` | ai_test_docs | 向量集合名称 |
+| `VECTOR_DIM` | 384 | Embedding 维度 |
+| `EMBEDDING_MODEL` | all-MiniLM-L6-v2 | Sentence transformer 模型 |
+| `EMBEDDING_DEVICE` | cuda | cuda 或 cpu |
+| `LLM_PROVIDER` | openai | openai、anthropic 或 ollama |
+| `LLM_MODEL` | gpt-4o-mini | 模型名称 |
+| `CHUNK_SIZE` | 500 | 文本分块大小（token） |
+| `CHUNK_OVERLAP` | 50 | 分块重叠大小 |
 
-## Docker Deployment
+## Docker 部署
 
-### Full Stack (RAG + Qdrant)
+### 完整部署（RAG + Qdrant）
 
 ```bash
 docker compose up -d
 ```
 
-### RAG Only (external Qdrant)
+### 仅 RAG（外部 Qdrant）
 
 ```bash
 docker build -t rag-service .
@@ -198,58 +198,58 @@ docker run -p 8001:8001 \
   rag-service
 ```
 
-## Development
+## 开发
 
-### Run Tests
+### 运行测试
 
 ```bash
-# Install dev dependencies
+# 安装开发依赖
 pip install -e ".[dev]"
 
-# Run tests
+# 运行测试
 pytest tests/ -v
 
-# With coverage
+# 带覆盖率
 pytest tests/ -v --cov=src --cov-report=html
 ```
 
-### Project Structure
+### 项目结构
 
 ```
 services/rag/
 ├── src/
-│   ├── main.py              # FastAPI app entry
-│   ├── config.py            # Settings management
-│   ├── schemas.py           # Pydantic models
+│   ├── main.py              # FastAPI 应用入口
+│   ├── config.py            # 配置管理
+│   ├── schemas.py           # Pydantic 模型
 │   ├── api/
-│   │   ├── documents.py     # Document API routes
-│   │   └── chat.py          # Chat API routes
+│   │   ├── documents.py     # 文档 API 路由
+│   │   └── chat.py          # 聊天 API 路由
 │   ├── core/
-│   │   ├── llm_gateway.py   # LLM provider abstraction
-│   │   ├── embedding.py    # Embedding model
-│   │   └── vector_store.py  # Qdrant integration
+│   │   ├── llm_gateway.py   # LLM 提供商抽象
+│   │   ├── embedding.py     # Embedding 模型
+│   │   └── vector_store.py  # Qdrant 集成
 │   ├── document_loader/
-│   │   └── loader.py       # Document loaders
+│   │   └── loader.py        # 文档加载器
 │   └── services/
-│       ├── ingestion.py    # Document ingestion
-│       └── rag_chain.py    # RAG chain logic
+│       ├── ingestion.py     # 文档摄取
+│       └── rag_chain.py     # RAG 链逻辑
 ├── tests/
-│   ├── conftest.py         # Test fixtures
-│   └── test_rag_api.py    # Unit tests
+│   ├── conftest.py          # 测试 fixtures
+│   └── test_rag_api.py      # 单元测试
 ├── Dockerfile
 ├── docker-compose.yml
 └── pyproject.toml
 ```
 
-## Supported Document Formats
+## 支持的文档格式
 
-| Format | Extension | Notes |
-|--------|-----------|-------|
-| Markdown | .md, .markdown | Converted to plain text |
-| PDF | .pdf | Text extraction |
-| Web | URL | HTML parsing |
-| Plain Text | .txt | Direct processing |
+| 格式 | 扩展名 | 说明 |
+|--------|-----------|-------------|
+| Markdown | .md, .markdown | 转换为纯文本处理 |
+| PDF | .pdf | 文本提取 |
+| 网页 | URL | HTML 解析 |
+| 纯文本 | .txt | 直接处理 |
 
-## License
+## 许可证
 
 MIT

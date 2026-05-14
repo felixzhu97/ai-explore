@@ -1,61 +1,61 @@
-# AI Vision Service - Documentation
+# AI Vision Service - 文档
 
-Welcome to the AI Vision Service documentation. This monorepo provides a full-stack AI-powered image analysis platform with object detection, image captioning, OCR capabilities, and a production-grade RAG service.
+欢迎使用 AI Vision Service 文档。这是一个全栈 AI 图像分析平台，提供目标检测、图像描述生成、OCR 识别功能，以及生产级 RAG 服务。
 
-## Documentation Index
+## 文档目录
 
-| Document | Description |
+| 文档 | 说明 |
 |----------|-------------|
-| [Quick Start](./QUICKSTART.md) | Get up and running in 5 minutes |
-| [Architecture](./ARCHITECTURE.md) | System design and component overview |
-| [API Reference](./API.md) | AI service REST API endpoints |
-| [Development](./DEVELOPMENT.md) | Local development setup and workflow |
-| [RAG Service](../services/rag/README.md) | RAG service documentation |
+| [快速开始](./QUICKSTART.md) | 5 分钟快速上手 |
+| [架构设计](./ARCHITECTURE.md) | 系统设计与组件概览 |
+| [API 参考](./API.md) | AI 服务 REST API 端点 |
+| [开发指南](./DEVELOPMENT.md) | 本地开发环境配置和工作流程 |
+| [RAG 服务](../services/rag/README.md) | RAG 服务文档 |
 
-## Project Overview
+## 项目概览
 
-The AI Vision Service is a TypeScript/Python monorepo that combines:
+AI Vision Service 是一个 TypeScript/Python monorepo 项目，整合了以下组件：
 
-- **React Frontend** (`apps/web`) - User interface for image upload and results display
-- **Express.js Server** (`apps/server`) - Backend utility endpoints
-- **Python AI Service** (`services/vision-service`) - FastAPI-based vision AI with YOLO, BLIP, and PaddleOCR
-- **RAG Service** (`services/rag`) - Production RAG with Qdrant vector store and multi-LLM support
+- **React 前端** (`apps/web`) - 用于图像上传和结果展示的用户界面
+- **Express.js 服务端** (`apps/server`) - 后端工具接口
+- **Python AI 服务** (`services/vision-service`) - 基于 FastAPI 的视觉 AI，集成了 YOLO、BLIP 和 PaddleOCR
+- **RAG 服务** (`services/rag`) - 生产级 RAG，基于 Qdrant 向量数据库，支持多种 LLM
 
-## Features
+## 功能特性
 
-| Feature | Model | Use Case |
+| 功能 | 模型 | 使用场景 |
 |---------|-------|----------|
-| Object Detection | YOLO11n | Identify and locate objects in images |
-| Image Captioning | BLIP | Generate natural language descriptions |
-| OCR | PaddleOCR | Extract text from images |
-| Combined Analysis | All models | Run all tasks on a single image |
-| Document Q&A | RAG | Answer questions based on uploaded documents |
-| Semantic Search | Qdrant | Find relevant content in document collections |
+| 目标检测 | YOLO11n | 识别并定位图像中的物体 |
+| 图像描述生成 | BLIP | 生成自然语言图像描述 |
+| OCR 文字识别 | PaddleOCR | 从图像中提取文字 |
+| 综合分析 | 全部模型 | 对单张图像执行所有任务 |
+| 文档问答 | RAG | 基于上传的文档回答问题 |
+| 语义搜索 | Qdrant | 在文档集合中查找相关内容 |
 
-## Tech Stack
+## 技术栈
 
-### Frontend
+### 前端
 - React 18
 - Vite
 - TypeScript
 
-### Backend
+### 后端
 - Node.js / Express.js
 - Python / FastAPI
 
-### AI Models
+### AI 模型
 - [Ultralytics YOLO](https://github.com/ultralytics/ultralytics)
 - [HuggingFace BLIP](https://huggingface.co/Salesforce/blip-image-captioning-large)
 - [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
 
 ### RAG
-- [Qdrant Vector Database](https://qdrant.tech/)
+- [Qdrant 向量数据库](https://qdrant.tech/)
 - [LangChain](https://langchain.com/)
 - [Sentence Transformers](https://www.sbert.net/)
 
-## Quick Links
+## 快速链接
 
-- [GitHub Repository](https://github.com)
-- [API Documentation](./API.md)
-- [Development Guide](./DEVELOPMENT.md)
-- [RAG Service Documentation](../services/rag/README.md)
+- [GitHub 仓库](https://github.com)
+- [API 文档](./API.md)
+- [开发指南](./DEVELOPMENT.md)
+- [RAG 服务文档](../services/rag/README.md)

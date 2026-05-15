@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
-import { colors, radius, spacing, typography } from '../../theme';
+import { colors, radius, typography } from '../../theme';
 
 type BadgeStatus = 'online' | 'offline' | 'busy' | 'error' | 'pending';
 

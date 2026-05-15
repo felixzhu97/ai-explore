@@ -4,15 +4,8 @@ import { StatusBadge } from '../agents/StatusBadge';
 import { useI18n } from '../../i18n';
 
 const AGENT_INFO = {
-  name: 'Supervisor Agent',
   status: 'online' as const,
 };
-
-const QUICK_PROMPTS = [
-  'Deploy a new microservice',
-  'Diagnose high latency issue',
-  'Generate system report',
-];
 
 export function SupervisorPanel() {
   const { t } = useI18n();
@@ -23,9 +16,9 @@ export function SupervisorPanel() {
       headerRight={<StatusBadge status={AGENT_INFO.status} />}
     >
       <AgentChat
-        agentInfo={{ ...AGENT_INFO, name: t.nav.supervisor, description: t.agents.descriptions.supervisor }}
+        agentInfo={{ name: t.nav.supervisor, description: t.agents.descriptions.supervisor }}
         apiEndpoint="/api/agents/supervisor/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.supervisor}
       />
     </AgentPanel>
   );

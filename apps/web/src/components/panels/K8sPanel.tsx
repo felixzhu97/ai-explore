@@ -7,12 +7,6 @@ const AGENT_INFO = {
   status: 'online' as const,
 };
 
-const QUICK_PROMPTS = [
-  'Show me all running pods',
-  'Check cluster health status',
-  'Scale deployment to 3 replicas',
-];
-
 export function K8sPanel() {
   const { t } = useI18n();
   return (
@@ -24,7 +18,7 @@ export function K8sPanel() {
       <AgentChat
         agentInfo={{ name: t.nav.kubernetes, description: t.agents.descriptions.k8s }}
         apiEndpoint="/api/agents/k8s/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.k8s}
       />
     </AgentPanel>
   );

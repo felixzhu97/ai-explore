@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { css, keyframes } from '@emotion/react';
 import { colors, radius, spacing, typography } from '../../theme';
 import { ToolCall } from './ChatMessage';
+import { ImageZoomModal } from '../ImageZoomModal';
 
 const pulse = keyframes`
   0%, 100% { opacity: 1; }
@@ -137,12 +138,138 @@ const EmptyOutput = styled.div`
   font-style: italic;
 `;
 
+const ImagePreview = styled.img`
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: ${radius.sm};
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+  margin: ${spacing.xs} 0;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+`;
+
+const ImageHint = styled.div`
+  font-size: ${typography.fontSize.xs};
+  color: ${colors.textTertiary};
+  margin-top: ${spacing.xs};
+`;
+
+const JsonString = styled.span`
+  color: #059669;
+`;
+
+const JsonNumber = styled.span`
+  color: #dc2626;
+`;
+
+const JsonBoolean = styled.span`
+  color: #2563eb;
+`;
+
+const JsonNull = styled.span`
+  color: ${colors.textTertiary};
+`;
+
+const JsonBracket = styled.span`
+  color: ${colors.textSecondary};
+`;
+
+function highlightJson(json: string): React.ReactNode {
+  return json.split(/("(?:[^"\\]|\\.)*"|true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}\[\],:])/g).map((part, i) => {
+    if (part.startsWith('"') && part.endsWith('"')) {
+      return <JsonString key={i}>{part}</JsonString>;
+    }
+    if (part === 'true' || part === 'false') {
+      return <JsonBoolean key={i}>{part}</JsonBoolean>;
+    }
+    if (part === 'null') {
+      return <JsonNull key={i}>{part}</JsonNull>;
+    }
+    if (/^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(part)) {
+      return <JsonNumber key={i}>{part}</JsonNumber>;
+    }
+    if (/^[{}\[\],:]$/.test(part)) {
+      return <JsonBracket key={i}>{part}</JsonBracket>;
+    }
+    return part;
+  });
+}
+
+function formatOutput(output: string): React.ReactNode {
+  const trimmed = output.trim();
+
+  // Detect image URLs
+  const imagePattern = /(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|bmp|svg)(?:\?[^\s]*)?)/gi;
+  const imageMatches = [...trimmed.matchAll(imagePattern)];
+
+  if (imageMatches.length > 0) {
+    // Find the image URL position
+    const imageUrl = imageMatches[0][1];
+    const imageStartIndex = trimmed.indexOf(imageUrl);
+
+    // Get text before and after image
+    const beforeText = trimmed.substring(0, imageStartIndex).trim();
+    const afterText = trimmed.substring(imageStartIndex + imageUrl.length).trim();
+
+    return (
+      <>
+        {beforeText && <span>{beforeText} </span>}
+        <ImagePreview
+          src={imageUrl}
+          alt="Tool output"
+          onClick={() => {}}
+          data-image-zoom={imageUrl}
+        />
+        {afterText && <span> {afterText}</span>}
+      </>
+    );
+  }
+
+  // Try to detect and format JSON
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return highlightJson(JSON.stringify(parsed, null, 2));
+    } catch {
+      // Not valid JSON
+    }
+  }
+
+  // Try to extract JSON from mixed content
+  const jsonMatch = trimmed.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[1]);
+      const formatted = JSON.stringify(parsed, null, 2);
+      const before = trimmed.substring(0, trimmed.indexOf(jsonMatch[1]));
+      const after = trimmed.substring(trimmed.indexOf(jsonMatch[1]) + jsonMatch[1].length);
+      return (
+        <>
+          {before && <span>{before}</span>}
+          {highlightJson(formatted)}
+          {after && <span>{after}</span>}
+        </>
+      );
+    } catch {
+      // Not valid JSON
+    }
+  }
+
+  return output;
+}
+
 interface ToolResultProps {
   toolCall: ToolCall;
 }
 
 export function ToolResult({ toolCall }: ToolResultProps) {
   const [expanded, setExpanded] = useState(false);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   const getStatusIcon = () => {
     switch (toolCall.status) {
@@ -158,6 +285,13 @@ export function ToolResult({ toolCall }: ToolResultProps) {
       return JSON.stringify(obj, null, 2);
     } catch {
       return String(obj);
+    }
+  };
+
+  const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    const src = e.currentTarget.dataset.imageZoom;
+    if (src) {
+      setZoomedImage(src);
     }
   };
 
@@ -178,26 +312,39 @@ export function ToolResult({ toolCall }: ToolResultProps) {
         </StatusIndicator>
         <ExpandIcon expanded={expanded} />
       </ToolHeader>
-      
+
       <ToolBody expanded={expanded}>
         <SectionLabel>Input</SectionLabel>
         <CodeBlock>{formatJson(toolCall.input)}</CodeBlock>
-        
+
         {toolCall.output && (
           <>
             <SectionLabel style={{ marginTop: spacing.md }}>Output</SectionLabel>
             {toolCall.status === 'error' ? (
               <ErrorText>{toolCall.output}</ErrorText>
             ) : (
-              <CodeBlock>{toolCall.output}</CodeBlock>
+              <>
+                <CodeBlock onClick={handleImageClick}>{formatOutput(toolCall.output)}</CodeBlock>
+                {/(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|bmp|svg)(?:\?[^\s]*)?)/i.test(toolCall.output) && (
+                  <ImageHint>Click image to enlarge</ImageHint>
+                )}
+              </>
             )}
           </>
         )}
-        
+
         {!toolCall.output && toolCall.status === 'success' && (
           <EmptyOutput>No output</EmptyOutput>
         )}
       </ToolBody>
+
+      {zoomedImage && (
+        <ImageZoomModal
+          src={zoomedImage}
+          alt="Tool output image"
+          onClose={() => setZoomedImage(null)}
+        />
+      )}
     </ToolContainer>
   );
 }

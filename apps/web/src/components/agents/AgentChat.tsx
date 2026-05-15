@@ -174,13 +174,30 @@ export function AgentChat({ agentInfo, apiEndpoint, quickPrompts = [] }: AgentCh
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Cleanup SSE connection on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
+
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
 
     const userMessage: ChatMessageData = {
       id: `user_${Date.now()}`,
@@ -214,6 +231,7 @@ export function AgentChat({ agentInfo, apiEndpoint, quickPrompts = [] }: AgentCh
         body: JSON.stringify({
           messages: [{ role: 'user', content: userMessage.content }],
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -317,6 +335,10 @@ export function AgentChat({ agentInfo, apiEndpoint, quickPrompts = [] }: AgentCh
         }
       }
     } catch (error) {
+      // Ignore abort errors (user cancelled or component unmounted)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error('Error sending message:', error);
       setMessages((prev) =>
         prev.map((msg) =>
@@ -327,6 +349,9 @@ export function AgentChat({ agentInfo, apiEndpoint, quickPrompts = [] }: AgentCh
       );
     } finally {
       setIsLoading(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null;
+      }
     }
   }, [input, isLoading, apiEndpoint, t]);
 

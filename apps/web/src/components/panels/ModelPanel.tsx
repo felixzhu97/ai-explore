@@ -7,12 +7,6 @@ const AGENT_INFO = {
   status: 'online' as const,
 };
 
-const QUICK_PROMPTS = [
-  'List all deployed models',
-  'Show model performance metrics',
-  'Deploy latest version to production',
-];
-
 export function ModelPanel() {
   const { t } = useI18n();
   return (
@@ -24,7 +18,7 @@ export function ModelPanel() {
       <AgentChat
         agentInfo={{ name: t.nav.model, description: t.agents.descriptions.model }}
         apiEndpoint="/api/agents/model/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.model}
       />
     </AgentPanel>
   );

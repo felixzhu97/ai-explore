@@ -59,10 +59,14 @@ async def initialize_agents():
         settings = get_settings()
         
         # Create LLM instance using Ollama
+        # Note: stream=True enables streaming mode, but the actual streaming
+        # behavior depends on the underlying model's support
         llm = ChatOllama(
             model=settings.OLLAMA_MODEL,
             base_url=settings.OLLAMA_BASE_URL,
             temperature=0.7,
+            stream=True,  # Enable streaming
+            timeout=120,  # 2 minute timeout per request
         )
         
         logger.info(f"Initializing AI Agents with Ollama ({settings.OLLAMA_BASE_URL}/{settings.OLLAMA_MODEL})...")
@@ -199,28 +203,60 @@ def create_app() -> FastAPI:
                     yield f"data: [DONE]\n\n"
                     return
                 
-                # Invoke supervisor
-                result = _supervisor.invoke({"messages": lc_messages})
+                # Send initial message to indicate processing started
+                yield f"event: message\n"
+                yield f"data: Starting analysis...\n\n"
                 
-                # Stream the response
-                result_messages = result.get("messages", [])
-                agent_results = result.get("agent_results", {})
+                import asyncio
+                import queue
+                import threading
                 
-                if result_messages:
-                    last_message = result_messages[-1]
-                    content = last_message.content if hasattr(last_message, 'content') else str(last_message)
-                    
-                    # Stream in chunks
-                    chunk_size = 20
-                    for i in range(0, len(content), chunk_size):
-                        yield f"event: message\n"
-                        yield f"data: {content[i:i+chunk_size]}\n\n"
-                        await asyncio.sleep(0.02)
+                result_queue = queue.Queue()
+                error_holder = [None]
                 
-                # Send agent results
-                for agent_name, agent_result in agent_results.items():
-                    yield f"event: tool_output\n"
-                    yield f"data: Agent '{agent_name}' completed\n\n"
+                def run_agent():
+                    try:
+                        result = _supervisor.invoke({"messages": lc_messages})
+                        result_queue.put(("result", result))
+                    except Exception as e:
+                        logger.error(f"Error invoking supervisor: {e}")
+                        error_holder[0] = e
+                        result_queue.put(("error", str(e)))
+                
+                # Start agent in background thread
+                thread = threading.Thread(target=run_agent)
+                thread.start()
+                
+                # Wait for initial response with timeout
+                try:
+                    while True:
+                        try:
+                            msg_type, data = result_queue.get(timeout=60)
+                            if msg_type == "error":
+                                yield f"event: error\n"
+                                yield f"data: {data}\n\n"
+                                break
+                            elif msg_type == "result":
+                                # Send the response
+                                result_messages = data.get("messages", [])
+                                if result_messages:
+                                    last_message = result_messages[-1]
+                                    content = last_message.content if hasattr(last_message, 'content') else str(last_message)
+                                    yield f"event: message\n"
+                                    yield f"data: {content}\n\n"
+                                
+                                # Send agent results
+                                agent_results = data.get("agent_results", {})
+                                for agent_name, agent_result in agent_results.items():
+                                    yield f"event: tool_output\n"
+                                    yield f"data: Agent '{agent_name}' completed\n\n"
+                                break
+                        except queue.Empty:
+                            # Timeout, send progress indicator
+                            yield f"event: message\n"
+                            yield f"data: Still processing...\n\n"
+                finally:
+                    thread.join(timeout=5)
                 
                 yield f"data: [DONE]\n\n"
                 
@@ -253,14 +289,43 @@ def create_app() -> FastAPI:
                 
                 task = request.messages[-1].content if request.messages else ""
                 
-                result = _supervisor.invoke_single_agent(agent_name, task)
-                
-                result_content = result.get("result", str(result))
-                if isinstance(result_content, dict):
-                    result_content = json.dumps(result_content, indent=2)
-                
+                # Send initial message
                 yield f"event: message\n"
-                yield f"data: {result_content}\n\n"
+                yield f"data: Processing...\n\n"
+                
+                import queue
+                import threading
+                
+                result_queue = queue.Queue()
+                
+                def run_agent():
+                    try:
+                        result = _supervisor.invoke_single_agent(agent_name, task)
+                        result_queue.put(("result", result))
+                    except Exception as e:
+                        logger.error(f"Error invoking agent {agent_name}: {e}")
+                        result_queue.put(("error", str(e)))
+                
+                thread = threading.Thread(target=run_agent)
+                thread.start()
+                
+                try:
+                    msg_type, data = result_queue.get(timeout=120)
+                    if msg_type == "error":
+                        yield f"event: error\n"
+                        yield f"data: {data}\n\n"
+                    else:
+                        result_content = data.get("result", str(data))
+                        if isinstance(result_content, dict):
+                            result_content = json.dumps(result_content, indent=2)
+                        yield f"event: message\n"
+                        yield f"data: {result_content}\n\n"
+                except queue.Empty:
+                    yield f"event: error\n"
+                    yield f"data: Timeout waiting for agent response\n\n"
+                finally:
+                    thread.join(timeout=5)
+                
                 yield f"data: [DONE]\n\n"
                 
             except Exception as e:

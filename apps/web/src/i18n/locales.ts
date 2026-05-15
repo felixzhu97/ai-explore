@@ -79,6 +79,15 @@ export interface Translations {
     inputPlaceholder: string;
     thinking: string;
     errorMessage: string;
+    quickPrompts: {
+      supervisor: string[];
+      k8s: string[];
+      monitoring: string[];
+      model: string[];
+      llmops: string[];
+      aiops: string[];
+      vectordb: string[];
+    };
     descriptions: {
       supervisor: string;
       k8s: string;
@@ -158,6 +167,43 @@ export const translations: Record<Language, Translations> = {
       inputPlaceholder: 'Type your message...',
       thinking: 'Thinking...',
       errorMessage: 'An error occurred. Please try again.',
+      quickPrompts: {
+        supervisor: [
+          'List all available agents',
+          'Delegate task to Kubernetes agent',
+          'Check overall system health',
+        ],
+        k8s: [
+          'Show me all running pods',
+          'Check cluster health status',
+          'Scale deployment to 3 replicas',
+        ],
+        monitoring: [
+          'Show CPU usage in last hour',
+          'List all active alerts',
+          'Check memory utilization',
+        ],
+        model: [
+          'List deployed models',
+          'Show model performance metrics',
+          'Compare inference latency',
+        ],
+        llmops: [
+          'Show current training jobs',
+          'List fine-tuned models',
+          'Check training dataset status',
+        ],
+        aiops: [
+          'Analyze recent incidents',
+          'Show root cause for incident #123',
+          'List pending automations',
+        ],
+        vectordb: [
+          'Search for similar documents',
+          'Show index statistics',
+          'List recent embeddings',
+        ],
+      },
       descriptions: {
         supervisor: 'Multi-agent orchestrator - coordinates specialized agents for complex tasks',
         k8s: 'Manage Kubernetes clusters, pods, services, and deployments',
@@ -235,6 +281,43 @@ export const translations: Record<Language, Translations> = {
       inputPlaceholder: '输入消息...',
       thinking: '思考中...',
       errorMessage: '发生错误，请重试。',
+      quickPrompts: {
+        supervisor: [
+          '列出所有可用的 Agent',
+          '委托任务给 K8s Agent',
+          '检查整体系统健康状态',
+        ],
+        k8s: [
+          '显示所有运行中的 Pod',
+          '检查集群健康状态',
+          '扩容部署到 3 个副本',
+        ],
+        monitoring: [
+          '显示过去一小时的 CPU 使用率',
+          '列出所有活跃告警',
+          '检查内存利用率',
+        ],
+        model: [
+          '列出已部署的模型',
+          '显示模型性能指标',
+          '对比推理延迟',
+        ],
+        llmops: [
+          '显示当前训练任务',
+          '列出微调后的模型',
+          '检查训练数据集状态',
+        ],
+        aiops: [
+          '分析最近的事件',
+          '显示 #123 事件的根因',
+          '列出待处理的自动化任务',
+        ],
+        vectordb: [
+          '搜索相似文档',
+          '显示索引统计信息',
+          '列出最近的嵌入向量',
+        ],
+      },
       descriptions: {
         supervisor: '多 Agent 协调器 - 协调专业 Agent 处理复杂任务',
         k8s: '管理 Kubernetes 集群、Pod、服务和部署',
@@ -312,6 +395,43 @@ export const translations: Record<Language, Translations> = {
       inputPlaceholder: 'メッセージを入力...',
       thinking: '考え中...',
       errorMessage: 'エラーが発生しました。もう一度お試しください。',
+      quickPrompts: {
+        supervisor: [
+          '利用可能なエージェントを一覧表示',
+          'K8sエージェントにタスクを委任',
+          'システム全体の健康状態を確認',
+        ],
+        k8s: [
+          '実行中のPodを全て表示',
+          'クラスターの健康状態を確認',
+          'デプロイメントを3レプリカにスケール',
+        ],
+        monitoring: [
+          '過去1時間のCPU使用率を表示',
+          'アクティブなアラートを一覧表示',
+          'メモリ使用率を確認',
+        ],
+        model: [
+          'デプロイ済みモデルを一覧表示',
+          'モデルのパフォーマンス指標を表示',
+          '推論レイテンシを比較',
+        ],
+        llmops: [
+          '現在のトレーニングジョブを表示',
+          'ファインチューン済みモデルを一覧表示',
+          'トレーニングデータセットの状態を確認',
+        ],
+        aiops: [
+          '最近のインシデントを分析',
+          'インシデント #123 の根本原因を表示',
+          '保留中の自動化タスクを一覧表示',
+        ],
+        vectordb: [
+          '類似ドキュメントを検索',
+          'インデックス統計を表示',
+          '最近のEmbeddingを一覧表示',
+        ],
+      },
       descriptions: {
         supervisor: 'マルチエージェントオーケストレーター - 専門エージェントを調整して複雑なタスクを解決',
         k8s: 'Kubernetesクラスター、Pod、サービス、デプロイメントを管理',
@@ -389,6 +509,43 @@ export const translations: Record<Language, Translations> = {
       inputPlaceholder: 'Tapez votre message...',
       thinking: 'Réflexion...',
       errorMessage: 'Une erreur s\'est produite. Veuillez réessayer.',
+      quickPrompts: {
+        supervisor: [
+          'Lister tous les agents disponibles',
+          'Déléguer une tâche à l\'agent Kubernetes',
+          'Vérifier l\'état de santé du système',
+        ],
+        k8s: [
+          'Afficher tous les pods en cours',
+          'Vérifier l\'état de santé du cluster',
+          'Mettre à l\'échelle à 3 réplicas',
+        ],
+        monitoring: [
+          'Afficher l\'utilisation CPU',
+          'Lister toutes les alertes actives',
+          'Vérifier l\'utilisation mémoire',
+        ],
+        model: [
+          'Lister les modèles déployés',
+          'Afficher les métriques de performance',
+          'Comparer la latence d\'inférence',
+        ],
+        llmops: [
+          'Afficher les tâches d\'entraînement',
+          'Lister les modèles affinés',
+          'Vérifier l\'état du dataset',
+        ],
+        aiops: [
+          'Analyser les incidents récents',
+          'Afficher la cause de l\'incident #123',
+          'Lister les automatisations en attente',
+        ],
+        vectordb: [
+          'Rechercher des documents similaires',
+          'Afficher les statistiques d\'index',
+          'Lister les embeddings récents',
+        ],
+      },
       descriptions: {
         supervisor: 'Orchestrateur multi-agents - coordonne les agents spécialisés pour les tâches complexes',
         k8s: 'Gérer les clusters Kubernetes, pods, services et déploiements',
@@ -466,6 +623,43 @@ export const translations: Record<Language, Translations> = {
       inputPlaceholder: 'Escribe tu mensaje...',
       thinking: 'Pensando...',
       errorMessage: 'Ocurrió un error. Por favor, inténtalo de nuevo.',
+      quickPrompts: {
+        supervisor: [
+          'Listar todos los agentes disponibles',
+          'Delegar tarea al agente de Kubernetes',
+          'Verificar el estado de salud del sistema',
+        ],
+        k8s: [
+          'Mostrar todos los pods en ejecución',
+          'Verificar el estado del cluster',
+          'Escalar a 3 réplicas',
+        ],
+        monitoring: [
+          'Mostrar uso de CPU',
+          'Listar todas las alertas activas',
+          'Verificar uso de memoria',
+        ],
+        model: [
+          'Listar modelos desplegados',
+          'Mostrar métricas de rendimiento',
+          'Comparar latencia de inferencia',
+        ],
+        llmops: [
+          'Mostrar trabajos de entrenamiento',
+          'Listar modelos afinados',
+          'Verificar estado del dataset',
+        ],
+        aiops: [
+          'Analizar incidentes recientes',
+          'Mostrar causa del incidente #123',
+          'Listar automatizaciones pendientes',
+        ],
+        vectordb: [
+          'Buscar documentos similares',
+          'Mostrar estadísticas de índice',
+          'Listar embeddings recientes',
+        ],
+      },
       descriptions: {
         supervisor: 'Orquestador multi-agente - coordina agentes especializados para tareas complejas',
         k8s: 'Gestionar clusters Kubernetes, pods, servicios y despliegues',

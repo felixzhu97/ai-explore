@@ -7,12 +7,6 @@ const AGENT_INFO = {
   status: 'online' as const,
 };
 
-const QUICK_PROMPTS = [
-  'Start a new training run',
-  'Compare model checkpoints',
-  'Run evaluation on test set',
-];
-
 export function LLMOpsPanel() {
   const { t } = useI18n();
   return (
@@ -24,7 +18,7 @@ export function LLMOpsPanel() {
       <AgentChat
         agentInfo={{ name: t.nav.llmops, description: t.agents.descriptions.llmops }}
         apiEndpoint="/api/agents/llmops/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.llmops}
       />
     </AgentPanel>
   );

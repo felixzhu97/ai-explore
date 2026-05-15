@@ -137,7 +137,7 @@ class BaseInfraAgent:
         return runnable.invoke(input_data)
     
     def stream(self, input_data: Dict[str, Any]):
-        """Stream the agent response.
+        """Stream the agent response (synchronous).
         
         Args:
             input_data: Dictionary with messages and context.
@@ -147,3 +147,21 @@ class BaseInfraAgent:
         """
         runnable = self.get_runnable()
         return runnable.stream(input_data)
+    
+    async def astream(self, input_data: Dict[str, Any]):
+        """Async stream the agent response.
+        
+        Args:
+            input_data: Dictionary with messages and context.
+            
+        Yields:
+            Streamed response chunks.
+        """
+        runnable = self.get_runnable()
+        if hasattr(runnable, 'astream'):
+            async for chunk in runnable.astream(input_data):
+                yield chunk
+        else:
+            # Fall back to sync stream
+            for chunk in runnable.stream(input_data):
+                yield chunk

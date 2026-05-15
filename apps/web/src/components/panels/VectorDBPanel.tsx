@@ -7,12 +7,6 @@ const AGENT_INFO = {
   status: 'online' as const,
 };
 
-const QUICK_PROMPTS = [
-  'Search for similar documents',
-  'Show collection statistics',
-  'Index new documents',
-];
-
 export function VectorDBPanel() {
   const { t } = useI18n();
   return (
@@ -24,7 +18,7 @@ export function VectorDBPanel() {
       <AgentChat
         agentInfo={{ name: t.nav.vectordb, description: t.agents.descriptions.vectordb }}
         apiEndpoint="/api/agents/vectordb/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.vectordb}
       />
     </AgentPanel>
   );

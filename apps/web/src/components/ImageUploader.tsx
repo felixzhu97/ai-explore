@@ -4,6 +4,7 @@ import { keyframes } from '@emotion/react';
 import { colors, radius, spacing, typography, transitions } from '../theme';
 import { Button } from './Button';
 import { useI18n } from '../i18n';
+import { ImageZoomModal } from './ImageZoomModal';
 
 type TaskType = 'caption' | 'detect' | 'ocr';
 
@@ -153,6 +154,32 @@ const PreviewImage = styled.img`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+`;
+
+const ZoomHint = styled.div`
+  position: absolute;
+  bottom: ${spacing.sm};
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: ${radius.sm};
+  color: white;
+  font-size: ${typography.fontSize.xs};
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 5;
+
+  ${ImageArea}:hover & {
+    opacity: 1;
+  }
 `;
 
 const ClearButton = styled.button`
@@ -295,6 +322,7 @@ export function ImageUploader() {
   const [task, setTask] = useState<TaskType>('caption');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = useCallback((selectedFile: File) => {
@@ -428,7 +456,12 @@ export function ImageUploader() {
             />
             {image ? (
               <>
-                <PreviewImage src={image} alt="Preview" />
+                <PreviewImage
+                  src={image}
+                  alt="Preview"
+                  onClick={() => setZoomedImage(image)}
+                />
+                <ZoomHint>Click to enlarge</ZoomHint>
                 <ClearButton onClick={handleClear}>×</ClearButton>
                 {loading && (
                   <LoadingOverlay>
@@ -464,6 +497,14 @@ export function ImageUploader() {
           </ActionArea>
         </Panel>
       </MainArea>
+
+      {zoomedImage && (
+        <ImageZoomModal
+          src={zoomedImage}
+          alt="Uploaded image"
+          onClose={() => setZoomedImage(null)}
+        />
+      )}
     </Container>
   );
 }

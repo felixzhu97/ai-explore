@@ -7,12 +7,6 @@ const AGENT_INFO = {
   status: 'online' as const,
 };
 
-const QUICK_PROMPTS = [
-  'Analyze recent incidents',
-  'Find root cause for alert XYZ',
-  'Generate incident report',
-];
-
 export function AIOpsPanel() {
   const { t } = useI18n();
   return (
@@ -24,7 +18,7 @@ export function AIOpsPanel() {
       <AgentChat
         agentInfo={{ name: t.nav.aiops, description: t.agents.descriptions.aiops }}
         apiEndpoint="/api/agents/aiops/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.aiops}
       />
     </AgentPanel>
   );

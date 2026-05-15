@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { colors, shadows, radius, spacing, typography } from '../theme';
 import { useI18n } from '../i18n';
+import { ImageZoomModal } from './ImageZoomModal';
 
 const RAG_API_URL = 'http://localhost:8001';
 
@@ -45,11 +46,6 @@ const fadeIn = keyframes`
 const slideIn = keyframes`
   from { opacity: 0; transform: translateX(100%); }
   to { opacity: 1; transform: translateX(0); }
-`;
-
-const slideOut = keyframes`
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(100%); }
 `;
 
 const pulse = keyframes`
@@ -309,8 +305,8 @@ const MessageContent = styled.div<{ isUser: boolean }>`
     margin: 0.5em 0 0.25em;
     font-weight: 600;
     line-height: 1.3;
-    &:first-child { margin-top: 0; }
-    &:last-child { margin-bottom: 0; }
+    &:first-of-type { margin-top: 0; }
+    &:last-of-type { margin-bottom: 0; }
   }
   h1 { font-size: 1.25em; }
   h2 { font-size: 1.15em; }
@@ -318,8 +314,8 @@ const MessageContent = styled.div<{ isUser: boolean }>`
 
   p {
     margin: 0.5em 0;
-    &:first-child { margin-top: 0; }
-    &:last-child { margin-bottom: 0; }
+    &:first-of-type { margin-top: 0; }
+    &:last-of-type { margin-bottom: 0; }
   }
 
   ul, ol {
@@ -465,7 +461,7 @@ const SourceItem = styled.div`
   margin-bottom: ${spacing.sm};
   border-left: 3px solid ${colors.primary};
 
-  &:last-child {
+  &:last-of-type {
     margin-bottom: 0;
   }
 `;
@@ -739,6 +735,20 @@ const UploadProgressBar = styled.div<{ progress: number }>`
   animation: ${pulse} 1s ease-in-out infinite;
 `;
 
+const MarkdownImage = styled.img`
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: ${radius.sm};
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+  margin: 0.5em 0;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+`;
+
 export function RAGChat() {
   const { t, tReplace } = useI18n();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -751,8 +761,10 @@ export function RAGChat() {
   const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
+  const [zoomedImage, setZoomedImage] = useState<{ src: string; alt?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const addToast = useCallback((message: string, type: Toast['type']) => {
     const id = `toast_${Date.now()}`;
@@ -768,6 +780,16 @@ export function RAGChat() {
 
   useEffect(() => {
     fetchAvailableDocs();
+  }, []);
+
+  // Cleanup SSE connection on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
   }, []);
 
   const fetchAvailableDocs = async () => {
@@ -887,6 +909,12 @@ export function RAGChat() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     const userMessage: Message = {
       id: `user_${Date.now()}`,
       role: 'user',
@@ -929,6 +957,7 @@ export function RAGChat() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -996,6 +1025,10 @@ export function RAGChat() {
         }
       }
     } catch (error) {
+      // Ignore abort errors (user cancelled or component unmounted)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error('Error sending message:', error);
       setMessages((prev) =>
         prev.map((msg) =>
@@ -1009,6 +1042,9 @@ export function RAGChat() {
       );
     } finally {
       setIsLoading(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -1037,6 +1073,16 @@ export function RAGChat() {
     t.ragChat.keyInfo,
     t.ragChat.explain,
   ];
+
+  const markdownComponents = {
+    img: ({ src, alt }: { src?: string; alt?: string }) => (
+      <MarkdownImage
+        src={src || ''}
+        alt={alt}
+        onClick={() => src && setZoomedImage({ src, alt })}
+      />
+    ),
+  };
 
   const hasPendingUploads = pendingFiles.length > 0;
   const hasUploadingFiles = Array.from(uploadStatuses.values()).some((s) => s.status === 'uploading');
@@ -1171,6 +1217,7 @@ export function RAGChat() {
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeHighlight]}
+                      components={markdownComponents}
                     >
                       {msg.content}
                     </ReactMarkdown>
@@ -1194,7 +1241,7 @@ export function RAGChat() {
                           {source.text.length > 200 ? `${source.text.slice(0, 200)}...` : source.text}
                         </SourceText>
                         <SourceMeta>
-                          {source.metadata?.source && <span>📄 {String(source.metadata.source)}</span>}
+                          {source.metadata?.source !== undefined && <span>📄 {String(source.metadata?.source)}</span>}
                           <SourceScore score={source.score}>
                             {t.ragChat.similarity}: {(source.score * 100).toFixed(1)}%
                           </SourceScore>
@@ -1230,6 +1277,14 @@ export function RAGChat() {
           {isLoading ? <Spinner /> : '→'}
         </SendButton>
       </InputArea>
+
+      {zoomedImage && (
+        <ImageZoomModal
+          src={zoomedImage.src}
+          alt={zoomedImage.alt}
+          onClose={() => setZoomedImage(null)}
+        />
+      )}
     </Container>
   );
 }

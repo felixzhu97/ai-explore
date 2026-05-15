@@ -7,12 +7,6 @@ const AGENT_INFO = {
   status: 'online' as const,
 };
 
-const QUICK_PROMPTS = [
-  'Show CPU usage for the last hour',
-  'Any alerts triggered today?',
-  'Compare latency across services',
-];
-
 export function MonitoringPanel() {
   const { t } = useI18n();
   return (
@@ -24,7 +18,7 @@ export function MonitoringPanel() {
       <AgentChat
         agentInfo={{ name: t.nav.monitoring, description: t.agents.descriptions.monitoring }}
         apiEndpoint="/api/agents/monitoring/invoke"
-        quickPrompts={QUICK_PROMPTS}
+        quickPrompts={t.agents.quickPrompts.monitoring}
       />
     </AgentPanel>
   );

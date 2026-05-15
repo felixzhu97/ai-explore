@@ -1,0 +1,77 @@
+@startuml C4-Component-RAG-Service
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 组件图 (C3) - RAG 服务架构
+
+Container_Boundary(rag_service, "RAG 服务") {
+    
+    ' API 层
+System_Boundary(api, "API Layer") {
+        Component(api_router, "API Router", "FastAPI", "路由定义")
+        Component(document_api, "Document API", "FastAPI", "文档管理端点")
+        Component(chat_api, "Chat API", "FastAPI", "聊天问答端点")
+    }
+    
+    ' 核心服务
+System_Boundary(services, "Services") {
+        Component(ingestion_service, "Ingestion Service", "Python", "文档摄入和处理")
+        Component(rag_chain, "RAG Chain", "LangChain LCEL", "检索增强生成链")
+    }
+
+    ' 文档处理
+System_Boundary(document_processing, "Document Processing") {
+        Component(document_loader, "Document Loader", "LangChain", "多格式文档加载 (PDF/MD/TXT/Web)")
+        Component(text_splitter, "Text Splitter", "LangChain", "文档分块处理")
+        Component(embedding_model, "Embedding Model", "Sentence Transformers", "文本嵌入生成")
+    }
+
+    ' 向量存储
+System_Boundary(vector_store, "Vector Store") {
+        Component(qdrant_client, "Qdrant Client", "gRPC", "向量数据库客户端")
+        Component(collection_manager, "Collection Manager", "Python", "集合管理")
+        Component(retriever, "Retriever", "LangChain", "向量检索器")
+    }
+
+    ' LLM 网关
+System_Boundary(llm_gateway, "LLM Gateway") {
+        Component(llm_factory, "LLM Factory", "Python", "多 LLM 提供者工厂")
+        Component(openai_llm, "OpenAI LLM", "LangChain", "OpenAI GPT-4")
+        Component(claude_llm, "Claude LLM", "LangChain", "Anthropic Claude")
+        Component(ollama_llm, "Ollama LLM", "LangChain", "本地 Ollama")
+    }
+
+    ' 核心模块
+System_Boundary(core, "Core") {
+        Component(schemas, "Schemas", "Pydantic", "请求/响应模型")
+        Component(config, "Config", "Pydantic Settings", "配置管理")
+    }
+}
+
+' API 层关系
+Rel(api_router, document_api, "路由")
+Rel(api_router, chat_api, "路由")
+Rel(document_api, ingestion_service, "调用")
+Rel(chat_api, rag_chain, "调用")
+
+' 服务层关系
+Rel(ingestion_service, document_loader, "加载文档")
+Rel(ingestion_service, text_splitter, "分块")
+Rel(ingestion_service, embedding_model, "生成嵌入")
+Rel(ingestion_service, qdrant_client, "存储向量")
+
+Rel(rag_chain, retriever, "检索")
+Rel(rag_chain, llm_factory, "生成回答")
+
+' 检索器关系
+Rel(retriever, qdrant_client, "查询")
+Rel(retriever, collection_manager, "管理集合")
+
+' LLM 关系
+Rel(llm_factory, openai_llm, "创建")
+Rel(llm_factory, claude_llm, "创建")
+Rel(llm_factory, ollama_llm, "创建")
+
+SHOW_LEGEND()
+@enduml

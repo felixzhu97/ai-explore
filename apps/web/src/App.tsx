@@ -1,13 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
 import { GlobalStyles } from './GlobalStyles';
 import { ImageUploader } from './components/ImageUploader';
 import { RAGChat } from './components/RAGChat';
+import {
+  SupervisorPanel,
+  K8sPanel,
+  MonitoringPanel,
+  ModelPanel,
+  LLMOpsPanel,
+  AIOpsPanel,
+  VectorDBPanel,
+} from './components/panels';
 import { I18nProvider, useI18n, Language, languageNames } from './i18n';
 import { colors, spacing, typography, radius } from './theme';
 
-type Tab = 'vision' | 'rag';
+type Tab = 'supervisor' | 'k8s' | 'monitoring' | 'model' | 'llmops' | 'aiops' | 'vectordb' | 'rag' | 'vision';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -41,6 +49,9 @@ const Logo = styled.div`
   font-size: ${typography.fontSize.lg};
   font-weight: ${typography.fontWeight.semibold};
   color: ${colors.text};
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const NavTabs = styled.div`
@@ -147,10 +158,22 @@ const ContentWrapper = styled.div`
 const languages: Language[] = ['en', 'zh', 'ja', 'fr', 'es'];
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<Tab>('vision');
+  const [activeTab, setActiveTab] = useState<Tab>('supervisor');
   const [langOpen, setLangOpen] = useState(false);
   const { language, setLanguage, t } = useI18n();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'supervisor', label: t.nav.supervisor },
+    { key: 'k8s', label: t.nav.kubernetes },
+    { key: 'monitoring', label: t.nav.monitoring },
+    { key: 'model', label: t.nav.model },
+    { key: 'llmops', label: t.nav.llmops },
+    { key: 'aiops', label: t.nav.aiops },
+    { key: 'vectordb', label: t.nav.vectordb },
+    { key: 'rag', label: t.nav.documentQA },
+    { key: 'vision', label: t.nav.visionAI },
+  ];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -162,24 +185,38 @@ function AppContent() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'supervisor': return <SupervisorPanel />;
+      case 'k8s': return <K8sPanel />;
+      case 'monitoring': return <MonitoringPanel />;
+      case 'model': return <ModelPanel />;
+      case 'llmops': return <LLMOpsPanel />;
+      case 'aiops': return <AIOpsPanel />;
+      case 'vectordb': return <VectorDBPanel />;
+      case 'rag': return <RAGChat />;
+      case 'vision': return <ImageUploader />;
+    }
+  };
+
   return (
     <AppContainer>
       <NavBar>
         <NavContent>
-          <Logo>AI Vision</Logo>
+          <Logo>
+            <span>AI</span>
+          </Logo>
           <NavTabs>
-            <NavTab
-              active={activeTab === 'vision'}
-              onClick={() => setActiveTab('vision')}
-            >
-              {t.nav.visionAI}
-            </NavTab>
-            <NavTab
-              active={activeTab === 'rag'}
-              onClick={() => setActiveTab('rag')}
-            >
-              {t.nav.documentQA}
-            </NavTab>
+            {tabs.map((tab) => (
+              <NavTab
+                key={tab.key}
+                active={activeTab === tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                title={tab.label}
+              >
+                {tab.label}
+              </NavTab>
+            ))}
           </NavTabs>
           <LanguageSelector ref={dropdownRef}>
             <LanguageButton onClick={() => setLangOpen(!langOpen)}>
@@ -205,7 +242,7 @@ function AppContent() {
       </NavBar>
       <Main>
         <ContentWrapper>
-          {activeTab === 'vision' ? <ImageUploader /> : <RAGChat />}
+          {renderContent()}
         </ContentWrapper>
       </Main>
     </AppContainer>

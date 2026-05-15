@@ -1,0 +1,90 @@
+@startuml C4-Component-AI-Agents
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title 组件图 (C3) - AI Agents 服务内部架构
+
+Container_Boundary(ai_agents, "AI Agents 服务") {
+    
+    ' 组件定义 - 智能体层
+    Component(supervisor_agent, "Supervisor Agent", "Python + LangChain", "主管智能体，负责意图识别和任务路由")
+    Component(rag_agent, "RAG Agent", "Python + LangChain", "文档检索、知识库问答")
+    Component(llmops_agent, "LLMOps Agent", "Python + LangChain", "ML 模型生命周期管理")
+    Component(aiops_agent, "AIOps Agent", "Python + LangChain", "智能运维和异常检测")
+    Component(pipeline_agent, "Pipeline Agent", "Python + LangChain", "ML/DevOps 流水线编排")
+    Component(feature_agent, "Feature Store Agent", "Python + LangChain", "特征工程和管理")
+    
+    ' LangGraph 工作流
+    Component(rag_graph, "RAG Graph Workflow", "LangGraph", "RAG 检索和生成工作流")
+    Component(llmops_graph, "LLMOps Graph Workflow", "LangGraph", "ML 流水线工作流")
+    Component(aiops_graph, "AIOps Graph Workflow", "LangGraph", "事故响应工作流")
+    
+    ' 工具层
+System_Boundary(tools, "LangChain Tools") {
+        Component(rag_tools, "RAG Tools", "create_collection, index_document, search, query")
+        Component(llmops_tools, "LLMOps Tools", "register_model, train, evaluate, deploy, ab_test")
+        Component(aiops_tools, "AIOps Tools", "detect_anomaly, search_logs, query_metrics, root_cause")
+        Component(pipeline_tools, "Pipeline Tools", "create_pipeline, run_pipeline, get_status")
+        Component(feature_tools, "Feature Store Tools", "create_feature_group, register_feature, materialize")
+    }
+    
+    ' 核心模块
+System_Boundary(core, "Core") {
+        Component(schemas, "Schemas", "Pydantic", "所有数据模型和枚举定义")
+        Component(prompts, "Prompts", "Python", "系统提示词模板")
+    }
+    
+    ' API 层
+    Component(api_router, "API Router", "FastAPI", "HTTP 端点定义")
+}
+
+Container_Boundary(external_services, "外部服务") {
+    Component(vector_store, "Vector Store", "Qdrant", "向量数据库")
+    Component(llm_gateway, "LLM Gateway", "OpenAI/Claude", "语言模型服务")
+    Component(mlflow, "MLflow", "MLflow", "实验跟踪")
+    Component(feast, "Feast", "Feast", "特征存储")
+    Component(k8s, "Kubernetes", "K8s", "集群管理")
+    Component(prometheus, "Prometheus", "Prometheus", "指标监控")
+}
+
+' 智能体与工作流关系
+Rel(supervisor_agent, rag_agent, "委托")
+Rel(supervisor_agent, llmops_agent, "委托")
+Rel(supervisor_agent, aiops_agent, "委托")
+Rel(supervisor_agent, pipeline_agent, "委托")
+Rel(supervisor_agent, feature_agent, "委托")
+
+Rel(rag_agent, rag_graph, "使用")
+Rel(llmops_agent, llmops_graph, "使用")
+Rel(aiops_agent, aiops_graph, "使用")
+
+' 工作流与工具关系
+Rel(rag_graph, rag_tools, "调用工具")
+Rel(llmops_graph, llmops_tools, "调用工具")
+Rel(aiops_graph, aiops_tools, "调用工具")
+Rel(pipeline_agent, pipeline_tools, "调用工具")
+Rel(feature_agent, feature_tools, "调用工具")
+
+' 工具与外部服务关系
+Rel(rag_tools, vector_store, "向量操作")
+Rel(llmops_tools, mlflow, "实验跟踪")
+Rel(llmops_tools, llm_gateway, "模型推理")
+Rel(feature_tools, feast, "特征存取")
+Rel(aiops_tools, k8s, "集群操作")
+Rel(aiops_tools, prometheus, "指标查询")
+Rel(pipeline_tools, k8s, "部署")
+
+' 核心模块关系
+Rel(supervisor_agent, schemas, "使用")
+Rel(rag_agent, schemas, "使用")
+Rel(supervisor_agent, prompts, "使用")
+
+' API 层
+Rel(api_router, supervisor_agent, "路由到")
+Rel(api_router, rag_agent, "路由到")
+Rel(api_router, llmops_agent, "路由到")
+Rel(api_router, aiops_agent, "路由到")
+
+SHOW_LEGEND()
+@enduml

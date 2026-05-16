@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import { colors, radius, shadows, spacing, typography, transitions } from '../../theme';
 import { ChatMessage, ChatMessageData, ToolCall } from './ChatMessage';
-import { StatusBadge } from './StatusBadge';
 import { useI18n } from '../../i18n';
 
 const API_BASE = 'http://localhost:8003';
@@ -23,33 +22,6 @@ const Container = styled.div`
   flex-direction: column;
   gap: ${spacing.lg};
   animation: ${fadeIn} 0.3s ease;
-`;
-
-const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: ${spacing.md};
-  border-bottom: 1px solid ${colors.border};
-`;
-
-const TitleArea = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${spacing.xs};
-`;
-
-const Title = styled.h2`
-  font-size: ${typography.fontSize.xl};
-  font-weight: ${typography.fontWeight.semibold};
-  color: ${colors.text};
-  margin: 0;
-`;
-
-const Description = styled.p`
-  font-size: ${typography.fontSize.sm};
-  color: ${colors.textSecondary};
-  margin: 0;
 `;
 
 const ChatContainer = styled.div`
@@ -388,14 +360,6 @@ export function AgentChat({ agentInfo, apiEndpoint, quickPrompts = [] }: AgentCh
 
   return (
     <Container>
-      <Header>
-        <TitleArea>
-          <Title>{agentInfo.name}</Title>
-          <Description>{agentInfo.description}</Description>
-        </TitleArea>
-        <StatusBadge status={agentInfo.status || 'online'} />
-      </Header>
-
       <ChatContainer>
         {messages.length === 0 ? (
           <EmptyState>

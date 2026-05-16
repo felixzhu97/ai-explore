@@ -44,18 +44,21 @@ interface AgentPanelProps {
   description: string;
   children: React.ReactNode;
   headerRight?: React.ReactNode;
+  hideHeader?: boolean;
 }
 
-export function AgentPanel({ title, description, children, headerRight }: AgentPanelProps) {
+export function AgentPanel({ title, description, children, headerRight, hideHeader }: AgentPanelProps) {
   return (
     <PanelContainer>
-      <PanelHeader>
-        <div>
-          <PanelTitle>{title}</PanelTitle>
-          <PanelDescription>{description}</PanelDescription>
-        </div>
-        {headerRight && <div>{headerRight}</div>}
-      </PanelHeader>
+      {!hideHeader && (
+        <PanelHeader>
+          <div>
+            <PanelTitle>{title}</PanelTitle>
+            <PanelDescription>{description}</PanelDescription>
+          </div>
+          {headerRight && <div>{headerRight}</div>}
+        </PanelHeader>
+      )}
       <PanelContent>
         {children}
       </PanelContent>

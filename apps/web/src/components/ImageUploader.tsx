@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import { colors, radius, spacing, typography, transitions } from '../theme';
 import { Button } from './Button';
+import { SegmentedControl } from './SegmentedControl';
 import { useI18n } from '../i18n';
 import { ImageZoomModal } from './ImageZoomModal';
 
@@ -36,32 +37,24 @@ const spin = keyframes`
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${spacing.lg};
+  gap: ${spacing.md};
 `;
 
-const TaskTabs = styled.div`
+const TabHeader = styled.div`
   display: flex;
-  gap: ${spacing.xs};
-  padding: 4px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: ${radius.md};
-  width: fit-content;
-`;
+  justify-content: center;
+  padding: ${spacing.md} 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 
-const TaskTab = styled.button<{ active: boolean }>`
-  padding: 8px 16px;
-  font-size: ${typography.fontSize.sm};
-  font-weight: ${typography.fontWeight.medium};
-  color: ${props => props.active ? colors.text : colors.textSecondary};
-  background: ${props => props.active ? colors.surface : 'transparent'};
-  border: none;
-  border-radius: ${radius.sm};
-  cursor: pointer;
-  transition: all ${transitions.fast};
-  box-shadow: ${props => props.active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
-  &:hover {
-    color: ${colors.text};
+  @media (max-width: 640px) {
+    justify-content: flex-start;
   }
 `;
 
@@ -308,12 +301,6 @@ const ActionArea = styled.div`
   border-top: 1px solid ${colors.border};
 `;
 
-const taskOptions = [
-  { value: 'caption' as TaskType, labelKey: 'caption' },
-  { value: 'detect' as TaskType, labelKey: 'detect' },
-  { value: 'ocr' as TaskType, labelKey: 'ocr' },
-];
-
 export function ImageUploader() {
   const { t } = useI18n();
   const [image, setImage] = useState<string | null>(null);
@@ -324,6 +311,12 @@ export function ImageUploader() {
   const [error, setError] = useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const taskOptions = [
+    { value: 'caption' as TaskType, label: t.imageUploader.caption },
+    { value: 'detect' as TaskType, label: t.imageUploader.detect },
+    { value: 'ocr' as TaskType, label: t.imageUploader.ocr },
+  ];
 
   const handleFileSelect = useCallback((selectedFile: File) => {
     if (!selectedFile.type.startsWith('image/')) {
@@ -422,23 +415,15 @@ export function ImageUploader() {
     return <EmptyState>{t.imageUploader.noImageYet}</EmptyState>;
   };
 
-  const getTaskLabel = (labelKey: string) => {
-    return t.imageUploader[labelKey as keyof typeof t.imageUploader] || labelKey;
-  };
-
   return (
     <Container>
-      <TaskTabs>
-        {taskOptions.map((opt) => (
-          <TaskTab
-            key={opt.value}
-            active={task === opt.value}
-            onClick={() => setTask(opt.value)}
-          >
-            {getTaskLabel(opt.labelKey)}
-          </TaskTab>
-        ))}
-      </TaskTabs>
+      <TabHeader>
+        <SegmentedControl
+          options={taskOptions}
+          value={task}
+          onChange={setTask}
+        />
+      </TabHeader>
 
       <MainArea>
         <Panel>

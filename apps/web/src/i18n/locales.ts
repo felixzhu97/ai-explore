@@ -8,6 +8,11 @@ export interface Translations {
     supervisor: string;
     kubernetes: string;
     monitoring: string;
+    aiinfra: string;
+    // AI Infra sub tabs
+    modelDev: string;
+    modelOps: string;
+    // Agent names (keep for agent display)
     model: string;
     llmops: string;
     aiops: string;
@@ -108,6 +113,9 @@ export const translations: Record<Language, Translations> = {
       supervisor: 'Supervisor',
       kubernetes: 'K8s',
       monitoring: 'Monitoring',
+      aiinfra: 'AI Infra',
+      modelDev: 'Dev',
+      modelOps: 'Ops',
       model: 'Models',
       llmops: 'LLMOps',
       aiops: 'AIOps',
@@ -222,10 +230,13 @@ export const translations: Record<Language, Translations> = {
       supervisor: '协调器',
       kubernetes: 'K8s',
       monitoring: '监控',
+      aiinfra: 'AI 基础设施',
+      modelDev: '开发',
+      modelOps: '运维',
       model: '模型',
       llmops: 'LLMOps',
       aiops: 'AIOps',
-        vectordb: '向量库',
+      vectordb: '向量库',
     },
     imageUploader: {
       imageLabel: '图片',
@@ -336,6 +347,9 @@ export const translations: Record<Language, Translations> = {
       supervisor: 'Supervisor',
       kubernetes: 'K8s',
       monitoring: '監視',
+      aiinfra: 'AI インフラ',
+      modelDev: '開発',
+      modelOps: '運用',
       model: 'モデル',
       llmops: 'LLMOps',
       aiops: 'AIOps',
@@ -450,6 +464,9 @@ export const translations: Record<Language, Translations> = {
       supervisor: 'Supervisor',
       kubernetes: 'K8s',
       monitoring: 'Surveillance',
+      aiinfra: 'AI Infra',
+      modelDev: 'Dev',
+      modelOps: 'Ops',
       model: 'Modèles',
       llmops: 'LLMOps',
       aiops: 'AIOps',
@@ -564,6 +581,9 @@ export const translations: Record<Language, Translations> = {
       supervisor: 'Supervisor',
       kubernetes: 'K8s',
       monitoring: 'Monitoreo',
+      aiinfra: 'AI Infra',
+      modelDev: 'Desarrollo',
+      modelOps: 'Operaciones',
       model: 'Modelos',
       llmops: 'LLMOps',
       aiops: 'AIOps',

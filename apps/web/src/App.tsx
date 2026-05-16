@@ -1,21 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { GlobalStyles } from './GlobalStyles';
-import { ImageUploader } from './components/ImageUploader';
-import { RAGChat } from './components/RAGChat';
 import {
-  SupervisorPanel,
-  K8sPanel,
-  MonitoringPanel,
-  ModelPanel,
-  LLMOpsPanel,
-  AIOpsPanel,
-  VectorDBPanel,
+  AIInfraPanel,
 } from './components/panels';
+import { RAGChat } from './components/RAGChat';
+import { ImageUploader } from './components/ImageUploader';
 import { I18nProvider, useI18n, Language, languageNames } from './i18n';
 import { colors, spacing, typography, radius } from './theme';
 
-type Tab = 'supervisor' | 'k8s' | 'monitoring' | 'model' | 'llmops' | 'aiops' | 'vectordb' | 'rag' | 'vision';
+type Tab = 'aiinfra' | 'rag' | 'vision';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -158,19 +152,13 @@ const ContentWrapper = styled.div`
 const languages: Language[] = ['en', 'zh', 'ja', 'fr', 'es'];
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<Tab>('supervisor');
+  const [activeTab, setActiveTab] = useState<Tab>('aiinfra');
   const [langOpen, setLangOpen] = useState(false);
   const { language, setLanguage, t } = useI18n();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: 'supervisor', label: t.nav.supervisor },
-    { key: 'k8s', label: t.nav.kubernetes },
-    { key: 'monitoring', label: t.nav.monitoring },
-    { key: 'model', label: t.nav.model },
-    { key: 'llmops', label: t.nav.llmops },
-    { key: 'aiops', label: t.nav.aiops },
-    { key: 'vectordb', label: t.nav.vectordb },
+    { key: 'aiinfra', label: t.nav.aiinfra },
     { key: 'rag', label: t.nav.documentQA },
     { key: 'vision', label: t.nav.visionAI },
   ];
@@ -187,13 +175,7 @@ function AppContent() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'supervisor': return <SupervisorPanel />;
-      case 'k8s': return <K8sPanel />;
-      case 'monitoring': return <MonitoringPanel />;
-      case 'model': return <ModelPanel />;
-      case 'llmops': return <LLMOpsPanel />;
-      case 'aiops': return <AIOpsPanel />;
-      case 'vectordb': return <VectorDBPanel />;
+      case 'aiinfra': return <AIInfraPanel />;
       case 'rag': return <RAGChat />;
       case 'vision': return <ImageUploader />;
     }

@@ -9,20 +9,20 @@
 基于 LangGraph 的智能体编排框架，提供 12 个专业智能体，由 Supervisor 作为中央协调器统一调度：
 
 
-| 智能体               | 功能              | 场景                        |
-| ----------------- | --------------- | ------------------------- |
-| **Supervisor**    | 多智能体协调器         | 任务路由、智能调度、结果聚合            |
-| **K8s**           | Kubernetes 集群管理 | Pod、Service、Deployment 管理 |
-| **VectorDB**      | 向量数据库           | 嵌入管理、相似度搜索                |
-| **RAG**           | 检索增强生成          | 文档问答、知识库管理                |
-| **Pipeline**      | 工作流编排           | 自动化流水线编排                  |
-| **LLMOps**        | LLM 运维          | 训练、微调、评估                  |
-| **AIOps**         | 智能运维            | 事件分析、根因定位                 |
-| **Feature Store** | 特征存储            | 特征工程管理                    |
-| **Monitoring**    | 监控系统            | 指标查询、告警配置                 |
-| **Model**         | ML 模型管理         | 版本控制、部署、推理                |
-| **TTS**           | 语音合成           | 文本转语音、多语言配音              |
-| **Video**         | 视频生成           | 文生视频、动态内容创作               |
+| 智能体 | 功能 | 场景 |
+| --- | --- | --- |
+| **Supervisor** | 多智能体协调器 | 任务路由、智能调度、结果聚合 |
+| **K8s** | Kubernetes 集群管理 | Pod、Service、Deployment 管理 |
+| **VectorDB** | 向量数据库 | 嵌入管理、相似度搜索 |
+| **RAG** | 检索增强生成 | 文档问答、知识库管理 |
+| **Pipeline** | 工作流编排 | 自动化流水线编排 |
+| **LLMOps** | LLM 运维 | 训练、微调、评估 |
+| **AIOps** | 智能运维 | 事件分析、根因定位 |
+| **Feature Store** | 特征存储 | 特征工程管理 |
+| **Monitoring** | 监控系统 | 指标查询、告警配置 |
+| **Model** | ML 模型管理 | 版本控制、部署、推理 |
+| **TTS** | 语音合成 | 文本转语音、多语言配音 |
+| **Video** | 视频生成 | 文生视频、动态内容创作 |
 
 
 ### Vision AI
@@ -139,11 +139,11 @@ ai-test/
 │   │       ├── components/
 │   │       │   ├── agents/      # Agent 聊天组件 (AgentChat, ChatMessage, ToolResult, StatusBadge)
 │   │       │   ├── panels/      # AIInfraPanel 统一面板 (Supervisor/K8s/Monitoring/Model/LLMOps/AIOps/VectorDB)
-│   │       │   └── AIHub.tsx   # AI 能力展示中心
+│   │       │   └── AIHub.tsx    # AI 能力展示中心 (Chat/Image/TTS)
 │   │       ├── i18n/            # 多语言支持 (EN/ZH/JA/FR/ES)
 │   │       │   ├── index.tsx    # I18nProvider + useI18n hook
 │   │       │   └── locales.ts   # 翻译文本
-│   │       └── theme.ts          # 苹果风格设计系统
+│   │       └── theme.ts         # 苹果风格设计系统
 │   └── server/             # Express 后端服务
 ├── packages/
 │   ├── config/            # 共享配置
@@ -228,12 +228,12 @@ pnpm install
 | Web 前端 | 5173 | React 开发服务器 |
 | 后端服务器 | 3000 | Express.js 服务 |
 | AI Agents | 8003 | 多智能体编排 |
-| Vision Service | 8002 | 视觉 AI（YOLO/BLIP/OCR/SD） |
-| RAG Service | 8001 | 文档检索增强生成 |
-| Text Service | 8004 | 文本生成（GPT/Claude/Ollama） |
-| TTS Service | 8004+ | 语音合成（端口共享或可配置） |
-| Media Gen | 3456 | 本地文生图（Stable Diffusion） |
-| Qdrant | 6333 | 向量数据库 |
+| Vision Service | 8000 | 视觉 AI（YOLO/BLIP/OCR/SD） |
+| RAG Service | 8010 | 文档检索增强生成 |
+| Text Service | 8006 | 文本生成（GPT/Claude/Ollama） |
+| TTS Service | 8013 | 语音合成 |
+| Media Gen | 8015 | 本地文生图（Stable Diffusion） |
+| Qdrant | 6333/6334 | 向量数据库 |
 | Ollama | 11434 | 本地 LLM（可选） |
 
 ### 启动服务
@@ -245,11 +245,11 @@ pnpm dev
 # 启动特定服务
 cd apps/web && pnpm dev              # 前端 (端口 5173)
 cd services/ai_agents && python main.py  # AI Agents (端口 8003)
-cd services/rag && uvicorn src.main:app --reload  # RAG (端口 8001)
-cd services/vision-service && uvicorn src.main:app --reload  # Vision (端口 8002)
-cd services/text-service && uvicorn src.main:app --reload --port 8004  # Text (端口 8004)
-cd services/tts-service && uvicorn src.main:app --reload  # TTS (端口 8004+)
-cd services/media-gen && python app.py  # Media Gen (端口 3456)
+cd services/rag && uvicorn src.main:app --reload --port 8010  # RAG (端口 8010)
+cd services/vision-service && uvicorn src.main:app --reload  # Vision (端口 8000)
+cd services/text-service && uvicorn src.main:app --reload --port 8006  # Text (端口 8006)
+cd services/tts-service && uvicorn src.main:app --reload  # TTS (端口 8013)
+cd services/media-gen && python app.py  # Media Gen (端口 8015)
 ```
 
 ### 配置
@@ -266,6 +266,8 @@ OLLAMA_MODEL=qwen2.5:7b
 **RAG 服务** (`services/rag/.env`):
 
 ```env
+HOST=0.0.0.0
+PORT=8010
 QDRANT_HOST=localhost
 QDRANT_PORT=6333
 LLM_PROVIDER=openai
@@ -275,8 +277,7 @@ OPENAI_API_KEY=your-api-key
 **Vision 服务** (`services/vision-service/.env`):
 
 ```env
-HOST=0.0.0.0
-PORT=8002
+DEVICE=cuda  # 或 cpu
 ```
 
 ## 开发指南
@@ -343,11 +344,12 @@ docker compose -f services/ai_agents/docker-compose.yml up -d
 
 - [项目文档](./docs/README.md)
 - [架构设计](./docs/ARCHITECTURE.md)
-- [API 参考](./docs/API.md)
 - [开发指南](./docs/DEVELOPMENT.md)
-- [Wardley 地图](./docs/wardley-map.png)
 - [C4 模型](./docs/c4/README.md)
 - [RAG 服务](./services/rag/README.md)
+- [Text Service](./services/text-service/README.md)
+- [TTS Service](./services/tts-service/README.md)
+- [Media Gen](./services/media-gen/README.md)
 
 ## 支持的多语言
 

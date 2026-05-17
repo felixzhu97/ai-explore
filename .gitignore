@@ -31,6 +31,9 @@ venv/
 *.log
 logs/
 
+# Docker volumes (runtime data)
+volumes/
+
 # ML model weights (at any level)
 *.pt
 *.onnx

@@ -140,18 +140,18 @@ def create_app() -> FastAPI:
             "endpoints": {
                 "health": "/health",
                 "documents": {
-                    "upload": "POST /documents/upload",
-                    "ingest_url": "POST /documents/ingest-url",
-                    "list": "GET /documents/",
-                    "list_from_db": "GET /documents/database",
-                    "stats": "GET /documents/{doc_id}/stats",
-                    "delete": "DELETE /documents/{doc_id}",
+                    "upload": "POST /api/rag/documents/upload",
+                    "ingest_url": "POST /api/rag/documents/ingest-url",
+                    "list": "GET /api/rag/documents/",
+                    "list_from_db": "GET /api/rag/documents/database",
+                    "stats": "GET /api/rag/documents/{doc_id}/stats",
+                    "delete": "DELETE /api/rag/documents/{doc_id}",
                 },
                 "chat": {
-                    "query": "POST /chat/",
-                    "stream": "POST /chat/stream",
-                    "history": "GET /chat/history/{session_id}",
-                    "ingest_text": "POST /chat/ingest-text",
+                    "query": "POST /api/rag/chat/",
+                    "stream": "POST /api/rag/chat/stream",
+                    "history": "GET /api/rag/chat/history/{session_id}",
+                    "ingest_text": "POST /api/rag/chat/ingest-text",
                 },
                 "reload": "POST /reload",
                 "cache": {

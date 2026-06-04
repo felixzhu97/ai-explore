@@ -204,7 +204,7 @@ export class RAGChatPage {
    * Mock RAG API responses
    */
   async mockRAGAPI(): Promise<void> {
-    await this.page.route('**/chat/stream**', async (route) => {
+    await this.page.route('**/api/rag/chat/stream**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'text/event-stream',
@@ -212,7 +212,7 @@ export class RAGChatPage {
       });
     });
 
-    await this.page.route('**/documents/**', async (route) => {
+    await this.page.route('**/api/rag/documents/**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

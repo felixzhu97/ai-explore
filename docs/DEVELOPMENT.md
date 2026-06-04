@@ -375,7 +375,7 @@ uvicorn src.main:app --host 0.0.0.0 --port 8001
 
 ```bash
 # Run Qdrant with Docker (optional)
-docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+docker run -p 6333:6333 qdrant/qdrant
 ```
 
 ### Text Service (Port 8006)

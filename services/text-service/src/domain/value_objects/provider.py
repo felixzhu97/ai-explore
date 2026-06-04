@@ -7,6 +7,7 @@ class LLMProvider(Enum):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
+    DEEPSEEK = "deepseek"
 
     @classmethod
     def all(cls) -> List["LLMProvider"]:

@@ -930,7 +930,7 @@ export function RAGChat() {
   const fetchAvailableDocs = async () => {
     setIsLoadingDocs(true);
     try {
-      const response = await fetch(`${RAG_API_URL}/documents/`);
+      const response = await fetch(`${RAG_API_URL}/api/rag/documents/`);
       if (response.ok) {
         const data = await response.json();
         const docs = data.documents || [];
@@ -975,7 +975,7 @@ export function RAGChat() {
     setDeletingDocIds((prev) => new Set(prev).add(docId));
 
     try {
-      const response = await fetch(`${RAG_API_URL}/documents/${docId}`, {
+      const response = await fetch(`${RAG_API_URL}/api/rag/documents/${docId}`, {
         method: 'DELETE',
       });
 
@@ -1053,7 +1053,7 @@ export function RAGChat() {
       formData.append('title', file.name);
 
       try {
-        const response = await fetch(`${RAG_API_URL}/documents/upload`, {
+        const response = await fetch(`${RAG_API_URL}/api/rag/documents/upload`, {
           method: 'POST',
           body: formData,
         });
@@ -1136,7 +1136,7 @@ export function RAGChat() {
       }
 
       // Use streaming endpoint
-      const response = await fetch(`${RAG_API_URL}/chat/stream`, {
+      const response = await fetch(`${RAG_API_URL}/api/rag/chat/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

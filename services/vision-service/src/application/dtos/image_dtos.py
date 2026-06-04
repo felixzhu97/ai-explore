@@ -1,6 +1,6 @@
 """Image-related DTOs."""
 
-from typing import Optional, List
+from typing import Optional, List, Tuple, Dict
 from pydantic import BaseModel, Field
 
 
@@ -34,7 +34,7 @@ class ImageGenerationResponseDTO(BaseModel):
     width: int
     height: int
     processing_time_ms: float
-    metadata: dict = {}
+    metadata: Dict = {}
 
 
 class ImageVariationRequest(BaseModel):
@@ -63,8 +63,8 @@ class ModelInfo(BaseModel):
     model_id: str
     model_type: str
     capabilities: List[str]
-    max_dimensions: tuple[int, int]
-    recommended_steps: tuple[int, int]
+    max_dimensions: Tuple[int, int]
+    recommended_steps: Tuple[int, int]
     vram_required_gb: float
     supports_attention_slicing: bool
     supports_vae_slicing: bool

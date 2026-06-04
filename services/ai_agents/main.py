@@ -272,22 +272,54 @@ async def initialize_agents():
     
     try:
         from langchain_ollama import ChatOllama
+        from langchain_openai import ChatOpenAI
         from services.ai_agents.infrastructure.config import get_settings
         
         settings = get_settings()
         
-        # Create LLM instance using Ollama
-        # Note: stream=True enables streaming mode, but the actual streaming
-        # behavior depends on the underlying model's support
-        llm = ChatOllama(
-            model=settings.OLLAMA_MODEL,
-            base_url=settings.OLLAMA_BASE_URL,
-            temperature=0.7,
-            stream=True,  # Enable streaming
-            timeout=120,  # 2 minute timeout per request
-        )
+        # Determine LLM provider (default to DeepSeek)
+        provider = os.environ.get("LLM_PROVIDER", "deepseek").lower()
         
-        logger.info(f"Initializing AI Agents with Ollama ({settings.OLLAMA_BASE_URL}/{settings.OLLAMA_MODEL})...")
+        if provider == "deepseek":
+            logger.info(f"Initializing AI Agents with DeepSeek ({settings.DEEPSEEK_BASE_URL}/{settings.DEEPSEEK_MODEL})...")
+            llm = ChatOpenAI(
+                model=settings.DEEPSEEK_MODEL,
+                api_key=settings.DEEPSEEK_API_KEY or None,
+                base_url=settings.DEEPSEEK_BASE_URL,
+                temperature=0.7,
+                stream=True,
+                timeout=120,
+            )
+        elif provider == "ollama":
+            logger.info(f"Initializing AI Agents with Ollama ({settings.OLLAMA_BASE_URL}/{settings.OLLAMA_MODEL})...")
+            llm = ChatOllama(
+                model=settings.OLLAMA_MODEL,
+                base_url=settings.OLLAMA_BASE_URL,
+                temperature=0.7,
+                stream=True,
+                timeout=120,
+            )
+        elif provider == "openai":
+            logger.info(f"Initializing AI Agents with OpenAI ({settings.OPENAI_BASE_URL}/{settings.OPENAI_MODEL})...")
+            llm = ChatOpenAI(
+                model=settings.OPENAI_MODEL,
+                api_key=settings.OPENAI_API_KEY or None,
+                base_url=settings.OPENAI_BASE_URL,
+                temperature=0.7,
+                stream=True,
+                timeout=120,
+            )
+        else:
+            # Default to DeepSeek
+            logger.info(f"Initializing AI Agents with DeepSeek ({settings.DEEPSEEK_BASE_URL}/{settings.DEEPSEEK_MODEL})...")
+            llm = ChatOpenAI(
+                model=settings.DEEPSEEK_MODEL,
+                api_key=settings.DEEPSEEK_API_KEY or None,
+                base_url=settings.DEEPSEEK_BASE_URL,
+                temperature=0.7,
+                stream=True,
+                timeout=120,
+            )
         
         # Initialize all specialized agents
         rag_agent = RAGAgent(llm=llm)

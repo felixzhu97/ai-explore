@@ -56,6 +56,8 @@ class LangChainLLMGateway(LLMGatewayPort):
             model = model or self._config.anthropic_default_model
         elif provider == "ollama":
             model = model or self._config.ollama_model
+        elif provider == "deepseek":
+            model = model or self._config.deepseek_model
         else:
             model = model or self._config.llm_model
         
@@ -106,6 +108,15 @@ class LangChainLLMGateway(LLMGatewayPort):
                 model=model,
                 temperature=temperature,
                 timeout=self._config.ollama_timeout,
+            )
+        elif provider == "deepseek":
+            return ChatOpenAI(
+                model=model,
+                api_key=self._config.deepseek_api_key or None,
+                base_url=self._config.deepseek_base_url,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=self._config.deepseek_timeout,
             )
         else:
             raise ValueError(f"Unknown LLM provider: {provider}")

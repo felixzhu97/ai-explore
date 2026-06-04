@@ -69,6 +69,26 @@ class ConfigPort(ABC):
     @abstractmethod
     def ollama_timeout(self) -> int:
         pass
+    
+    @property
+    @abstractmethod
+    def deepseek_api_key(self) -> Optional[str]:
+        pass
+    
+    @property
+    @abstractmethod
+    def deepseek_base_url(self) -> str:
+        pass
+    
+    @property
+    @abstractmethod
+    def deepseek_model(self) -> str:
+        pass
+    
+    @property
+    @abstractmethod
+    def deepseek_timeout(self) -> int:
+        pass
 
 
 class PydanticConfigAdapter(ConfigPort):
@@ -125,3 +145,19 @@ class PydanticConfigAdapter(ConfigPort):
     @property
     def ollama_timeout(self) -> int:
         return self._settings.OLLAMA_TIMEOUT
+    
+    @property
+    def deepseek_api_key(self) -> Optional[str]:
+        return self._settings.DEEPSEEK_API_KEY or None
+    
+    @property
+    def deepseek_base_url(self) -> str:
+        return self._settings.DEEPSEEK_BASE_URL
+    
+    @property
+    def deepseek_model(self) -> str:
+        return self._settings.DEEPSEEK_MODEL
+    
+    @property
+    def deepseek_timeout(self) -> int:
+        return self._settings.DEEPSEEK_TIMEOUT

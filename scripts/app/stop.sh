@@ -29,4 +29,16 @@ pkill -f "text-service.*uvicorn" 2>/dev/null || true
 pkill -f "tts-service.*uvicorn" 2>/dev/null || true
 pkill -f "media-gen.*app.py" 2>/dev/null || true
 
+# Only stop Docker containers if Docker is running
+if docker info >/dev/null 2>&1; then
+    echo "Stopping Docker containers..."
+    COMPOSE_CMD="docker compose"
+    docker compose version >/dev/null 2>&1 || COMPOSE_CMD="docker-compose"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+    $COMPOSE_CMD -f "$ROOT_DIR/services/rag/docker-compose.yml" down 2>/dev/null || true
+else
+    echo -e "${YELLOW}Docker not running, skipping container cleanup${NC}"
+fi
+
 echo -e "${GREEN}All services stopped${NC}\n"

@@ -6,7 +6,7 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).parent.parent / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     EMBEDDING_DEVICE: str = "cuda"
 
     LLM_PROVIDER: Literal["openai", "anthropic", "ollama", "deepseek"] = "deepseek"
-    LLM_MODEL: str = "deepseek-chat"
+    LLM_MODEL: str = "deepseek-v4-flash"
 
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str = "https://api.openai.com/v1"

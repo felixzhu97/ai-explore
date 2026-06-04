@@ -8,6 +8,7 @@ to ImageGenerationRules in the domain layer.
 """
 
 import time
+from typing import Optional
 
 from ...domain.ports.image_providers import IImageGenerationService
 from ...domain.services.image_generation_rules import (
@@ -46,7 +47,7 @@ class GenerateImageUseCase:
     def __init__(
         self,
         image_service: IImageGenerationService,
-        rules: ImageGenerationRules | None = None,
+        rules: Optional[ImageGenerationRules] = None,
     ):
         """Initialize the use case with an image generation service.
 
@@ -113,7 +114,7 @@ class GenerateVariationUseCase:
     def __init__(
         self,
         image_service: IImageGenerationService,
-        rules: ImageGenerationRules | None = None,
+        rules: Optional[ImageGenerationRules] = None,
     ):
         """Initialize the use case with an image generation service."""
         self._service = image_service
@@ -171,7 +172,7 @@ class UpscaleImageUseCase:
     def __init__(
         self,
         image_service: IImageGenerationService,
-        rules: ImageGenerationRules | None = None,
+        rules: Optional[ImageGenerationRules] = None,
     ):
         """Initialize the use case with an image generation service."""
         self._service = image_service

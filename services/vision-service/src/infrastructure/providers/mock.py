@@ -4,7 +4,9 @@ This provider simulates video generation for testing purposes
 without making actual API calls.
 """
 
-from typing import Optional
+from typing import Optional, Dict
+from datetime import datetime
+import asyncio
 from .base import BaseVideoProvider
 from loguru import logger
 import uuid
@@ -16,7 +18,7 @@ class MockVideoProvider(BaseVideoProvider):
     Simulates video generation with realistic async behavior.
     """
     
-    _tasks: dict[str, dict] = {}
+    _tasks: Dict[str, Dict] = {}
     
     def __init__(self):
         """Initialize mock provider."""

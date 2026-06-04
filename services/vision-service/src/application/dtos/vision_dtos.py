@@ -1,6 +1,6 @@
 """Vision-related DTOs for API requests and responses."""
 
-from typing import Optional, List
+from typing import Optional, List, Tuple, Dict
 from enum import Enum
 from pydantic import BaseModel, Field
 
@@ -17,7 +17,7 @@ class DetectionResult(BaseModel):
     """Detection result for a single object."""
     class_name: str
     confidence: float = Field(ge=0.0, le=1.0)
-    bbox: tuple[int, int, int, int]
+    bbox: Tuple[int, int, int, int]
 
 
 class DetectionResponseDTO(BaseModel):
@@ -61,6 +61,6 @@ class AnalyzeImageRequestDTO(BaseModel):
 
 class AnalyzeImageResponseDTO(BaseModel):
     """DTO for combined image analysis response."""
-    caption: Optional[dict] = None
-    detections: Optional[dict] = None
-    ocr: Optional[dict] = None
+    caption: Optional[Dict] = None
+    detections: Optional[Dict] = None
+    ocr: Optional[Dict] = None

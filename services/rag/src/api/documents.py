@@ -27,7 +27,7 @@ from ..config import get_settings
 from ..persistence.document_metadata import get_document_store, DocumentRecord
 
 
-router = APIRouter(prefix="/documents", tags=["Documents"])
+router = APIRouter(prefix="/api/rag/documents", tags=["Documents"])
 
 
 def get_document_service(

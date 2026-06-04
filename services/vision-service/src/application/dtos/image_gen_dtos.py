@@ -1,6 +1,6 @@
 """Image generation DTOs for application layer."""
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from pydantic import BaseModel, Field
 
 
@@ -91,8 +91,8 @@ class ModelInfoDTO(BaseModel):
     model_id: str
     model_type: str
     capabilities: List[str]
-    max_dimensions: tuple[int, int]
-    recommended_steps: tuple[int, int]
+    max_dimensions: Tuple[int, int]
+    recommended_steps: Tuple[int, int]
     vram_required_gb: float
     supports_attention_slicing: bool
     supports_vae_slicing: bool

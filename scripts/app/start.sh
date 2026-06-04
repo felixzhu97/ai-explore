@@ -13,6 +13,18 @@ ENV=${1:-dev}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Load environment variables from .env files
+if [ -f "$ROOT_DIR/.env" ]; then
+  set -a
+  source "$ROOT_DIR/.env"
+  set +a
+fi
+if [ -f "$ROOT_DIR/services/ai_agents/.env" ]; then
+  set -a
+  source "$ROOT_DIR/services/ai_agents/.env"
+  set +a
+fi
+
 cleanup() {
   echo -e "\n${YELLOW}Stopping services...${NC}"
   [ -n "$AI_AGENTS_PID" ] && kill $AI_AGENTS_PID 2>/dev/null || true
@@ -50,17 +62,21 @@ pkill -f "uvicorn.*8013" 2>/dev/null || true
 sleep 2
 
 echo -e "${BLUE}[2/5] Docker + Qdrant...${NC}"
-COMPOSE_CMD="docker compose"
-docker compose version >/dev/null 2>&1 || COMPOSE_CMD="docker-compose"
-export COMPOSE_PROJECT_NAME=ai-test
-$COMPOSE_CMD -f "$ROOT_DIR/services/rag/docker-compose.yml" down 2>/dev/null || true
-$COMPOSE_CMD -f "$ROOT_DIR/services/rag/docker-compose.yml" up -d --wait qdrant 2>/dev/null || true
+if docker info >/dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+    docker compose version >/dev/null 2>&1 || COMPOSE_CMD="docker-compose"
+    export COMPOSE_PROJECT_NAME=ai-test
+    $COMPOSE_CMD -f "$ROOT_DIR/services/rag/docker-compose.yml" down 2>/dev/null || true
+    $COMPOSE_CMD -f "$ROOT_DIR/services/rag/docker-compose.yml" up -d --wait qdrant 2>/dev/null || true
 
-for i in $(seq 1 30); do
-  nc -z 127.0.0.1 6333 2>/dev/null && break
-  sleep 1
-done
-echo -e "${GREEN}  ✓ Qdrant ready on http://localhost:6333${NC}"
+    for i in $(seq 1 30); do
+      nc -z 127.0.0.1 6333 2>/dev/null && break
+      sleep 1
+    done
+    echo -e "${GREEN}  ✓ Qdrant ready on http://localhost:6333${NC}"
+else
+    echo -e "${YELLOW}  ⚠ Docker not running, skipping Qdrant${NC}"
+fi
 
 echo -e "${BLUE}[3/5] Installing dependencies...${NC}"
 [ ! -d "$ROOT_DIR/node_modules" ] && cd "$ROOT_DIR" && pnpm install

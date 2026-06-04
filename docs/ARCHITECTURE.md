@@ -97,21 +97,25 @@ Ports:
 ```
 
 **Key Entities:**
+
 - `Session` - Aggregate root managing conversation history with max_history trimming
 - `ChatMessage` - Immutable value object for messages
 - `LLMProvider` - Enum (OPENAI, ANTHROPIC, OLLAMA)
 
 **API Endpoints (Port 8006):**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/text/health` | GET | Health check |
-| `/api/text/providers` | GET | List available LLM providers |
-| `/api/text/models` | GET | List available models |
-| `/api/text/complete` | POST | Generate text completion |
-| `/api/text/complete/stream` | POST | Stream completion (SSE) |
-| `/api/text/chat` | POST | Chat completion with session |
-| `/api/text/chat/stream` | POST | Stream chat (SSE) |
-| `/api/text/session/{id}` | GET/DELETE | Session management |
+
+
+| Endpoint                    | Method     | Description                  |
+| --------------------------- | ---------- | ---------------------------- |
+| `/api/text/health`          | GET        | Health check                 |
+| `/api/text/providers`       | GET        | List available LLM providers |
+| `/api/text/models`          | GET        | List available models        |
+| `/api/text/complete`        | POST       | Generate text completion     |
+| `/api/text/complete/stream` | POST       | Stream completion (SSE)      |
+| `/api/text/chat`            | POST       | Chat completion with session |
+| `/api/text/chat/stream`     | POST       | Stream chat (SSE)            |
+| `/api/text/session/{id}`    | GET/DELETE | Session management           |
+
 
 ---
 
@@ -161,22 +165,27 @@ Presentation Layer
 ```
 
 **Key Entities:**
+
 - `Voice` - Immutable voice descriptor with language/gender filtering
 - `SynthesisRequest` - Domain entity for synthesis parameters
 - `SynthesisResult` - Immutable result with audio data
 - `AudioConfig` - Immutable audio configuration (sample_rate, bit_rate, channels)
 
 **Domain Service:**
+
 - `SynthesisService` - Text normalization, SSML generation, speed/pitch transformation
 
 **API Endpoints (Port 8005):**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/tts/health` | GET | Health check |
-| `/tts/synthesize` | POST | Synthesize speech (returns audio) |
-| `/tts/stream` | POST | Stream speech |
-| `/tts/voices` | GET | List available voices |
-| `/tts/providers` | GET | List TTS providers |
+
+
+| Endpoint          | Method | Description                       |
+| ----------------- | ------ | --------------------------------- |
+| `/tts/health`     | GET    | Health check                      |
+| `/tts/synthesize` | POST   | Synthesize speech (returns audio) |
+| `/tts/stream`     | POST   | Stream speech                     |
+| `/tts/voices`     | GET    | List available voices             |
+| `/tts/providers`  | GET    | List TTS providers                |
+
 
 ---
 
@@ -215,6 +224,7 @@ Presentation Layer
 ```
 
 **Domain Ports:**
+
 - `VectorStorePort` - Search, upsert, delete operations
 - `EmbeddingPort` - Query/document embedding generation
 - `LLMGatewayPort` - LLM generation with streaming
@@ -222,17 +232,21 @@ Presentation Layer
 - `DocumentRepositoryPort` - Document metadata storage
 
 **Key Components:**
+
 - `DocumentService` - Upload, ingest, chunk text, upsert vectors
 - `RAGChainService` - Query embedding, similarity search, context building, LLM generation
 
 **API Endpoints (Port 8001):**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/documents/ingest` | POST | Upload and ingest document |
-| `/documents/list` | GET | List documents |
-| `/documents/{id}` | GET/DELETE | Get/delete document |
-| `/chat` | POST | RAG chat |
-| `/chat/stream` | POST | Stream chat response |
+
+
+| Endpoint            | Method     | Description                |
+| ------------------- | ---------- | -------------------------- |
+| `/documents/ingest` | POST       | Upload and ingest document |
+| `/documents/list`   | GET        | List documents             |
+| `/documents/{id}`   | GET/DELETE | Get/delete document        |
+| `/chat`             | POST       | RAG chat                   |
+| `/chat/stream`      | POST       | Stream chat response       |
+
 
 ---
 
@@ -274,18 +288,23 @@ Presentation Layer
 ```
 
 **Key Entities:**
+
 - `GeneratedImage` - Immutable image result with metadata
 - `GenerationParams` - Validated generation parameters (steps, guidance_scale, width, height, seed)
 
 **Key Ports:**
+
 - `ModelCacheRepository` - Pipeline caching with lazy loading
 - `ImageEncoderPort` - Image encoding interface
 
 **API Endpoints:**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/image/generate` | POST | Generate images |
+
+
+| Endpoint          | Method | Description     |
+| ----------------- | ------ | --------------- |
+| `/health`         | GET    | Health check    |
+| `/image/generate` | POST   | Generate images |
+
 
 ---
 
@@ -339,18 +358,22 @@ Presentation Layer
 ```
 
 **Key Entities:**
+
 - `ImageGeneration` - Image generation with validation
 - `VideoTask` - Video generation state machine (PENDING, PROCESSING, COMPLETED, FAILED)
 
 **API Endpoints (Port 8000):**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/vision/detect` | POST | Object detection (YOLO) |
-| `/vision/ocr` | POST | Text recognition |
-| `/vision/caption` | POST | Image captioning |
-| `/image-gen/generate` | POST | Generate image |
-| `/video/generate` | POST | Generate video |
-| `/video/status/{id}` | GET | Check video status |
+
+
+| Endpoint              | Method | Description             |
+| --------------------- | ------ | ----------------------- |
+| `/vision/detect`      | POST   | Object detection (YOLO) |
+| `/vision/ocr`         | POST   | Text recognition        |
+| `/vision/caption`     | POST   | Image captioning        |
+| `/image-gen/generate` | POST   | Generate image          |
+| `/video/generate`     | POST   | Generate video          |
+| `/video/status/{id}`  | GET    | Check video status      |
+
 
 ---
 
@@ -463,13 +486,15 @@ Chat Response + Source Documents
 
 ## API Reference Summary
 
-| Service | Port | Key Endpoints |
-|---------|------|----------------|
-| Text | 8006 | `/api/text/chat`, `/api/text/complete`, `/api/text/chat/stream` |
-| TTS | 8005 | `/tts/synthesize`, `/tts/stream`, `/tts/voices` |
-| RAG | 8001 | `/chat`, `/documents/ingest` |
-| Media Gen | 8002 | `/image/generate` |
-| Vision | 8000 | `/vision/detect`, `/image-gen/generate`, `/video/generate` |
+
+| Service   | Port | Key Endpoints                                                   |
+| --------- | ---- | --------------------------------------------------------------- |
+| Text      | 8006 | `/api/text/chat`, `/api/text/complete`, `/api/text/chat/stream` |
+| TTS       | 8005 | `/tts/synthesize`, `/tts/stream`, `/tts/voices`                 |
+| RAG       | 8001 | `/chat`, `/documents/ingest`                                    |
+| Media Gen | 8002 | `/image/generate`                                               |
+| Vision    | 8000 | `/vision/detect`, `/image-gen/generate`, `/video/generate`      |
+
 
 ---
 
@@ -508,3 +533,4 @@ Detailed C4 architecture diagrams are maintained in `docs/c4/`:
 - `c4-context.puml` - System context
 - `c4-container.puml` - Container-level architecture
 - `c4-component-media-services.puml` - Media services component detail
+

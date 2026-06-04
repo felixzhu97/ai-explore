@@ -31,7 +31,7 @@ from ..persistence.session_store import ChatMessage
 from config import get_settings
 
 
-router = APIRouter(prefix="/chat", tags=["Chat"])
+router = APIRouter(prefix="/api/rag/chat", tags=["Chat"])
 
 
 def get_rag_chain_service(

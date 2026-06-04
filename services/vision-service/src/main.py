@@ -13,11 +13,12 @@ if not os.environ.get("HF_ENDPOINT"):
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from typing import List
 from loguru import logger
 from .api import vision, video, image_gen
 
 
-def get_cors_origins() -> list[str]:
+def get_cors_origins() -> List[str]:
     """Get CORS origins from environment variable or use defaults."""
     origins_env = os.getenv("CORS_ORIGINS", "")
     if origins_env:

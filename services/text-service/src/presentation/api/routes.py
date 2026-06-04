@@ -79,6 +79,12 @@ async def list_providers(
             models=settings.OLLAMA_MODELS.split(","),
             status="available",
         ),
+        ProviderInfo(
+            name="deepseek",
+            display_name="DeepSeek",
+            models=settings.DEEPSEEK_MODELS.split(","),
+            status="available" if settings.DEEPSEEK_API_KEY else "configured",
+        ),
     ]
 
 
@@ -119,7 +125,16 @@ async def list_models(
                 description=f"Ollama {model_name.strip()} (Local)",
                 max_tokens=None,
             ))
-    
+
+    if provider is None or provider == "deepseek":
+        for model_name in settings.DEEPSEEK_MODELS.split(","):
+            models.append(ModelInfo(
+                name=model_name.strip(),
+                provider="deepseek",
+                description=f"DeepSeek {model_name.strip()}",
+                max_tokens=128000,
+            ))
+
     return models
 
 

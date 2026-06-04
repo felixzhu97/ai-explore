@@ -71,30 +71,38 @@
 ## 架构图
 
 ### Wardley 地图
-![Wardley Map](docs/png/AI-Test-Wardley-Map.png)
+
+Wardley Map
 
 ### C1 系统上下文图
-![C1 Context](docs/c4/png/C4-Context.png)
+
+C1 Context
 
 ### C2 容器图
-![C2 Container](docs/c4/png/C4-Container.png)
+
+C2 Container
 
 ### C3 组件图
 
 #### AI Agents 服务组件
-![C3 AI Agents](docs/c4/png/C4-Component-AI-Agents.png)
+
+C3 AI Agents
 
 #### 前端组件
-![C3 Frontend](docs/c4/png/C4-Component-Frontend.png)
+
+C3 Frontend
 
 #### RAG 服务组件
-![C3 RAG](docs/c4/png/C4-Component-RAG-Service.png)
+
+C3 RAG
 
 #### Vision Service 组件
-![C3 Vision](docs/c4/png/C4-Component-Vision-Service.png)
+
+C3 Vision
 
 #### Media Services 组件
-![C3 Media](docs/c4/png/C4-Component-Media-Services.png)
+
+C3 Media
 
 ## 技术栈
 
@@ -229,8 +237,9 @@ pnpm stop
 | Text Service   | 8006      | 文本生成（GPT/Claude/Ollama） |
 | TTS Service    | 8013      | 语音合成                    |
 | Media Gen      | 8015      | 本地文生图（Stable Diffusion） |
-| Qdrant         | 6333/6334 | 向量数据库                   |
+| Qdrant         | 6333 | 向量数据库                   |
 | Ollama         | 11434     | 本地 LLM（可选）              |
+
 
 ## 手动启动
 

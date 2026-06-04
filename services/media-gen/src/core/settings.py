@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = "MEDIA_GEN_"
         case_sensitive = False
+        extra = "ignore"
 
 
 @lru_cache

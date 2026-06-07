@@ -1,15 +1,15 @@
 ---
 name: angular-react-ui-test
-description: Angular 与 React 迁移后 UI/交互一致性测试规范与 Playwright E2E 测试指南。对比验证 Angular 应用与 React 原版在视觉、交互、i18n 等方面的完全一致性。
+description: Angular 与 React 迁移后 UI/交互一致性验证指南。使用 MCP 浏览器工具进行手动/半自动对比验证。对比验证 Angular 应用与 React 原版在视觉、交互、i18n 等方面的完全一致性。
 globs: **/*.spec.ts **/*.test.ts **/*.cy.ts
 alwaysApply: false
 ---
 
-# Angular ↔ React UI/交互一致性测试规范
+# Angular ↔ React UI/交互一致性验证规范
 
 ## 概述
 
-本规范用于验证 Angular 迁移后的 UI 与 React 原版在视觉、交互、国际化等方面完全一致。适用于所有已迁移组件的回归测试。
+本规范用于验证 Angular 迁移后的 UI 与 React 原版在视觉、交互、国际化等方面完全一致。使用 MCP 浏览器工具（`cursor-ide-browser`）进行手动/半自动对比验证，而非 Playwright 自动化测试。
 
 ---
 
@@ -148,417 +148,246 @@ alwaysApply: false
 
 ---
 
-## Playwright E2E 测试指南
+---
 
-### 安装与配置
+## MCP 浏览器工具验证指南
 
-```bash
-# 安装 Playwright
-pnpm add -D @playwright/test
-npx playwright install chromium
+### MCP 工具简介
 
-# 配置文件 playwright.config.ts
-import { defineConfig } from '@playwright/test';
+`cursor-ide-browser` MCP 工具提供浏览器自动化能力，适合进行 UI/交互对比验证。主要工具：
 
-export default defineConfig({
-  testDir: './e2e',
-  timeout: 30_000,
-  use: {
-    baseURL: 'http://localhost:4200', // Angular
-    screenshot: 'only-on-failure',
-  },
-  projects: [
-    { name: 'angular', use: { baseURL: 'http://localhost:4200' } },
-    { name: 'react', use: { baseURL: 'http://localhost:5173' } },
-  ],
-});
+| 工具 | 用途 |
+|------|------|
+| `browser_navigate` | 导航到指定页面 |
+| `browser_snapshot` | 获取页面结构快照（ARIA） |
+| `browser_take_screenshot` | 截图（用于视觉对比） |
+| `browser_click` / `browser_mouse_click_xy` | 点击元素或坐标 |
+| `browser_fill` / `browser_type` | 填写表单 |
+| `browser_console_messages` | 检查控制台错误 |
+| `browser_network_requests` | 验证 API 请求 |
+
+### 核心工作流程
+
+```yaml
+1. 启动服务
+   - Angular: pnpm --filter @ai-test/web-angular run start  # http://localhost:4200
+   - React: pnpm --filter @ai-test/web run start           # http://localhost:5173
+
+2. 打开浏览器 Tab
+   - browser_navigate → Angular 页面
+   - browser_navigate → React 页面（第二个 Tab）
+
+3. 视觉对比
+   - browser_take_screenshot → 截图对比
+   - 人工检查或使用图像差异工具
+
+4. 交互验证
+   - browser_snapshot → 获取页面结构
+   - browser_click/browser_fill → 模拟交互
+   - 验证状态变化是否符合预期
+
+5. 控制台检查
+   - browser_console_messages → 检查错误/警告
 ```
 
-### 视觉一致性测试示例
+### MCP 工具使用示例
+
+#### 基础导航与截图
 
 ```typescript
-// e2e/visual-consistency.spec.ts
-import { test, expect } from '@playwright/test';
-
-// 通用视觉辅助函数
-async function captureAndCompare(
-  page: Page,
-  component: string,
-  reactUrl: string,
-  angularUrl: string
-) {
-  // React 截图
-  await page.goto(reactUrl);
-  await page.waitForLoadState('networkidle');
-  const reactScreenshot = await page.screenshot({ fullPage: false });
-
-  // Angular 截图
-  await page.goto(angularUrl);
-  await page.waitForLoadState('networkidle');
-  const angularScreenshot = await page.screenshot({ fullPage: false });
-
-  // 使用像素差异检测 (阈值 0.1%)
-  const diff = await page.evaluate(
-    (react: Buffer, angular: Buffer) => {
-      // ... 像素差异计算逻辑
-    },
-    reactScreenshot,
-    angularScreenshot
-  );
-
-  expect(diff).toBeLessThan(0.001); // < 0.1% 差异
-}
-
-// ==================== SegmentedControl ====================
-
-test.describe('SegmentedControl 视觉一致性', () => {
-  test('tab 选项样式一致', async ({ page }) => {
-    await page.goto('http://localhost:4200/ai-hub');
-    const angularTabs = page.locator('.segment-button');
-    const count = await angularTabs.count();
-    expect(count).toBe(3); // chat / image / tts
-
-    // 验证激活态
-    await expect(angularTabs.nth(0)).toHaveClass(/active/);
-    await expect(angularTabs.nth(0)).toHaveCSS('background-color', 'rgb(255, 255, 255)');
-
-    // 验证非激活态
-    await expect(angularTabs.nth(1)).not.toHaveClass(/active/);
-    const bgColor = await angularTabs.nth(1).evaluate(
-      (el) => getComputedStyle(el).backgroundColor
-    );
-    expect(bgColor).toBe('transparent');
-
-    // 验证 box-shadow 激活态
-    const boxShadow = await angularTabs.nth(0).evaluate(
-      (el) => getComputedStyle(el).boxShadow
-    );
-    expect(boxShadow).toContain('0 2px 4px');
-  });
-
-  test('tab 切换交互一致', async ({ page }) => {
-    await page.goto('http://localhost:4200/ai-hub');
-    const tabs = page.locator('.segment-button');
-
-    await tabs.nth(1).click();
-    await expect(tabs.nth(1)).toHaveClass(/active/);
-    await expect(tabs.nth(0)).not.toHaveClass(/active/);
-
-    // 验证 focus-visible
-    await tabs.nth(2).focus();
-    const outline = await tabs.nth(2).evaluate(
-      (el) => getComputedStyle(el).boxShadow
-    );
-    expect(outline).toContain('rgba(0, 122, 255, 0.3)');
-  });
-});
-
-// ==================== StatusBadge ====================
-
-test.describe('StatusBadge 视觉一致性', () => {
-  const statusCases = [
-    { status: 'online', expectedBg: 'rgb(52, 199, 89)', label: 'Online' },
-    { status: 'offline', expectedBg: 'rgba(0, 0, 0, 0.06)', label: 'Offline' },
-    { status: 'busy', expectedBg: 'rgb(255, 204, 0)', label: 'Busy' },
-    { status: 'error', expectedBg: 'rgb(255, 59, 48)', label: 'Error' },
-    { status: 'pending', expectedBg: 'rgb(0, 122, 255)', label: 'Pending' },
-  ] as const;
-
-  statusCases.forEach(({ status, expectedBg, label }) => {
-    test(`状态 ${status} 颜色正确`, async ({ page }) => {
-      await page.goto('http://localhost:4200/agent-chat');
-      const badge = page.locator(`app-status-badge .badge--${status}`);
-
-      await expect(badge).toBeVisible();
-      await expect(badge).toContainText(label);
-      const bg = await badge.evaluate((el) => getComputedStyle(el).backgroundColor);
-      expect(bg).toBe(expectedBg);
-    });
-  });
-
-  test('Dot 显示/隐藏一致', async ({ page }) => {
-    await page.goto('http://localhost:4200/agent-chat');
-
-    const badgeWithDot = page.locator('app-status-badge').first();
-    const dot = badgeWithDot.locator('.badge__dot');
-    await expect(dot).toBeVisible();
-
-    // 验证 dot 尺寸
-    const size = await dot.evaluate((el) => ({
-      width: el.offsetWidth,
-      height: el.offsetHeight,
-    }));
-    expect(size.width).toBe(6);
-    expect(size.height).toBe(6);
-
-    // 验证 dot 圆形
-    const borderRadius = await dot.evaluate((el) => getComputedStyle(el).borderRadius);
-    expect(borderRadius).toBe('50%');
-  });
-});
-
-// ==================== VisionPanel ====================
-
-test.describe('VisionPanel 交互一致性', () => {
-  test('图片拖放区域样式', async ({ page }) => {
-    await page.goto('http://localhost:4200/vision');
-
-    const imageArea = page.locator('.image-area');
-    const bg = await imageArea.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe('rgb(245, 245, 247)'); // #f5f5f7
-
-    // 虚线边框
-    const border = await imageArea.evaluate((el) => getComputedStyle(el).border);
-    expect(border).toContain('dashed');
-  });
-
-  test('图片预览缩放交互', async ({ page }) => {
-    await page.goto('http://localhost:4200/vision');
-
-    // 上传测试图片
-    const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles('./test-image.png');
-
-    const preview = page.locator('.preview-image');
-    await expect(preview).toBeVisible();
-
-    // 悬停验证
-    await preview.hover();
-    const transform = await preview.evaluate((el) => getComputedStyle(el).transform);
-    expect(transform).toBe('matrix(1.02, 0, 0, 1.02, 0, 0)'); // scale(1.02)
-
-    // Zoom Hint 显示
-    const hint = page.locator('.zoom-hint');
-    const hintOpacity = await hint.evaluate((el) => getComputedStyle(el).opacity);
-    expect(hintOpacity).toBe('1');
-  });
-
-  test('Zoom Modal 样式', async ({ page }) => {
-    await page.goto('http://localhost:4200/vision');
-
-    // 先上传图片
-    const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles('./test-image.png');
-
-    // 点击预览图打开 modal
-    await page.locator('.preview-image').click();
-
-    const modal = page.locator('.zoom-modal');
-    await expect(modal).toBeVisible();
-
-    // 背景色
-    const bg = await modal.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe('rgba(0, 0, 0, 0.9)');
-
-    // 关闭按钮
-    const closeBtn = modal.locator('.zoom-close');
-    await expect(closeBtn).toBeVisible();
-
-    // 点击背景关闭
-    await modal.click({ position: { x: 10, y: 10 } });
-    await expect(modal).not.toBeVisible();
-  });
-
-  test('Loading Spinner 样式', async ({ page }) => {
-    await page.goto('http://localhost:4200/vision');
-
-    // 上传图片后点击分析
-    const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles('./test-image.png');
-    await page.locator('.action-button').click();
-
-    const spinner = page.locator('.spinner');
-    await expect(spinner).toBeVisible();
-
-    const borderColor = await spinner.evaluate((el) => getComputedStyle(el).borderTopColor);
-    expect(borderColor).toBe('rgb(0, 113, 227)'); // #0071e3
-
-    // 验证 animation
-    const animation = await spinner.evaluate((el) => getComputedStyle(el).animation);
-    expect(animation).toContain('spin');
-  });
-});
-
-// ==================== RAGChat ====================
-
-test.describe('RAGChat 交互一致性', () => {
-  test('Toast 滑入动画', async ({ page }) => {
-    await page.goto('http://localhost:4200/rag-chat');
-
-    // 触发 toast (例如上传文件)
-    const fileInput = page.locator('input#file-upload');
-    await fileInput.setInputFiles('./test.pdf');
-
-    const toast = page.locator('.toast-item').first();
-    await expect(toast).toBeVisible();
-
-    // 验证初始状态 (从右侧滑入)
-    const transform = await toast.evaluate((el) => getComputedStyle(el).transform);
-    expect(transform).toBe('matrix(1, 0, 0, 1, 0, 0)'); // 已滑入
-  });
-
-  test('Document Card 选中态', async ({ page }) => {
-    await page.goto('http://localhost:4200/rag-chat');
-    await page.waitForSelector('.document-card', { timeout: 5000 });
-
-    const card = page.locator('.document-card').first();
-    await card.click();
-
-    // 验证选中态样式
-    await expect(card).toHaveClass(/selected/);
-    const bg = await card.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe('rgb(0, 122, 255)'); // primary blue
-  });
-
-  test('Document Card 删除动画', async ({ page }) => {
-    await page.goto('http://localhost:4200/rag-chat');
-    await page.waitForSelector('.document-card', { timeout: 5000 });
-
-    const card = page.locator('.document-card').first();
-    const deleteBtn = card.locator('.delete-button');
-
-    // 等待删除完成
-    await deleteBtn.click();
-    await expect(card).toHaveClass(/deleting/);
-
-    // 等待动画完成
-    await page.waitForTimeout(500);
-  });
-
-  test('Chat 输入框样式', async ({ page }) => {
-    await page.goto('http://localhost:4200/rag-chat');
-
-    const input = page.locator('.chat-input');
-    await expect(input).toBeVisible();
-
-    // 验证边框
-    const border = await input.evaluate((el) => getComputedStyle(el).borderRadius);
-    expect(border).toBe('12px');
-
-    // 验证 focus 样式
-    await input.focus();
-    const boxShadow = await input.evaluate((el) => getComputedStyle(el).boxShadow);
-    expect(boxShadow).toContain('rgba(0, 113, 227, 0.1)');
-  });
-
-  test('Send Button 禁用态', async ({ page }) => {
-    await page.goto('http://localhost:4200/rag-chat');
-
-    const sendBtn = page.locator('.send-button');
-    // 空输入时禁用
-    await expect(sendBtn).toBeDisabled();
-
-    const opacity = await sendBtn.evaluate((el) => getComputedStyle(el).opacity);
-    expect(opacity).toBe('0.5');
-
-    // 输入内容后启用
-    await page.locator('.chat-input').fill('test message');
-    await expect(sendBtn).toBeEnabled();
-  });
-});
-
-// ==================== i18n 一致性 ====================
-
-test.describe('国际化一致性', () => {
-  test('所有 UI 文本来自 i18n', async ({ page }) => {
-    await page.goto('http://localhost:4200/ai-hub');
-
-    // 检查是否有硬编码英文
-    const hardcodedStrings = [
-      'Chat',
-      'Image',
-      'TTS',
-      'Generate',
-      'Send',
-    ];
-
-    for (const str of hardcodedStrings) {
-      const elements = page.locator(`text="${str}"`);
-      const count = await elements.count();
-      if (count > 0) {
-        // 检查是否是国际化文本
-        const first = elements.first();
-        const parent = await first.locator('..').evaluate((el) => {
-          const angular = (el as HTMLElement).getAttribute('ng-reflect-i18n') ||
-                         (el as HTMLElement).getAttribute('i18n');
-          return angular;
-        });
-        expect(parent ?? 'NOT I18N').not.toBe('NOT I18N');
-      }
-    }
-  });
-
-  test('5 种语言切换一致性', async ({ page }) => {
-    await page.goto('http://localhost:4200/ai-hub');
-
-    // 切换语言
-    const langSwitcher = page.locator('[data-testid="lang-switcher"]');
-    const languages = ['en', 'zh', 'ja', 'fr', 'es'];
-
-    for (const lang of languages) {
-      await langSwitcher.selectOption(lang);
-      await page.waitForTimeout(500);
-
-      // 验证 SegmentedControl labels
-      const activeTab = page.locator('.segment-button.active');
-      const label = await activeTab.textContent();
-      expect(label).toBeTruthy();
-    }
-  });
-});
-
-// ==================== 组件通信一致性 ====================
-
-test.describe('组件通信一致性', () => {
-  test('SegmentedControl → 子组件数据流', async ({ page }) => {
-    await page.goto('http://localhost:4200/ai-hub');
-
-    // 点击 Vision tab
-    const tabs = page.locator('.segment-button');
-    await tabs.nth(1).click();
-
-    // 验证 VisionPanel 渲染
-    await expect(page.locator('.vision-panel')).toBeVisible();
-
-    // 点击 OCR tab
-    await tabs.nth(2).click();
-    await expect(page.locator('.ocr-text')).toBeVisible();
-  });
-
-  test('RAGChat 消息流', async ({ page }) => {
-    await page.goto('http://localhost:4200/rag-chat');
-
-    // 发送消息
-    await page.locator('.chat-input').fill('What is this about?');
-    await page.locator('.send-button').click();
-
-    // 验证消息显示
-    await expect(page.locator('.message-bubble.user')).toBeVisible();
-
-    // 验证 assistant placeholder
-    await expect(page.locator('.message-bubble:not(.user)')).toBeVisible();
-  });
-});
+// 1. 打开 Angular 页面
+browser_navigate({ url: "http://localhost:4200/ai-hub" })
+
+// 2. 等待加载完成
+browser_snapshot({ tab_id: "current" })  // 验证页面结构
+
+// 3. 截图
+browser_take_screenshot({
+  tab_id: "current",
+  take_screenshot_afterwards: true
+})
+
+// 4. 切换到 React 页面对比
+browser_navigate({ url: "http://localhost:5173/ai-hub" })
+browser_take_screenshot({
+  tab_id: "current",
+  take_screenshot_afterwards: true
+})
 ```
 
-### 快速运行命令
+#### 交互验证
+
+```typescript
+// 点击 SegmentedControl tab
+browser_snapshot({ tab_id: "current" })  // 先获取结构
+browser_click({ ref: "tab-button-1" })    // 点击 Vision tab
+
+// 填写表单
+browser_fill({
+  ref: "chat-input",
+  value: "Hello, world!"
+})
+browser_click({ ref: "send-button" })
+
+// 检查结果
+browser_snapshot({ tab_id: "current" })
+browser_console_messages({ tab_id: "current" })  // 检查错误
+```
+
+#### 拖放文件上传
+
+```typescript
+// 对于文件上传场景，先上传文件
+browser_fill({
+  ref: "file-input",
+  files: ["./e2e/test-image.png"]  // MCP 支持文件路径
+})
+
+// 验证预览
+browser_snapshot({ tab_id: "current" })
+browser_hover({ ref: "preview-image" })  // 验证悬停效果
+
+// 截图
+browser_take_screenshot({
+  tab_id: "current",
+  take_screenshot_afterwards: true
+})
+```
+
+### 视觉一致性检查示例
+
+#### SegmentedControl 检查
+
+```yaml
+检查项:
+  - 激活 tab: 白色背景 + 阴影
+  - 非激活 tab: 透明背景
+  - hover: 背景色变化
+  - focus-visible: 焦点环样式
+
+验证步骤:
+  1. browser_navigate → Angular VisionPanel
+  2. browser_snapshot → 定位 .segment-button
+  3. browser_hover → 验证悬停变色
+  4. browser_click → 切换 tab
+  5. browser_snapshot → 验证激活态变化
+  6. browser_take_screenshot → 截图记录
+```
+
+#### StatusBadge 检查
+
+```yaml
+检查项:
+  - Dot 圆点: 6px × 6px, border-radius 50%
+  - 背景色: online=success / offline=gray / busy=warning / error=error / pending=primary
+  - padding: 4px 10px
+  - font-size: xs, font-weight: medium
+
+验证步骤:
+  1. browser_navigate → Angular AgentChat
+  2. browser_snapshot → 定位 app-status-badge
+  3. 检查各状态的 .badge--{status} 样式
+  4. 截图对比 React 版本
+```
+
+#### VisionPanel 检查
+
+```yaml
+检查项:
+  - 拖放区域: 虚线边框, 背景色 #f5f5f7
+  - 预览图: max 100%, 悬停 scale(1.02) + 阴影
+  - Zoom Modal: 背景 rgba(0,0,0,0.9)
+  - Loading Spinner: #0071e3 蓝色, 旋转动画
+  - 错误消息: 背景 #ffebee / 文字 #c62828
+
+验证步骤:
+  1. browser_navigate → Angular VisionPanel
+  2. browser_fill → 上传测试图片
+  3. browser_snapshot → 检查预览图显示
+  4. browser_hover → 截图验证悬停效果
+  5. browser_click → 打开 Zoom Modal
+  6. browser_snapshot → 检查 Modal 结构
+  7. browser_console_messages → 检查错误
+```
+
+#### RAGChat 检查
+
+```yaml
+检查项:
+  - Toast: slideIn 动画 (translateX 100% → 0)
+  - Document Card: 选中态 primary 背景
+  - Skeleton: shimmer 动画 (渐变方向 200% → -200%)
+  - Chat Input: border-radius 12px, focus box-shadow
+  - Send Button: 禁用态 opacity 0.5
+
+验证步骤:
+  1. browser_navigate → Angular RAGChat
+  2. browser_fill → 上传 PDF 文件
+  3. browser_snapshot → 检查 Toast 动画
+  4. browser_snapshot → 检查 Document Card
+  5. browser_fill → 输入聊天内容
+  6. browser_hover → 验证 Send Button 状态
+  7. browser_click → 发送消息
+  8. browser_snapshot → 检查消息气泡
+```
+
+### 国际化一致性检查
+
+```yaml
+检查项:
+  - UI 文本是否来自 i18n（非硬编码）
+  - 5 种语言切换: en / zh / ja / fr / es
+
+验证步骤:
+  1. browser_navigate → Angular 页面
+  2. browser_snapshot → 检查文本内容
+  3. 检查是否有硬编码英文（如 "Chat", "Generate"）
+  4. 测试语言切换功能
+```
+
+### 控制台与网络检查
+
+```yaml
+检查控制台错误:
+  browser_console_messages({ tab_id: "current" })
+  # 检查是否有 Error 级别消息
+
+检查网络请求:
+  browser_network_requests({ tab_id: "current" })
+  # 验证 API 调用是否正确
+```
+
+### 快速验证命令
 
 ```bash
-# 启动 Angular dev server
+# 1. 启动 Angular dev server
 pnpm --filter @ai-test/web-angular run start &
 
-# 启动 React dev server
+# 2. 启动 React dev server
 pnpm --filter @ai-test/web run start &
 
-# 运行全部测试
-pnpm exec playwright test
+# 3. 使用 MCP 工具进行对比验证
+#    - 打开浏览器 Tab
+#    - 导航到两个版本
+#    - 执行 snapshot / screenshot / click 等操作
+#    - 对比结果
 
-# 运行特定组件测试
-pnpm exec playwright test --grep "SegmentedControl"
-
-# 生成测试报告
-pnpm exec playwright test --reporter=html
+# 4. 记录差异
+#    - 截图保存到 docs/screenshots/
+#    - 记录不一致项到 GitHub Issue
 ```
+
+### MCP 工具优势
+
+| 对比项 | Playwright E2E | MCP 浏览器工具 |
+|--------|----------------|----------------|
+| **交互方式** | 自动化脚本 | 人工 + 半自动 |
+| **适用场景** | CI/CD 回归测试 | 开发时实时验证 |
+| **截图对比** | 需要额外图像处理 | 直接截图对比 |
+| **灵活性** | 修改测试代码 | 实时调整验证步骤 |
+| **调试** | 日志输出 | 可视化操作 |
+
+> **注意**：MCP 工具适合开发过程中的实时验证。对于持续集成，仍可保留 Playwright 测试，但验证流程应以 MCP 为主。
 
 ---
 

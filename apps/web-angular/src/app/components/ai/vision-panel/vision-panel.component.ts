@@ -194,7 +194,7 @@ interface VisionResult {
     .segment-button.active {
       background: #ffffff;
       color: #1d1d1f;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .main-area {

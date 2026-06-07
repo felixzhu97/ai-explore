@@ -413,7 +413,7 @@ interface ImageSize {
     }
 
     .segmented-control {
-      display: flex;
+      display: inline-flex;
       background: #f5f5f7;
       border-radius: 12px;
       padding: 4px;

@@ -433,7 +433,7 @@ interface ImageSize {
       justify-content: space-between;
       padding: 16px;
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 14px;
     }
 
@@ -452,7 +452,7 @@ interface ImageSize {
 
     .panel-content {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 14px;
       padding: 24px;
     }
@@ -513,7 +513,7 @@ interface ImageSize {
       padding: 16px;
       background: #ffffff;
       border-radius: 14px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
     }
 
     .empty-state {
@@ -590,7 +590,7 @@ interface ImageSize {
       word-break: break-word;
       background: #f5f5f7;
       color: #1d1d1f;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
     }
 
     .message-content.user {
@@ -654,7 +654,7 @@ interface ImageSize {
       padding: 16px;
       font-size: 15px;
       font-family: inherit;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 14px;
       background: #ffffff;
       color: #1d1d1f;
@@ -780,7 +780,7 @@ interface ImageSize {
       padding: 12px 16px;
       font-size: 15px;
       font-family: inherit;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       background: #ffffff;
       color: #1d1d1f;
@@ -803,7 +803,7 @@ interface ImageSize {
       padding: 12px 16px;
       font-size: 15px;
       font-family: inherit;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       background: #ffffff;
       color: #1d1d1f;
@@ -828,7 +828,7 @@ interface ImageSize {
       font-weight: 500;
       background: #ffffff;
       color: #1d1d1f;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.15s ease;
@@ -851,7 +851,7 @@ interface ImageSize {
       font-family: inherit;
       background: #ffffff;
       color: #1d1d1f;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.15s ease;

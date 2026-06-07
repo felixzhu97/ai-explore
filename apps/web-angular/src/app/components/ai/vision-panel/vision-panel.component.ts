@@ -174,7 +174,7 @@ interface VisionResult {
 
     .panel {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 14px;
       padding: 24px;
       display: flex;

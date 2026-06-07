@@ -359,12 +359,12 @@ interface Toast {
       background: #ffffff;
       padding: 4px 8px;
       border-radius: 20px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
     }
 
     .documents-section {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 14px;
       padding: 16px;
     }
@@ -681,7 +681,7 @@ interface Toast {
       padding: 16px;
       background: #ffffff;
       border-radius: 14px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       position: relative;
       z-index: 1;
     }
@@ -721,7 +721,7 @@ interface Toast {
       padding: 6px 12px;
       font-size: 14px;
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 20px;
       color: #007aff;
       cursor: pointer;
@@ -887,7 +887,7 @@ interface Toast {
       padding: 12px;
       font-size: 15px;
       font-family: inherit;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 14px;
       background: #ffffff;
       color: #1d1d1f;

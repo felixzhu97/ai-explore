@@ -180,7 +180,7 @@ interface Tab {
       margin-top: 4px;
       min-width: 140px;
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
       overflow: hidden;

@@ -180,7 +180,7 @@ interface Tab {
       margin-top: 4px;
       min-width: 140px;
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
       overflow: hidden;
@@ -259,7 +259,7 @@ export class AppComponent {
   readonly router = inject(Router);
 
   readonly tabs: Tab[] = [
-    { key: 'aiinfra', labelKey: 'aiinfra', path: '/aiinfra' },
+    { key: 'ai-infra', labelKey: 'aiinfra', path: '/ai-infra' },
     { key: 'rag', labelKey: 'documentQA', path: '/rag' },
     { key: 'vision', labelKey: 'visionAI', path: '/vision' },
     { key: 'aihubs', labelKey: 'aiHub', path: '/aihubs' },

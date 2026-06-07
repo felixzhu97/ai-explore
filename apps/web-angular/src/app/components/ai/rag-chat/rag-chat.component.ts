@@ -12,6 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, SourceDocument } from '../services/api.service';
+import { I18nService } from '../../../i18n';
 
 interface Message {
   id: string;
@@ -58,22 +59,22 @@ interface Toast {
 
       <!-- Header -->
       <div class="header">
-        <h2 class="title">RAG Chat</h2>
-        <span class="model-badge">Powered by RAG</span>
+        <h2 class="title">{{ i18n.t().ragChat.title }}</h2>
+        <span class="model-badge">{{ i18n.t().ragChat.modelBadge }}</span>
       </div>
 
       <!-- Documents Section -->
       <div class="documents-section">
         <div class="section-header">
           <h3 class="section-title">
-            📄 Documents
+            📄 {{ i18n.t().ragChat.documents }}
             @if (!isLoadingDocs()) {
               <span class="document-count">{{ availableDocs().length }}</span>
             }
           </h3>
           @if (availableDocs().length > 0 && selectedDocIds().size > 0) {
             <span class="selected-badge">
-              {{ selectedDocIds().size }} selected
+              {{ i18n.t().ragChat.selectedDocuments.replace('{count}', selectedDocIds().size.toString()) }}
             </span>
           }
         </div>
@@ -114,16 +115,16 @@ interface Toast {
           </div>
           <div class="selection-controls">
             <button class="select-button" (click)="selectAllDocs()">
-              Select All
+              {{ i18n.t().ragChat.selectAll }}
             </button>
             @if (selectedDocIds().size > 0) {
               <button class="select-button" (click)="clearDocSelection()">
-                Clear Selection
+                {{ i18n.t().ragChat.clearSelection }}
               </button>
             }
           </div>
         } @else {
-          <p class="empty-docs">No documents uploaded</p>
+          <p class="empty-docs">{{ i18n.t().ragChat.noDocuments }}</p>
         }
       </div>
 
@@ -136,10 +137,10 @@ interface Toast {
           accept=".pdf,.md,.txt,.markdown"
           multiple
           (change)="onFileSelect($event)"
-          style="display: none"
+          class="visually-hidden"
         />
         <label for="file-upload" class="file-upload-label">
-          📎 Upload Documents
+          📎 {{ i18n.t().ragChat.uploadDocs }}
         </label>
 
         @if (pendingFiles().length > 0) {
@@ -165,9 +166,9 @@ interface Toast {
             [disabled]="isUploading()"
           >
             @if (isUploading()) {
-              <span class="spinner"></span> Uploading...
+              <span class="spinner"></span> {{ i18n.t().ragChat.uploading }}
             } @else {
-              ↑ Upload ({{ pendingFiles().length }})
+              ↑ {{ i18n.t().ragChat.upload }} ({{ pendingFiles().length }})
             }
           </button>
         }
@@ -178,16 +179,16 @@ interface Toast {
         @if (messages().length === 0) {
           <div class="empty-state">
             <div class="empty-icon">💬</div>
-            <p>Ask questions about your documents</p>
+            <p>{{ i18n.t().ragChat.askQuestion }}</p>
             <div class="quick-actions">
-              <button class="quick-action" (click)="setInput('What is this document about?')">
-                What is this about?
+              <button class="quick-action" (click)="setInput(i18n.t().ragChat.whatIsThis)">
+                {{ i18n.t().ragChat.whatIsThis }}
               </button>
-              <button class="quick-action" (click)="setInput('Summarize the key points')">
-                Summarize
+              <button class="quick-action" (click)="setInput(i18n.t().ragChat.summarize)">
+                {{ i18n.t().ragChat.summarize }}
               </button>
-              <button class="quick-action" (click)="setInput('What are the main topics?')">
-                Main topics
+              <button class="quick-action" (click)="setInput(i18n.t().ragChat.keyInfo)">
+                {{ i18n.t().ragChat.keyInfo }}
               </button>
             </div>
           </div>
@@ -208,21 +209,21 @@ interface Toast {
                     class="source-badge"
                     (click)="toggleSources(msg.id)"
                   >
-                    📚 Based on {{ msg.sources.length }} source{{ msg.sources.length > 1 ? 's' : '' }}
+                    📚 {{ i18n.t().ragChat.basedOn.replace('{count}', msg.sources.length.toString()) }}
                     {{ expandedSources().has(msg.id) ? '▲' : '▼' }}
                   </span>
                 }
               </div>
               @if (msg.role === 'assistant' && msg.sources && expandedSources().has(msg.id)) {
                 <div class="sources-panel">
-                  <div class="sources-title">📖 Sources</div>
+                  <div class="sources-title">📖 {{ i18n.t().ragChat.sources }}</div>
                   @for (source of msg.sources.slice(0, 3); track $index) {
                     <div class="source-item">
                       <div class="source-text">
                         {{ source.text.length > 200 ? source.text.slice(0, 200) + '...' : source.text }}
                       </div>
                       <div class="source-meta">
-                        <span>Similarity: {{ (source.score * 100).toFixed(1) }}%</span>
+                        <span>{{ i18n.t().ragChat.similarity }}: {{ (source.score * 100).toFixed(1) }}%</span>
                       </div>
                     </div>
                   }
@@ -233,7 +234,7 @@ interface Toast {
           @if (isLoading() && messages()[messages().length - 1]?.role === 'assistant' && !messages()[messages().length - 1]?.content) {
             <div class="message-bubble">
               <div class="message-content">
-                <span class="spinner"></span> Thinking...
+                <span class="spinner"></span> {{ i18n.t().ragChat.thinking }}
               </div>
             </div>
           }
@@ -246,9 +247,8 @@ interface Toast {
         <textarea
           class="chat-input"
           [ngModel]="input()"
-          (ngModelChange)="setInput($event)"
           (keydown)="onInputKeyDown($event)"
-          placeholder="Ask a question about your documents..."
+          placeholder="{{ i18n.t().ragChat.inputPlaceholder }}"
           rows="1"
           [disabled]="isLoading()"
         ></textarea>
@@ -272,6 +272,15 @@ interface Toast {
       flex-direction: column;
       gap: 16px;
       animation: fadeIn 0.3s ease;
+      overflow-x: hidden;
+      word-break: break-word;
+    }
+
+    @media (max-width: 640px) {
+      .rag-chat {
+        overflow-x: hidden;
+        padding: 0 8px;
+      }
     }
 
     @keyframes fadeIn {
@@ -334,7 +343,7 @@ interface Toast {
       align-items: center;
       justify-content: space-between;
       padding-bottom: 16px;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .title {
@@ -346,17 +355,17 @@ interface Toast {
 
     .model-badge {
       font-size: 12px;
-      color: #6e6e73;
+      color: #86868b;
       background: #ffffff;
       padding: 4px 8px;
       border-radius: 20px;
-      border: 1px solid #e5e5e5;
+      border: 1px solid var(--color-border);
     }
 
     .documents-section {
       background: #ffffff;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
       padding: 16px;
     }
 
@@ -406,17 +415,17 @@ interface Toast {
       font-size: 14px;
       background: #ffffff;
       color: #1d1d1f;
-      border-radius: 12px;
-      border: 1.5px solid #e5e5e5;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0, 0, 0, 0.08);
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       user-select: none;
     }
 
     .document-card:hover {
-      border-color: #0071e3;
+      border-color: #007aff;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .document-card:active {
@@ -424,9 +433,10 @@ interface Toast {
     }
 
     .document-card.selected {
-      background: #0071e3;
+      background: #007aff;
       color: white;
-      border-color: #0071e3;
+      border-color: #007aff;
+      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
     }
 
     .document-card.deleting {
@@ -538,15 +548,17 @@ interface Toast {
       gap: 8px;
       padding: 12px;
       background: #ffffff;
-      border: 1px dashed #e5e5e5;
-      border-radius: 12px;
+      border: 1px dashed rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
       transition: all 0.15s ease;
       flex-wrap: wrap;
       align-items: center;
+      z-index: 10;
+      position: relative;
     }
 
     .file-upload-area:hover {
-      border-color: #0071e3;
+      border-color: #007aff;
     }
 
     .file-upload-label {
@@ -555,15 +567,15 @@ interface Toast {
       gap: 8px;
       padding: 8px 16px;
       font-size: 14px;
-      color: #0071e3;
+      color: #007aff;
       cursor: pointer;
       transition: all 0.15s ease;
-      border: 1px solid #0071e3;
-      border-radius: 8px;
+      border: 1px solid #007aff;
+      border-radius: 10px;
     }
 
     .file-upload-label:hover {
-      background: #f5f5f7;
+      background: rgba(0, 122, 255, 0.12);
     }
 
     .uploaded-files {
@@ -611,7 +623,7 @@ interface Toast {
 
     .upload-progress-bar {
       height: 100%;
-      background: #0071e3;
+      background: #007aff;
       animation: pulse 1s ease-in-out infinite;
     }
 
@@ -638,10 +650,10 @@ interface Toast {
     .upload-button {
       padding: 8px 16px;
       font-size: 14px;
-      background: #0071e3;
+      background: #007aff;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.15s ease;
       margin-left: auto;
@@ -651,7 +663,7 @@ interface Toast {
     }
 
     .upload-button:hover:not(:disabled) {
-      background: #0077ed;
+      background: #0071e3;
     }
 
     .upload-button:disabled {
@@ -664,11 +676,22 @@ interface Toast {
       flex-direction: column;
       gap: 12px;
       max-height: 400px;
+      min-height: 200px;
       overflow-y: auto;
       padding: 16px;
       background: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #e5e5e5;
+      border-radius: 14px;
+      border: 1px solid var(--color-border);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 640px) {
+      .chat-container {
+        max-height: 300px;
+        padding: 12px;
+        border-radius: 8px;
+      }
     }
 
     .empty-state {
@@ -698,16 +721,16 @@ interface Toast {
       padding: 6px 12px;
       font-size: 14px;
       background: #ffffff;
-      border: 1px solid #e5e5e5;
+      border: 1px solid var(--color-border);
       border-radius: 20px;
-      color: #0071e3;
+      color: #007aff;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .quick-action:hover {
-      background: #f5f5f7;
-      border-color: #0071e3;
+      background: rgba(0, 122, 255, 0.12);
+      border-color: #007aff;
     }
 
     .message-bubble {
@@ -726,18 +749,18 @@ interface Toast {
 
     .message-content {
       padding: 12px;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 15px;
       line-height: 1.6;
       word-break: break-word;
-      background: #f5f5f7;
+      background: rgba(0, 0, 0, 0.04);
       color: #1d1d1f;
     }
 
     .message-content.user {
-      background: #0071e3;
+      background: #007aff;
       color: white;
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 6px;
     }
 
     .message-bubble:not(.user) .message-content {
@@ -788,16 +811,16 @@ interface Toast {
 
     .source-badge {
       font-size: 12px;
-      color: #0071e3;
-      background: #f5f5f7;
+      color: #007aff;
+      background: rgba(0, 122, 255, 0.12);
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .source-badge:hover {
-      background: #e5e5ea;
+      background: rgba(0, 122, 255, 0.2);
     }
 
     .sources-panel {
@@ -849,6 +872,14 @@ interface Toast {
       display: flex;
       gap: 8px;
       align-items: flex-end;
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 640px) {
+      .input-area {
+        gap: 6px;
+      }
     }
 
     .chat-input {
@@ -856,8 +887,8 @@ interface Toast {
       padding: 12px;
       font-size: 15px;
       font-family: inherit;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
       background: #ffffff;
       color: #1d1d1f;
       resize: none;
@@ -868,12 +899,21 @@ interface Toast {
 
     .chat-input:focus {
       outline: none;
-      border-color: #0071e3;
-      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
     }
 
     .chat-input::placeholder {
       color: #86868b;
+    }
+
+    .chat-input::-webkit-input-placeholder {
+      color: #86868b;
+    }
+
+    .chat-input::-moz-placeholder {
+      color: #86868b;
+      opacity: 1;
     }
 
     .send-button {
@@ -882,21 +922,21 @@ interface Toast {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0071e3;
+      background: #007aff;
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
       font-size: 18px;
       transition: all 0.2s ease;
     }
 
     .send-button:hover:not(:disabled) {
-      background: #0077ed;
+      background: #0071e3;
     }
 
     .send-button:active:not(:disabled) {
-      background: #005bb5;
+      background: #0056b3;
       transform: scale(0.95);
     }
 
@@ -919,10 +959,23 @@ interface Toast {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   `]
 })
 export class RagChatComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
+  protected readonly i18n = inject(I18nService);
   private sessionId = `session_${Date.now()}`;
 
   // State
@@ -1021,7 +1074,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
             next.delete(docId);
             return next;
           });
-          this.addToast('Document deleted', 'success');
+          this.addToast(this.i18n.t().ragChat.documentDeleted, 'success');
         }, 200);
       },
       error: () => {
@@ -1030,7 +1083,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
           next.delete(docId);
           return next;
         });
-        this.addToast('Delete failed, please retry', 'error');
+        this.addToast(this.i18n.t().ragChat.deleteFailed, 'error');
       },
     });
   }
@@ -1045,7 +1098,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
         (f) => !this.pendingFiles().some((pf) => pf.name === f.name)
       );
       this.pendingFiles.update((prev) => [...prev, ...newFiles]);
-      this.addToast(`${newFiles.length} file(s) selected`, 'info');
+      this.addToast(this.i18n.t().ragChat.fileSelected.replace('{count}', newFiles.length.toString()), 'info');
     }
     input.value = '';
   }
@@ -1079,7 +1132,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
             next.set(file.name, { id: docId, title: file.name, status: 'success' });
             return next;
           });
-          this.addToast(`${file.name} uploaded successfully`, 'success');
+          this.addToast(this.i18n.t().ragChat.uploadSuccess.replace('{name}', file.name), 'success');
 
           if (index === this.pendingFiles().length - 1) {
             this.pendingFiles.set([]);
@@ -1092,10 +1145,10 @@ export class RagChatComponent implements OnInit, OnDestroy {
         error: () => {
           this.uploadStatuses.update((statuses) => {
             const next = new Map(statuses);
-            next.set(file.name, { id: docId, title: file.name, status: 'error', error: 'Upload failed' });
+            next.set(file.name, { id: docId, title: file.name, status: 'error', error: this.i18n.t().ragChat.uploadFailed.replace('{name}', file.name) });
             return next;
           });
-          this.addToast(`Failed to upload ${file.name}`, 'error');
+          this.addToast(this.i18n.t().ragChat.uploadFailed.replace('{name}', file.name), 'error');
         },
         complete: () => {
           if (index === this.pendingFiles().length - 1) {
@@ -1167,7 +1220,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
 
     let fullContent = '';
 
-    this.api.ragChat(
+    const streamResult = this.api.ragChat(
       requestBody,
       (chunk) => {
         fullContent += chunk;

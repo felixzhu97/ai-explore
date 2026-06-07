@@ -117,10 +117,10 @@ export interface SourceDocument {
 // ==================== Service URLs ====================
 
 const TEXT_SERVICE_URL = '/api/text';
-const VISION_SERVICE_URL = '/api/vision';
+const VISION_SERVICE_URL = '/vision';
 const RAG_SERVICE_URL = '/api/rag';
-const SPEECH_SERVICE_URL = '/api/speech';
-const MEDIA_GEN_SERVICE_URL = '/api/media-gen';
+const SPEECH_SERVICE_URL = '/tts';
+const MEDIA_GEN_SERVICE_URL = '/image';
 
 // ==================== AI Service ====================
 
@@ -249,25 +249,25 @@ export class AiService {
   captionImage(file: File): Observable<VisionResult> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<VisionResult>(`${VISION_SERVICE_URL}/vision/caption`, formData);
+    return this.http.post<VisionResult>(`${VISION_SERVICE_URL}/caption`, formData);
   }
 
   detectObjects(file: File): Observable<VisionResult> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<VisionResult>(`${VISION_SERVICE_URL}/vision/detect`, formData);
+    return this.http.post<VisionResult>(`${VISION_SERVICE_URL}/detect`, formData);
   }
 
   ocrImage(file: File): Observable<VisionResult> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<VisionResult>(`${VISION_SERVICE_URL}/vision/ocr`, formData);
+    return this.http.post<VisionResult>(`${VISION_SERVICE_URL}/ocr`, formData);
   }
 
   // ==================== TTS ====================
 
   synthesizeSpeech(request: SynthesizeRequest): Observable<Blob> {
-    return this.http.post(`${SPEECH_SERVICE_URL}/tts/synthesize`, request, {
+    return this.http.post(`${SPEECH_SERVICE_URL}/synthesize`, request, {
       responseType: 'blob',
     });
   }
@@ -277,7 +277,7 @@ export class AiService {
     if (language) {
       params = params.set('language', language);
     }
-    return this.http.get<Voice[]>(`${SPEECH_SERVICE_URL}/tts/voices`, { params });
+    return this.http.get<Voice[]>(`${SPEECH_SERVICE_URL}/voices`, { params });
   }
 
   getSpeechServiceHealth(): Observable<{
@@ -291,7 +291,7 @@ export class AiService {
       provider: string;
       provider_status: string;
       version: string;
-    }>(`${SPEECH_SERVICE_URL}/tts/health`);
+    }>(`${SPEECH_SERVICE_URL}/health`);
   }
 
   // ==================== RAG ====================

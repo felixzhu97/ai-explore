@@ -108,9 +108,9 @@ C3 Media
 
 ### 前端
 
-- React 18 + TypeScript
-- Vite 构建工具
-- Emotion CSS-in-JS
+- Angular 20+ + TypeScript
+- Angular CLI 构建工具
+- SCSS 样式管理
 - i18n 多语言支持 (EN/ZH/JA/FR/ES)
 - theme.ts 苹果风格设计系统
 
@@ -142,7 +142,7 @@ C3 Media
 ```
 ai-test/
 ├── apps/
-│   ├── web/              # React 前端应用
+│   └── web-angular/       # Angular 前端应用
 │   │   └── src/
 │   │       ├── components/
 │   │       │   ├── agents/      # Agent 聊天组件 (AgentChat, ChatMessage, ToolResult, StatusBadge)
@@ -229,7 +229,7 @@ pnpm stop
 
 | 服务             | 端口        | 说明                      |
 | -------------- | --------- | ----------------------- |
-| Web 前端         | 5173      | React 开发服务器             |
+| Web 前端         | 4200      | Angular 开发服务器             |
 | 后端服务器          | 3000      | Express.js 服务           |
 | AI Agents      | 8003      | 多智能体编排                  |
 | Vision Service | 8000      | 视觉 AI（YOLO/BLIP/OCR/SD） |
@@ -248,7 +248,7 @@ pnpm stop
 pnpm install
 
 # 启动特定服务
-cd apps/web && pnpm dev              # 前端 (端口 5173)
+cd apps/web-angular && pnpm start           # 前端 (端口 4200)
 cd services/ai_agents && python main.py  # AI Agents (端口 8003)
 cd services/rag && uvicorn src.main:app --reload --port 8010  # RAG (端口 8010)
 cd services/vision-service && uvicorn src.main:app --reload  # Vision (端口 8000)
@@ -290,10 +290,10 @@ DEVICE=cuda  # 或 cpu
 ### 前端开发
 
 ```bash
-cd apps/web
+cd apps/web-angular
 
 # 开发服务器
-pnpm dev
+pnpm start
 
 # 类型检查
 pnpm build

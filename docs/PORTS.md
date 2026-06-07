@@ -135,7 +135,7 @@ Standard port assignments for AI-Test platform services.
 
 ## Environment Variables
 
-### Frontend (apps/web/.env)
+### Frontend (apps/web-angular/.env)
 
 ```env
 VITE_TEXT_SERVICE_URL=http://localhost:8006

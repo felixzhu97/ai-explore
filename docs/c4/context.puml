@@ -12,7 +12,7 @@ Person(data_scientist, "数据科学家", "进行数据分析和特征工程")
 
 ' AI-Test Platform 系统边界
 System_Boundary(ai_platform, "AI-Test Platform") {
-    System(web_app, "Web 应用", "React 单页应用，提供用户交互界面 (Port 5173)")
+    System(web_app, "Web 应用", "Angular 单页应用，提供用户交互界面 (Port 4200)")
     System(ai_agents_service, "AI Agents 服务", "多智能体协调系统，处理复杂 AI 任务 (Port 8003)")
     System(vision_service, "Vision 服务", "视觉 AI 服务：目标检测、OCR、图像生成 (Port 8000)")
     System(tts_service, "TTS 服务", "文本转语音合成服务 (Port 8005)")

@@ -7,7 +7,7 @@ The AI-Test Platform is a microservices-based AI service platform with five core
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Client Layer                             │
-│                    (React + Vite SPA)                           │
+│                    (Angular SPA)                           │
 └─────────────────────────────────────────────────────────────────┘
                                   │
                                   ▼
@@ -380,9 +380,9 @@ Presentation Layer
 ## Directory Structure
 
 ```
-ai-test/
+ai-explore/
 ├── apps/
-│   ├── web/                    # React frontend
+│   ├── web/                    # Angular frontend
 │   │   ├── src/components/     # UI components
 │   │   ├── src/i18n/          # Internationalization
 │   │   └── src/theme.ts        # Theme system

@@ -1,6 +1,6 @@
 # Angular Web Application
 
-A modern Angular 20+ frontend application migrated from React, featuring:
+A modern Angular 20+ frontend application featuring:
 
 - **AI Infrastructure Panel** - Model management, LLMOps, AIOps, VectorDB
 - **RAG Chat** - Document Q&A with retrieval-augmented generation
@@ -14,20 +14,6 @@ A modern Angular 20+ frontend application migrated from React, featuring:
 - SCSS
 - Angular Signals for state management
 - Standalone components
-
-## Migration from React
-
-This project is migrated from React to Angular following these key patterns:
-
-| React | Angular |
-|-------|---------|
-| `useState` | `signal()` |
-| `useEffect` | `effect()` / `ngOnInit` |
-| `useMemo` | `computed()` |
-| `useContext` | `inject()` |
-| `Context Provider` | `injectable` services |
-| `CSS-in-JS` | SCSS + BEM |
-| `React Router` | Angular Router |
 
 ## Getting Started
 

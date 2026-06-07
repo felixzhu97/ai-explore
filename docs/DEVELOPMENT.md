@@ -7,7 +7,7 @@ This guide covers local development setup, testing, and contribution workflow.
 ```
 ai-test/
 ├── apps/
-│   ├── web/           # React frontend (TypeScript + Vite)
+│   ├── web/           # Angular frontend (TypeScript)
 │   └── server/        # Express.js backend (TypeScript)
 ├── packages/
 │   ├── config/        # Shared TypeScript config
@@ -310,7 +310,7 @@ LOG_LEVEL=INFO
 | Text Service   | 8006 | Text generation (GPT, Claude, Ollama)             |
 | TTS Service    | 8005 | Text-to-Speech (Azure, Google, ElevenLabs, Coqui) |
 | Media Gen      | 3456 | Local Stable Diffusion (CPU/GPU)                  |
-| Web Frontend   | 5173 | React frontend                                   |
+| Web Frontend   | 5173 | Angular frontend                                                |
 | Backend Server | 3000 | Express.js backend                              |
 | Qdrant        | 6333 | Vector database                                 |
 | Ollama         | 11434 | Local LLM (optional)                           |
@@ -414,11 +414,12 @@ source .venv/bin/activate
 python app.py
 ```
 
-### Web Frontend (Node.js)
+### Web Frontend (Angular)
 
 ```bash
-cd apps/web
-pnpm dev
+cd apps/web-angular
+pnpm install
+pnpm start
 ```
 
 ### Backend Server (Node.js)
@@ -453,8 +454,8 @@ cd services/ai_agents && source .venv/bin/activate && uvicorn main:app --reload 
 # Terminal 3: RAG Service
 cd services/rag && source .venv/bin/activate && uvicorn src.main:app --reload --port 8001
 
-# Terminal 4: Web Frontend
-cd apps/web && pnpm dev
+# Terminal 4: Web Frontend (Angular)
+cd apps/web-angular && pnpm start
 
 # Terminal 5: Backend Server (optional)
 cd apps/server && pnpm dev
@@ -681,9 +682,9 @@ Or run with verbose output:
 uvicorn src.main:app --reload --log-level debug
 ```
 
-### React Frontend
+### Angular Frontend
 
-Enable React DevTools and check network tab for API calls.
+Enable Angular DevTools and check network tab for API calls.
 
 ### API Requests
 
@@ -830,7 +831,7 @@ python -m pytest -k "detect" -v
 ## Resources
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [React Documentation](https://react.dev/)
+- [Angular Documentation](https://angular.dev/)
 - [Ultralytics YOLO](https://docs.ultralytics.com/)
 - [HuggingFace Transformers](https://huggingface.co/docs/transformers/)
 - [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)

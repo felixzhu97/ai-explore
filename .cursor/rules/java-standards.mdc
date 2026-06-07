@@ -1,0 +1,409 @@
+---
+description: Java 24+ / Spring Boot 3.4+ 后端编码规范，涵盖 Controller/Service/Repository 架构、DTO 设计、异常处理、安全配置
+globs: **/*.java **/*.kt **/*.gradle.kts
+alwaysApply: false
+---
+
+# Java/Spring Boot 编码规范
+
+## 项目结构
+
+```
+src/main/java/com/ai/api/
+├── api/                      # REST Controllers
+│   ├── UserController.java
+│   └──advice/
+│       └── GlobalExceptionHandler.java
+├── service/                  # 业务逻辑
+│   ├── UserService.java
+│   └── impl/
+│       └── UserServiceImpl.java
+├── repository/               # 数据访问
+│   └── UserRepository.java
+├── domain/                   # 领域模型
+│   ├── entity/
+│   │   └── User.java
+│   └── vo/
+│       └── Email.java
+├── dto/                      # 数据传输对象
+│   ├── request/
+│   │   └── CreateUserRequest.java
+│   └── response/
+│       └── UserResponse.java
+├── config/                   # 配置类
+│   ├── SecurityConfig.java
+│   └── OpenApiConfig.java
+├── exception/                # 自定义异常
+│   └── ResourceNotFoundException.java
+└── Application.java
+```
+
+## 命名规范
+
+| 类型 | 规则 | 示例 |
+|------|------|------|
+| 类名 | PascalCase | `UserService`, `UserController` |
+| 方法名 | camelCase | `findById`, `createUser` |
+| 常量 | SCREAMING_SNAKE | `MAX_RETRY_COUNT` |
+| 包名 | lowercase | `com.ai.api.service` |
+| 测试类 | ClassName + Test | `UserServiceTest` |
+| DTO Record | PascalCase + 后缀 | `UserDTO`, `CreateUserRequest` |
+
+## DTO 设计
+
+### 使用 Record (JDK 16+)
+
+```java
+// 查询响应
+public record UserDTO(
+    UUID id,
+    String name,
+    String email,
+    Instant createdAt
+) {
+    public static UserDTO from(User user) {
+        return new UserDTO(
+            user.getId(),
+            user.getName(),
+            user.getEmail().value(),
+            user.getCreatedAt()
+        );
+    }
+}
+
+// 创建请求
+public record CreateUserRequest(
+    @NotBlank(message = "Name is required")
+    String name,
+
+    @Email(message = "Invalid email format")
+    String email,
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    String password
+) {}
+
+// 分页响应
+public record PageResponse<T>(
+    List<T> content,
+    int page,
+    int size,
+    long totalElements,
+    int totalPages
+) {}
+```
+
+## Controller 规范
+
+```java
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+@Tag(name = "Users", description = "User management APIs")
+public class UserController {
+
+    private final UserService userService;
+
+    @GetMapping
+    @Operation(summary = "List users", description = "Get paginated list of users")
+    public ResponseEntity<PageResponse<UserDTO>> findAll(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(userService.findAll(page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> findById(@PathVariable UUID id) {
+        return userService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody CreateUserRequest request) {
+        UserDTO created = userService.create(request);
+        return ResponseEntity
+                .created(URI.create("/api/users/" + created.id()))
+                .body(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateUserRequest request
+    ) {
+        return userService.update(id, request)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
+        userService.delete(id);
+    }
+}
+```
+
+## Service 规范
+
+```java
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EventPublisher eventPublisher;
+
+    public PageResponse<UserDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<User> users = userRepository.findAll(pageable);
+
+        return toPageResponse(users);
+    }
+
+    public Optional<UserDTO> findById(UUID id) {
+        return userRepository.findById(id).map(UserDTO::from);
+    }
+
+    @Transactional
+    public UserDTO create(CreateUserRequest request) {
+        // 业务校验
+        if (userRepository.existsByEmail(request.email())) {
+            throw new EmailAlreadyExistsException(request.email());
+        }
+
+        // 构建实体
+        User user = new User(
+                request.name(),
+                new Email(request.email()),
+                passwordEncoder.encode(request.password())
+        );
+
+        // 保存
+        User saved = userRepository.save(user);
+
+        // 发布事件
+        eventPublisher.publishEvent(new UserCreatedEvent(saved));
+
+        return UserDTO.from(saved);
+    }
+
+    @Transactional
+    public Optional<UserDTO> update(UUID id, UpdateUserRequest request) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.updateName(request.name());
+                    return UserDTO.from(userRepository.save(user));
+                });
+    }
+
+    private PageResponse<UserDTO> toPageResponse(Page<User> page) {
+        return new PageResponse<>(
+                page.getContent().stream().map(UserDTO::from).toList(),
+                page.getNumber() + 1,
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+    }
+}
+```
+
+## Repository 规范
+
+```java
+@Repository
+public interface UserRepository extends JpaRepository<User, UUID> {
+
+    // 方法名查询
+    Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email);
+
+    // 自定义查询
+    @Query("SELECT u FROM User u WHERE u.active = true AND u.role = :role")
+    List<User> findActiveUsersByRole(@Param("role") UserRole role);
+
+    // 分页查询
+    Page<User> findByActiveTrue(Pageable pageable);
+
+    // 原生查询
+    @Query(value = "SELECT * FROM users WHERE name ILIKE %:name%", nativeQuery = true)
+    List<User> searchByName(@Param("name") String name);
+}
+```
+
+## 异常处理
+
+```java
+// 自定义异常
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class UserNotFoundException extends RuntimeException {
+    public UserNotFoundException(UUID id) {
+        super("User not found with id: " + id);
+    }
+}
+
+@ResponseStatus(HttpStatus.CONFLICT)
+public class EmailAlreadyExistsException extends RuntimeException {
+    public EmailAlreadyExistsException(String email) {
+        super("Email already exists: " + email);
+    }
+}
+
+// 全局异常处理器
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(ex.getMessage(), 404));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(message, 400));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
+        log.error("Unexpected error", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("An unexpected error occurred", 500));
+    }
+}
+
+public record ErrorResponse(String message, int status, Instant timestamp) {
+    public ErrorResponse(String message, int status) {
+        this(message, status, Instant.now());
+    }
+}
+```
+
+## 安全配置
+
+```java
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+}
+```
+
+## 测试规范
+
+```java
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private UserService userService;
+
+    @Test
+    void shouldCreateUser() {
+        // Given
+        CreateUserRequest request = new CreateUserRequest("John", "john@example.com", "password123");
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("hashedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            return new User(u.getId(), u.getName(), u.getEmail(), u.getPassword(), Instant.now());
+        });
+
+        // When
+        UserDTO result = userService.create(request);
+
+        // Then
+        assertThat(result.name()).isEqualTo("John");
+        assertThat(result.email()).isEqualTo("john@example.com");
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void shouldThrowWhenEmailExists() {
+        // Given
+        CreateUserRequest request = new CreateUserRequest("John", "john@example.com", "password");
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
+
+        // When/Then
+        assertThatThrownBy(() -> userService.create(request))
+                .isInstanceOf(EmailAlreadyExistsException.class);
+    }
+}
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    @DisplayName("Should create user and return 201")
+    void shouldCreateUser() throws Exception {
+        CreateUserRequest request = new CreateUserRequest("John", "john@example.com", "password123");
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("John"))
+                .andExpect(jsonPath("$.email").value("john@example.com"));
+    }
+}
+```

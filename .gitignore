@@ -54,7 +54,6 @@ playwright/.cache/
 
 # Playwright MCP (test screenshots and logs)
 .playwright-mcp/
-*.log
 
 # Screenshots (test outputs)
 *-screenshot.png

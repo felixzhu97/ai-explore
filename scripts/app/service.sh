@@ -15,7 +15,7 @@ show_status() {
     printf "${GREEN}%-12s %-8s %-6s %s${NC}\n" "Service" "Port" "Status" "PID"
     echo "─────────────────────────────────────────"
 
-    local services="vision:8000 rag:8010 text:8006 tts:8013 agents:8003 media:8015 web:5173 server:3000"
+    local services="rag:8010 text:8006 tts:8013 agents:8003 media:8015 server:3000"
     for entry in $services; do
         name="${entry%%:*}"
         port="${entry##*:}"
@@ -97,7 +97,7 @@ stop_service() {
         tts) pkill -f "tts-service.*uvicorn" 2>/dev/null || true ;;
         agents) pkill -f "ai_agents.*main.py" 2>/dev/null || true ;;
         media) pkill -f "media-gen.*app.py" 2>/dev/null || true ;;
-        web) pkill -f "vite.*ai-test/web" 2>/dev/null || true ;;
+        web) pkill -f "ng serve.*ai-test/web-angular" 2>/dev/null || true ;;
         server) pkill -f "tsx.*ai-test/server" 2>/dev/null || true ;;
     esac
 
@@ -124,7 +124,7 @@ get_service_info() {
         tts) echo "8013|services/tts-service|uvicorn" ;;
         agents) echo "8003|services/ai_agents|python" ;;
         media) echo "8015|services/media-gen|python" ;;
-        web) echo "5173|apps/web|pnpm" ;;
+        web) echo "4200|apps/web-angular|pnpm" ;;
         server) echo "3000|apps/server|pnpm" ;;
         *) return 1 ;;
     esac
@@ -148,7 +148,7 @@ usage() {
     echo "  tts                 TTS Service (port 8013)"
     echo "  agents              AI Agents (port 8003)"
     echo "  media               Media Generation (port 8015)"
-    echo "  web                 Web Frontend (port 5173)"
+    echo "  web                 Angular Frontend (port 4200)"
     echo "  server              Express Server (port 3000)"
     echo ""
     echo "Examples:"

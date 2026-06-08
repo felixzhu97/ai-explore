@@ -11,7 +11,7 @@ Person(data_scientist, "数据科学家")
 
 ' === 前端层 ===
 System_Boundary(frontend_boundary, "前端层") {
-    Container(web_app, "Web 应用", "React 18 + TypeScript + Vite", "用户界面和交互 (AIHub, AgentPanels, TTSPanel, VideoPanel)")
+    Container(web_app, "Web 应用", "Angular 20+ + TypeScript + SCSS", "用户界面和交互 (AIHub, AgentPanels, TTSPanel, VideoPanel)")
 }
 
 ' === 服务层 ===

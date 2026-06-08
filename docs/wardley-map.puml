@@ -93,10 +93,10 @@ package "Product\n(商业/开源产品)" <<product>> #ADD8E6 {
     rectangle "Sora" as prod_sora
 
     ' 前端
-    rectangle "React 18" as prod_react
-    rectangle "Vite" as prod_vite
-    rectangle "Zustand" as prod_zustand
-    rectangle "Tailwind CSS" as prod_tailwind
+    rectangle "Angular 20+" as prod_angular
+    rectangle "Angular CLI" as prod_angular_cli
+    rectangle "SCSS" as prod_scss
+    rectangle "RxJS" as prod_rxjs
 }
 
 ' ==================== COMMODITY 层 ====================
@@ -208,10 +208,10 @@ cb_video -right-> prod_sora
 
 cb_aiops -right-> prod_langchain
 
-cb_aihub -right-> prod_react
-cb_aihub -right-> prod_vite
-cb_aihub -right-> prod_zustand
-cb_aihub -right-> prod_tailwind
+cb_aihub -right-> prod_angular
+cb_aihub -right-> prod_angular_cli
+cb_aihub -right-> prod_scss
+cb_aihub -right-> prod_rxjs
 
 cb_llmops -right-> prod_langchain
 cb_llmops -right-> prod_ollama
@@ -229,9 +229,9 @@ prod_ocr -right-> com_pytorch
 prod_blip -right-> com_pytorch
 prod_sd -right-> com_pytorch
 
-prod_react -right-> prod_vite
-prod_vite -right-> com_nodejs
-prod_zustand -right-> com_nodejs
+prod_angular -right-> prod_angular_cli
+prod_angular_cli -right-> com_nodejs
+prod_scss -right-> com_nodejs
 
 prod_qdrant -right-> com_docker
 prod_qdrant -right-> com_grpc

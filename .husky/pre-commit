@@ -3,14 +3,6 @@
 
 echo "🔍 Running pre-commit checks..."
 
-# Type check for web app
-echo "📦 Type checking apps/web..."
-pnpm --filter @ai-test/web typecheck
-if [ $? -ne 0 ]; then
-  echo "❌ Type check failed for apps/web"
-  exit 1
-fi
-
 # Type check for server
 echo "📦 Type checking apps/server..."
 pnpm --filter @ai-test/server typecheck

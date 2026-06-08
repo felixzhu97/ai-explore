@@ -600,11 +600,8 @@ ruff check src/
 ### Web Frontend
 
 ```bash
-cd apps/web
+cd apps/web-angular
 pnpm build
-
-# Preview production build
-pnpm preview
 ```
 
 ### Backend Server

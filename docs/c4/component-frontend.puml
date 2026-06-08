@@ -28,7 +28,7 @@ Container_Boundary(frontend, "Web Frontend (apps/web-angular)") {
 
     ' === 智能体聊天组件 ===
     System_Boundary(chat_components, "Chat Components") {
-        Component(agent_chat, "AgentChat", "React + TypeScript", "通用智能体聊天组件，支持 SSE 流式响应")
+        Component(agent_chat, "AgentChat", "Angular + TypeScript", "通用智能体聊天组件，支持 SSE 流式响应")
         Component(chat_message, "ChatMessage", "Angular", "聊天消息展示组件")
         Component(status_badge, "StatusBadge", "Angular", "状态徽章组件")
         Component(tool_result, "ToolResult", "Angular", "工具执行结果展示")
@@ -63,7 +63,7 @@ Container_Boundary(frontend, "Web Frontend (apps/web-angular)") {
 
     ' === 基础设施 ===
     System_Boundary(infrastructure, "Infrastructure") {
-        Component(i18n, "i18n Provider", "React i18next", "国际化支持")
+        Component(i18n, "i18n Provider", "i18next", "国际化支持")
         Component(theme, "Theme", "CSS-in-JS / Tailwind", "主题配置")
         Component(api_client, "API Client", "Fetch API / SSE", "HTTP 请求和流式响应封装")
         Component(sse_client, "SSE Client", "EventSource", "Server-Sent Events 客户端")

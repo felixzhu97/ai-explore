@@ -1,22 +1,24 @@
 ---
-description: Python/Java/TypeScript 后端迁移过程中的小步推进与 MCP 测试规范。适用于 microservices migration 和 java-backend-migration。
+description: Python/Java/TypeScript 后端迁移过程中的小步推进与 MCP 测试规范。适用于 microservices migration 和 java-backend-migration（单体架构）。
 globs: services/**/*.py apps/server/**/*.ts backend/**/*.java .cursor/skills/**/SKILL.md
 alwaysApply: false
 ---
 
-# Migration Testing 规范
+# Migration Testing 规范（单体架构版）
 
-> 本规则用于约束“一次只改一个服务、一步只切一个接口”，并要求每步都通过 MCP 工具完成可复现验证。
+> 本规则用于约束“一次只改一个 Agent/模块、一步只切一个接口”，并要求每步都通过 MCP 工具完成可复现验证。
+> 当前迁移目标为 **Java 单体应用**，所有能力收敛到 `apps/server-java/gateway`（端口 9000）。
 
 ## 强制要求
 
 ### 小步迁移
-- 最小迁移单元是“单个服务”，不是“单个接口”或“单个文件”。
-- 单个服务内可以按接口拆分，但所有接口必须等价实现后，才能进入下一服务。
-- 禁止一次性修改多个服务的路由、配置、数据模型、代理配置。
+- 最小迁移单元是“单个 Agent 模块”，不是“单个接口”或“单个文件”。
+- 单个 Agent 模块内可以按接口拆分，但该模块所有接口必须等价实现后，才能进入下一模块。
+- 禁止一次性修改多个 Agent 的路由、配置、数据模型。
+- 所有新功能必须放在 `gateway` 单体内，禁止新建独立 Spring Boot 服务。
 
 ### MCP 验证
-- 每个服务迁移完成后，必须执行一次 MCP 验证闭环。
+- 每个 Agent 迁移完成后，必须执行一次 MCP 验证闭环。
 - MCP 验证至少包含：
   - 服务健康检查
   - 关键接口调用成功
@@ -24,7 +26,7 @@ alwaysApply: false
   - 截图或日志留存
 
 ### 回滚策略
-- 如果某个服务迁移失败，先回滚该服务，不要叠加新的修复。
+- 如果某个 Agent 迁移失败，先回滚该 Agent，不要叠加新的修复。
 - 回滚后重新执行 Step 0 基线确认。
 
 ## 小步迁移流程
@@ -34,9 +36,10 @@ alwaysApply: false
    - 确认 Python 服务健康
    - 记录接口契约和测试用例
 
-2. 初始化 Java 服务
-   - 创建 Spring Boot 项目
-   - 完成基础配置
+2. 初始化 Agent 模块
+   - 在 gateway 下创建 DDD 分层目录
+   - 定义 Domain Port 接口
+   - 创建基础 DTO
 
 3. 逐接口迁移
    - 单接口实现
@@ -48,41 +51,80 @@ alwaysApply: false
    - 异常场景
    - 性能基线对比
 
-5. 切流与灰度
-   - 5% -> 20% -> 100%
-   - 每阶段通过 MCP 观察
+5. 灰度验证
+   - 先在 /api/v1/agents/ 新路径验证
+   - 逐步增加流量
 
 6. 全量切流
-   - 验证通过后删除 Python 服务
+   - 验证通过后标记 Python 服务为 deprecated
 ```
 
 ## MCP 测试要求
 
 ### 健康检查验证
-- 使用 MCP 浏览器工具访问 `/health` 接口
+- 使用 MCP 浏览器工具访问 `/actuator/health` 接口
 - 截图记录健康状态
-- 保存到 `docs/screenshots/migration/health-{service}.png`
+- 保存到 `docs/screenshots/migration/health-{agent}.png`
 
 ### 接口契约验证
 - 使用 `curl` 或 MCP 浏览器调用接口
 - 对比请求/响应内容
-- 记录差异到 `docs/migration/{service}-diff.md`
+- 记录差异到 `docs/migration/{agent}-diff.md`
 
 ### 截图要求
 - 每次迁移后必须截图
 - 包含接口响应、健康检查、错误页面
-- 文件命名：`{service}-{step}-{date}.png`
+- 文件命名：`{agent}-{step}-{date}.png`
+
+## 单体架构端口规范
+
+### Java 单体服务
+- Gateway（单体）: 9000
+
+### Python 服务（逐步下线）
+- AI Agents: 8003（待迁移）
+- RAG: 8001/8010（待迁移）
+- Text Service: 8006（待迁移）
+- TTS: 8013/8005（待迁移）
+- Vision: 8000（待迁移）
+- Media Gen: 8015/8002（待迁移）
+
+### 支持服务
+- Qdrant: 6333
+- Ollama: 11434
+- Angular 前端: 4200
+
+## URL 路径对齐检查表（单体架构）
+
+| 服务 | Java 单体路径 | 说明 |
+|---|---|---|
+| AI Agents | `/api/v1/agents/**` | 新路径 |
+| RAG | `/api/v1/agents/rag/**` 或保留 `/api/rag/**` | 兼容期保留旧路径 |
+| Text | `/api/v1/agents/text/**` | 新路径 |
+| TTS | `/api/v1/agents/tts/**` | 新路径 |
+| Vision | `/api/v1/agents/vision/**` | 新路径 |
+| Media | `/api/v1/agents/media/**` | 新路径 |
+
+## 常见错误诊断表
+
+| 症状 | 可能原因 | 诊断方法 | 解决方案 |
+|---|---|---|---|
+| 404 | 路径不匹配 | 对比 Controller @RequestMapping | 统一路径 |
+| CORS | origin 未列入 | `curl -I http://localhost:9000/` | 添加到 allowed_origins |
+| 500 | Agent 未注册 | 检查 Agent 配置 | 注册 Agent 到 Supervisor |
+| 500 | 依赖未初始化 | 检查 Qdrant / LLM 连接 | 修复依赖配置 |
 
 ## 禁止行为
-- 禁止跳过 MCP 验证直接进入下一服务
-- 禁止同时迁移多个服务
+- 禁止跳过 MCP 验证直接进入下一 Agent
+- 禁止同时迁移多个 Agent
 - 禁止修改测试断言以适应错误实现
 - 禁止在未验证健康检查的情况下切流
+- 禁止新建独立 Spring Boot 服务（所有能力必须收敛到 gateway 单体）
 
 ## 记录模板
 
 ```
-### {service} 迁移记��
+### {agent} 迁移记录
 
 - 日期：{date}
 - 迁移步骤：Step {step}

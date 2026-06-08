@@ -72,3 +72,6 @@ ai-test-*.png
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Java/Gradle build artifacts
+apps/server-java/.gradle/

@@ -6,21 +6,25 @@ describe('ButtonComponent', () => {
   let fixture: ComponentFixture<ButtonComponent>;
   let component: ButtonComponent;
 
+  const createFixture = () => {
+    fixture = TestBed.createComponent(ButtonComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ButtonComponent],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(ButtonComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    createFixture();
     expect(component).toBeTruthy();
   });
 
   it('should have default values', () => {
+    createFixture();
     expect(component.variant()).toBe('primary');
     expect(component.size()).toBe('md');
     expect(component.loading()).toBe(false);
@@ -29,6 +33,7 @@ describe('ButtonComponent', () => {
   });
 
   it('should emit click event', () => {
+    createFixture();
     const spy = vi.fn();
     component.clicked.subscribe(spy);
 
@@ -38,7 +43,10 @@ describe('ButtonComponent', () => {
   });
 
   it('should not emit click when disabled', () => {
-    component.disabled.set(true);
+    createFixture();
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    
     const spy = vi.fn();
     component.clicked.subscribe(spy);
 
@@ -48,7 +56,10 @@ describe('ButtonComponent', () => {
   });
 
   it('should not emit click when loading', () => {
-    component.loading.set(true);
+    createFixture();
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+    
     const spy = vi.fn();
     component.clicked.subscribe(spy);
 
@@ -57,32 +68,51 @@ describe('ButtonComponent', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('should compute button classes correctly', () => {
-    expect(component.buttonClasses()).toContain('button--primary');
-    expect(component.buttonClasses()).toContain('button--md');
+  it('should render button with default classes', () => {
+    createFixture();
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.classList).toContain('button');
+    expect(button.classList).toContain('button--primary');
+    expect(button.classList).toContain('button--md');
   });
 
   it('should include full-width class when fullWidth is true', () => {
-    component.fullWidth.set(true);
-    expect(component.buttonClasses()).toContain('button--full-width');
+    createFixture();
+    fixture.componentRef.setInput('fullWidth', true);
+    fixture.detectChanges();
+    
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.classList).toContain('button--full-width');
   });
 
   it('should update classes when variant changes', () => {
-    component.variant.set('secondary');
-    expect(component.buttonClasses()).toContain('button--secondary');
+    createFixture();
+    fixture.componentRef.setInput('variant', 'secondary');
+    fixture.detectChanges();
+    
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.classList).toContain('button--secondary');
   });
 
   it('should update classes when size changes', () => {
-    component.size.set('lg');
-    expect(component.buttonClasses()).toContain('button--lg');
+    createFixture();
+    fixture.componentRef.setInput('size', 'lg');
+    fixture.detectChanges();
+    
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.classList).toContain('button--lg');
   });
 
   describe('variants', () => {
     const variants: ButtonVariant[] = ['primary', 'secondary', 'ghost', 'danger'];
     variants.forEach((variant) => {
       it(`should support ${variant} variant`, () => {
-        component.variant.set(variant);
-        expect(component.buttonClasses()).toContain(`button--${variant}`);
+        createFixture();
+        fixture.componentRef.setInput('variant', variant);
+        fixture.detectChanges();
+        
+        const button = fixture.nativeElement.querySelector('button');
+        expect(button.classList).toContain(`button--${variant}`);
       });
     });
   });
@@ -91,8 +121,12 @@ describe('ButtonComponent', () => {
     const sizes: ButtonSize[] = ['sm', 'md', 'lg'];
     sizes.forEach((size) => {
       it(`should support ${size} size`, () => {
-        component.size.set(size);
-        expect(component.buttonClasses()).toContain(`button--${size}`);
+        createFixture();
+        fixture.componentRef.setInput('size', size);
+        fixture.detectChanges();
+        
+        const button = fixture.nativeElement.querySelector('button');
+        expect(button.classList).toContain(`button--${size}`);
       });
     });
   });

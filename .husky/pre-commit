@@ -19,12 +19,30 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Run tests
-echo "🧪 Running tests..."
+# Run tests for packages
+echo "🧪 Running tests for packages..."
 pnpm test
 if [ $? -ne 0 ]; then
-  echo "❌ Tests failed"
+  echo "❌ Package tests failed"
   exit 1
 fi
+
+# Run Angular tests (Vitest)
+echo "🧪 Running Angular tests (Vitest)..."
+cd apps/web-angular && npx vitest run --reporter=verbose 2>&1
+if [ $? -ne 0 ]; then
+  echo "❌ Angular tests failed"
+  exit 1
+fi
+cd ../..
+
+# Run Java tests (JUnit 5)
+echo "🧪 Running Java tests (JUnit 5)..."
+cd apps/server-java && ./gradlew test --no-daemon -q 2>&1
+if [ $? -ne 0 ]; then
+  echo "❌ Java tests failed"
+  exit 1
+fi
+cd ..
 
 echo "✅ All pre-commit checks passed!"

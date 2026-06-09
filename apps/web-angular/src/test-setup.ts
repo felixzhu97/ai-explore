@@ -1,21 +1,24 @@
 import 'zone.js';
 import 'zone.js/testing';
-import { TestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import { getTestBed } from '@angular/core/testing';
 
-// Only configure TestBed for Angular component/directive tests
-// Pure unit tests (services, models, theme) don't need TestBed
+// Initialize test environment
 try {
-  TestBed.initTestEnvironment('jsdom' as any, 'jsdom' as any);
+  getTestBed().initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+    { teardown: { destroyAfterEach: true } }
+  );
 } catch {
-  // Already initialized or not needed for unit tests
+  // Already initialized
 }
 
-beforeEach(() => {
-  try {
-    TestBed.configureTestingModule({
-      teardown: { destroyAfterEach: true }
-    });
-  } catch {
-    // TestBed not available or already configured
+// Suppress JSDOM CSS parsing errors for SCSS nesting
+const originalError = console.error;
+console.error = (...args: unknown[]) => {
+  if (args[0] && typeof args[0] === 'string' && args[0].includes('Could not parse CSS stylesheet')) {
+    return;
   }
-});
+  originalError.apply(console, args);
+};

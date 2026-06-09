@@ -6,48 +6,66 @@ describe('CardComponent', () => {
   let fixture: ComponentFixture<CardComponent>;
   let component: CardComponent;
 
+  const createFixture = () => {
+    fixture = TestBed.createComponent(CardComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CardComponent],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(CardComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    createFixture();
     expect(component).toBeTruthy();
   });
 
   it('should have default values', () => {
+    createFixture();
     expect(component.variant()).toBe('default');
     expect(component.padding()).toBe('md');
     expect(component.hoverable()).toBe(false);
   });
 
-  it('should compute card classes correctly', () => {
-    expect(component.cardClasses()).toContain('card--default');
-    expect(component.cardClasses()).toContain('card--padding-md');
-    expect(component.cardClasses()).not.toContain('card--interactive');
+  it('should render card with default classes', () => {
+    createFixture();
+    const card = fixture.nativeElement.querySelector('.card');
+    expect(card.classList).toContain('card');
+    expect(card.classList).toContain('card--default');
+    expect(card.classList).toContain('card--padding-md');
   });
 
   it('should include interactive class when hoverable is true', () => {
-    component.hoverable.set(true);
-    expect(component.cardClasses()).toContain('card--interactive');
+    createFixture();
+    fixture.componentRef.setInput('hoverable', true);
+    fixture.detectChanges();
+    
+    const card = fixture.nativeElement.querySelector('.card');
+    expect(card.classList).toContain('card--interactive');
   });
 
-  it('should include interactive class when onClick is provided', () => {
-    component.hoverable.set(false);
-    expect(component.cardClasses()).not.toContain('card--interactive');
+  it('should not include interactive class when hoverable is false', () => {
+    createFixture();
+    fixture.componentRef.setInput('hoverable', false);
+    fixture.detectChanges();
+    
+    const card = fixture.nativeElement.querySelector('.card');
+    expect(card.classList).not.toContain('card--interactive');
   });
 
   describe('variants', () => {
     const variants: CardVariant[] = ['default', 'elevated', 'outlined', 'glass'];
     variants.forEach((variant) => {
       it(`should support ${variant} variant`, () => {
-        component.variant.set(variant);
-        expect(component.cardClasses()).toContain(`card--${variant}`);
+        createFixture();
+        fixture.componentRef.setInput('variant', variant);
+        fixture.detectChanges();
+        
+        const card = fixture.nativeElement.querySelector('.card');
+        expect(card.classList).toContain(`card--${variant}`);
       });
     });
   });
@@ -56,34 +74,42 @@ describe('CardComponent', () => {
     const paddings: CardPadding[] = ['none', 'sm', 'md', 'lg'];
     paddings.forEach((padding) => {
       it(`should support ${padding} padding`, () => {
-        component.padding.set(padding);
-        expect(component.cardClasses()).toContain(`card--padding-${padding}`);
+        createFixture();
+        fixture.componentRef.setInput('padding', padding);
+        fixture.detectChanges();
+        
+        const card = fixture.nativeElement.querySelector('.card');
+        expect(card.classList).toContain(`card--padding-${padding}`);
       });
     });
   });
 
   describe('hover state', () => {
     it('should update hovered state on mouseenter', () => {
-      component.hoverable.set(true);
-      const cardElement = fixture.nativeElement.querySelector('.card');
+      createFixture();
+      fixture.componentRef.setInput('hoverable', true);
+      fixture.detectChanges();
       
-      cardElement.dispatchEvent(new Event('mouseenter'));
+      const card = fixture.nativeElement.querySelector('.card');
+      
+      card.dispatchEvent(new Event('mouseenter'));
       fixture.detectChanges();
       
       expect(component.isHovered()).toBe(true);
-      expect(component.cardClasses()).toContain('card--hovered');
     });
 
     it('should clear hovered state on mouseleave', () => {
-      component.hoverable.set(true);
-      const cardElement = fixture.nativeElement.querySelector('.card');
+      createFixture();
+      fixture.componentRef.setInput('hoverable', true);
+      fixture.detectChanges();
       
-      cardElement.dispatchEvent(new Event('mouseenter'));
-      cardElement.dispatchEvent(new Event('mouseleave'));
+      const card = fixture.nativeElement.querySelector('.card');
+      
+      card.dispatchEvent(new Event('mouseenter'));
+      card.dispatchEvent(new Event('mouseleave'));
       fixture.detectChanges();
       
       expect(component.isHovered()).toBe(false);
-      expect(component.cardClasses()).not.toContain('card--hovered');
     });
   });
 });

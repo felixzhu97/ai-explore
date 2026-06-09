@@ -72,10 +72,15 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "ngx-vitest:vitest",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "config": "vitest.config.ts",
-            "tsConfig": "tsconfig.spec.json"
+            "tsConfig": "tsconfig.spec.json",
+            "setupFiles": ["src/test-setup.ts"]
+          },
+          "configurations": {
+            "ci": {
+              "watch": false
+            }
           }
         }
       }

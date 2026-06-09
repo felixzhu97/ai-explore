@@ -6,42 +6,48 @@ describe('ImageZoomModalComponent', () => {
   let fixture: ComponentFixture<ImageZoomModalComponent>;
   let component: ImageZoomModalComponent;
 
+  const createFixture = (src = 'https://example.com/image.jpg', alt = 'Test image') => {
+    fixture = TestBed.createComponent(ImageZoomModalComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('src', src);
+    fixture.componentRef.setInput('alt', alt);
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ImageZoomModalComponent],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(ImageZoomModalComponent);
-    component = fixture.componentInstance;
-    component.src = 'https://example.com/image.jpg';
-    component.alt = 'Test image';
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    createFixture();
     expect(component).toBeTruthy();
   });
 
   it('should display overlay when open', () => {
+    createFixture();
     expect(component.isOpen()).toBe(true);
     const overlay = fixture.nativeElement.querySelector('.overlay');
     expect(overlay).toBeTruthy();
   });
 
   it('should display image with correct src', () => {
+    createFixture();
     const img = fixture.nativeElement.querySelector('.image');
     expect(img).toBeTruthy();
     expect(img.getAttribute('src')).toBe('https://example.com/image.jpg');
   });
 
   it('should display alt text as caption', () => {
+    createFixture();
     const caption = fixture.nativeElement.querySelector('.caption');
     expect(caption).toBeTruthy();
     expect(caption.textContent?.trim()).toBe('Test image');
   });
 
   it('should not display caption when alt is empty', () => {
-    component.alt.set('');
+    createFixture('https://example.com/image.jpg', '');
     fixture.detectChanges();
     
     const caption = fixture.nativeElement.querySelector('.caption');
@@ -49,6 +55,7 @@ describe('ImageZoomModalComponent', () => {
   });
 
   it('should emit closed event when close is called', () => {
+    createFixture();
     component.closed.subscribe(() => {
       // done callback equivalent
     });
@@ -57,6 +64,7 @@ describe('ImageZoomModalComponent', () => {
   });
 
   it('should close modal and emit closed event', () => {
+    createFixture();
     const spy = vi.fn();
     component.closed.subscribe(spy);
 
@@ -67,11 +75,13 @@ describe('ImageZoomModalComponent', () => {
   });
 
   it('should have close button', () => {
+    createFixture();
     const closeButton = fixture.nativeElement.querySelector('.close-button');
     expect(closeButton).toBeTruthy();
   });
 
   it('should have proper ARIA attributes', () => {
+    createFixture();
     const overlay = fixture.nativeElement.querySelector('.overlay');
     expect(overlay.getAttribute('role')).toBe('dialog');
     expect(overlay.getAttribute('aria-modal')).toBe('true');
@@ -82,6 +92,7 @@ describe('ImageZoomModalComponent', () => {
 
   describe('keyboard support', () => {
     it('should close on escape key', () => {
+      createFixture();
       const spy = vi.fn();
       component.closed.subscribe(spy);
 
@@ -92,6 +103,7 @@ describe('ImageZoomModalComponent', () => {
     });
 
     it('should not close on escape if already closed', () => {
+      createFixture();
       component.isOpen.set(false);
       const spy = vi.fn();
       component.closed.subscribe(spy);
@@ -104,6 +116,7 @@ describe('ImageZoomModalComponent', () => {
 
   describe('lifecycle', () => {
     it('should clean up body overflow on destroy', () => {
+      createFixture();
       document.body.style.overflow = 'hidden';
       
       component.ngOnDestroy();
@@ -114,6 +127,7 @@ describe('ImageZoomModalComponent', () => {
 
   describe('click handling', () => {
     it('should stop propagation on image container click', () => {
+      createFixture();
       const container = fixture.nativeElement.querySelector('.image-container');
       
       const mockEvent = {
@@ -126,6 +140,7 @@ describe('ImageZoomModalComponent', () => {
     });
 
     it('should close on overlay click', () => {
+      createFixture();
       const overlay = fixture.nativeElement.querySelector('.overlay');
       const spy = vi.fn();
       component.closed.subscribe(spy);

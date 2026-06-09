@@ -54,15 +54,24 @@ public class ChunkingService {
 
         List<String> chunks = new ArrayList<>();
         int textLength = text.length();
-        int start = 0;
 
+        // If text fits in one chunk, return it directly
+        if (textLength <= chunkSize) {
+            chunks.add(text.trim());
+            return chunks;
+        }
+
+        int start = 0;
         while (start < textLength) {
             int end = Math.min(start + chunkSize, textLength);
             String chunk = text.substring(start, end);
 
             // Try to break at natural boundaries
             if (end < textLength) {
-                chunk = breakAtNaturalBoundary(chunk);
+                String broken = breakAtNaturalBoundary(chunk);
+                if (broken.length() < chunk.length()) {
+                    chunk = broken;
+                }
             }
 
             if (!chunk.isBlank()) {
@@ -70,8 +79,10 @@ public class ChunkingService {
             }
 
             // Move start position, accounting for overlap
-            start = start + chunk.length() - overlap;
-            if (start <= 0 || start >= textLength) {
+            int advance = Math.max(chunk.length() - overlap, 1);
+            start = start + advance;
+
+            if (start >= textLength) {
                 break;
             }
         }

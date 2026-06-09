@@ -15,39 +15,40 @@ describe('ChatMessageComponent', () => {
     ...overrides,
   });
 
+  const createFixture = (messageData: ChatMessageData) => {
+    fixture = TestBed.createComponent(ChatMessageComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('message', messageData);
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ChatMessageComponent],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(ChatMessageComponent);
-    component = fixture.componentInstance;
   });
 
   it('should create', () => {
-    component.message.set(createMessage());
-    fixture.detectChanges();
+    createFixture(createMessage());
     expect(component).toBeTruthy();
   });
 
   it('should display user message content', () => {
-    component.message.set(createMessage({
+    createFixture(createMessage({
       role: 'user',
       content: 'Hello, this is a user message',
     }));
-    fixture.detectChanges();
 
     const content = fixture.nativeElement.querySelector('.message-content');
     expect(content.textContent?.trim()).toContain('Hello, this is a user message');
-    expect(content).toHaveClass('message-content--user');
+    expect(content.classList).toContain('message-content--user');
   });
 
   it('should display assistant message with rendered content', () => {
-    component.message.set(createMessage({
+    createFixture(createMessage({
       role: 'assistant',
       content: 'This is an assistant response',
     }));
-    fixture.detectChanges();
 
     const content = fixture.nativeElement.querySelector('.message-content');
     expect(content.textContent?.trim()).toContain('This is an assistant response');
@@ -55,8 +56,7 @@ describe('ChatMessageComponent', () => {
 
   it('should format timestamp correctly', () => {
     const testTimestamp = new Date('2024-01-15T10:30:00').getTime();
-    component.message.set(createMessage({ timestamp: testTimestamp }));
-    fixture.detectChanges();
+    createFixture(createMessage({ timestamp: testTimestamp }));
 
     const timeElement = fixture.nativeElement.querySelector('.message-time');
     expect(timeElement.textContent).toBeTruthy();
@@ -72,35 +72,31 @@ describe('ChatMessageComponent', () => {
         status: 'success',
       },
     ];
-    component.message.set(createMessage({ toolCalls }));
-    fixture.detectChanges();
+    createFixture(createMessage({ toolCalls }));
 
     const toolResults = fixture.nativeElement.querySelectorAll('app-tool-result');
     expect(toolResults.length).toBe(1);
   });
 
   it('should not render tool calls section when no tool calls', () => {
-    component.message.set(createMessage({ toolCalls: undefined }));
-    fixture.detectChanges();
+    createFixture(createMessage({ toolCalls: undefined }));
 
     const toolCallsSection = fixture.nativeElement.querySelector('.tool-calls');
     expect(toolCallsSection).toBeFalsy();
   });
 
   it('should handle empty content gracefully', () => {
-    component.message.set(createMessage({ content: '' }));
-    fixture.detectChanges();
+    createFixture(createMessage({ content: '' }));
 
     const content = fixture.nativeElement.querySelector('.message-content');
     expect(content).toBeTruthy();
   });
 
   it('should escape HTML in user content', () => {
-    component.message.set(createMessage({
+    createFixture(createMessage({
       role: 'user',
       content: '<script>alert("xss")</script>',
     }));
-    fixture.detectChanges();
 
     const content = fixture.nativeElement.querySelector('.message-content');
     expect(content.innerHTML).not.toContain('<script>');
@@ -109,17 +105,17 @@ describe('ChatMessageComponent', () => {
 
   describe('isUser computed', () => {
     it('should return true for user messages', () => {
-      component.message.set(createMessage({ role: 'user' }));
+      createFixture(createMessage({ role: 'user' }));
       expect(component.isUser()).toBe(true);
     });
 
     it('should return false for assistant messages', () => {
-      component.message.set(createMessage({ role: 'assistant' }));
+      createFixture(createMessage({ role: 'assistant' }));
       expect(component.isUser()).toBe(false);
     });
 
     it('should return false for system messages', () => {
-      component.message.set(createMessage({ role: 'system' }));
+      createFixture(createMessage({ role: 'system' }));
       expect(component.isUser()).toBe(false);
     });
   });
@@ -127,7 +123,7 @@ describe('ChatMessageComponent', () => {
   describe('formattedTime computed', () => {
     it('should format time using locale format', () => {
       const timestamp = new Date('2024-01-15T14:30:45').getTime();
-      component.message.set(createMessage({ timestamp }));
+      createFixture(createMessage({ timestamp }));
       
       const formatted = component.formattedTime();
       expect(formatted).toBeTruthy();
@@ -137,16 +133,15 @@ describe('ChatMessageComponent', () => {
 
   describe('renderedContent computed', () => {
     it('should return empty string for empty content', () => {
-      component.message.set(createMessage({ content: '' }));
+      createFixture(createMessage({ content: '' }));
       expect(component.renderedContent()).toBe('');
     });
 
     it('should render markdown headers', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: '# Hello\n## World',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('<h1>');
@@ -154,11 +149,10 @@ describe('ChatMessageComponent', () => {
     });
 
     it('should render bold text', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: 'This is **bold** text',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('<strong>');
@@ -166,11 +160,10 @@ describe('ChatMessageComponent', () => {
     });
 
     it('should render italic text', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: 'This is *italic* text',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('<em>');
@@ -178,22 +171,20 @@ describe('ChatMessageComponent', () => {
     });
 
     it('should render inline code', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: 'Use `console.log()` for debugging',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('<code>console.log()</code>');
     });
 
     it('should render code blocks', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: '```javascript\nconst x = 1;\n```',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('<pre');
@@ -202,11 +193,10 @@ describe('ChatMessageComponent', () => {
     });
 
     it('should render links', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: 'Check [this link](https://example.com)',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('<a href="https://example.com"');
@@ -214,11 +204,10 @@ describe('ChatMessageComponent', () => {
     });
 
     it('should handle JSON content with syntax highlighting', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: '{"name": "John", "age": 30}',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.innerHTML).toContain('json-key');
@@ -227,11 +216,10 @@ describe('ChatMessageComponent', () => {
     });
 
     it('should not parse JSON when inside code blocks', () => {
-      component.message.set(createMessage({
+      createFixture(createMessage({
         role: 'assistant',
         content: '```\n{"key": "value"}\n```',
       }));
-      fixture.detectChanges();
       
       const content = fixture.nativeElement.querySelector('.message-content');
       expect(content.textContent).toContain('{"key": "value"}');
@@ -240,34 +228,30 @@ describe('ChatMessageComponent', () => {
 
   describe('message bubble styling', () => {
     it('should have user class for user messages', () => {
-      component.message.set(createMessage({ role: 'user' }));
-      fixture.detectChanges();
+      createFixture(createMessage({ role: 'user' }));
       
       const bubble = fixture.nativeElement.querySelector('.message-bubble');
-      expect(bubble).toHaveClass('message-bubble--user');
+      expect(bubble.classList).toContain('message-bubble--user');
     });
 
     it('should not have user class for assistant messages', () => {
-      component.message.set(createMessage({ role: 'assistant' }));
-      fixture.detectChanges();
+      createFixture(createMessage({ role: 'assistant' }));
       
       const bubble = fixture.nativeElement.querySelector('.message-bubble');
-      expect(bubble).not.toHaveClass('message-bubble--user');
+      expect(bubble.classList).not.toContain('message-bubble--user');
     });
   });
 
   describe('accessibility', () => {
     it('should have message-meta for timestamp', () => {
-      component.message.set(createMessage());
-      fixture.detectChanges();
+      createFixture(createMessage());
       
       const meta = fixture.nativeElement.querySelector('.message-meta');
       expect(meta).toBeTruthy();
     });
 
     it('should have time element with proper formatting', () => {
-      component.message.set(createMessage());
-      fixture.detectChanges();
+      createFixture(createMessage());
       
       const time = fixture.nativeElement.querySelector('.message-time');
       expect(time).toBeTruthy();

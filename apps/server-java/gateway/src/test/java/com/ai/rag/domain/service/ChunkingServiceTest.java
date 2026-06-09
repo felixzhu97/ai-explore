@@ -234,6 +234,7 @@ class ChunkingServiceTest {
         @Test
         @DisplayName("should split large paragraph that exceeds chunk size")
         void shouldSplitLargeParagraphThatExceedsChunkSize() {
+            // Use a controlled-size paragraph that triggers chunkBySize without OOM
             String largeParagraph = "X".repeat(250);
             String text = largeParagraph + "\n\nSmall paragraph.";
 

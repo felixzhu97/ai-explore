@@ -1,18 +1,34 @@
 package com.ai.config;
 
+import com.ai.agents.domain.service.AgentRegistry;
+import com.ai.agents.domain.service.SupervisorAgent;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration to enable AI Agents module components in the Gateway.
- * This allows the Gateway to use AI Agents endpoints and services.
+ * This configuration imports the new com.ai.agents package structure.
  */
 @Configuration
 @ComponentScan(basePackages = {
-        "com.ai.agents.service",
-        "com.ai.agents.config",
-        "com.ai.agents.domain"
+        "com.ai.agents"
 })
 public class AiAgentsImportConfiguration {
-    // AI Agents module is imported and auto-configured
+
+    /**
+     * Domain service for agent registration.
+     */
+    @Bean
+    public AgentRegistry agentRegistry() {
+        return new AgentRegistry();
+    }
+
+    /**
+     * Domain service for intent routing.
+     */
+    @Bean
+    public SupervisorAgent supervisorAgent() {
+        return new SupervisorAgent();
+    }
 }

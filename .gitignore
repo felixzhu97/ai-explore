@@ -75,3 +75,11 @@ ai-test-*.png
 
 # Java/Gradle build artifacts
 apps/server-java/.gradle/
+apps/server-java/**/build/
+apps/server-java/**/.gradle/
+
+# Legacy merged services (migrated to monolith)
+apps/server-java/services/ai-agents/
+
+# Root-level build
+build/

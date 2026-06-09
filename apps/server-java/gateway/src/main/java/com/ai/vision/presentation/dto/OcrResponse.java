@@ -1,6 +1,7 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -9,8 +10,8 @@ public record OcrResponse(
     String task,
     String model,
     List<TextBlock> results,
-    String fullText,
-    double processingTimeMs
+    @JsonProperty("full_text") String fullText,
+    @JsonProperty("processing_time_ms") double processingTimeMs
 ) {
     public record TextBlock(
         String text,

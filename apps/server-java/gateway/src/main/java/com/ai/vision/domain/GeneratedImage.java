@@ -1,21 +1,23 @@
 package com.ai.vision.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Immutable result of image generation task.
  */
 public record GeneratedImage(
-    String imageUrl,
-    String base64Image,
+    @JsonProperty("image_url") String imageUrl,
+    @JsonProperty("base64_image") String base64Image,
     int seed,
     GenerationMetadata metadata
 ) {
     public record GenerationMetadata(
         String prompt,
-        String negativePrompt,
+        @JsonProperty("negative_prompt") String negativePrompt,
         int width,
         int height,
         int steps,
-        float guidanceScale
+        @JsonProperty("guidance_scale") float guidanceScale
     ) {}
 
     public GeneratedImage {

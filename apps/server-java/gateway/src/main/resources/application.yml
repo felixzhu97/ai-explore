@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 9001
 
 spring:
   application:
@@ -8,6 +8,11 @@ spring:
   webflux:
     problemdetails:
       enabled: true
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    serialization:
+      write-dates-as-timestamps: false
 
 management:
   endpoints:

@@ -25,6 +25,19 @@ public interface VisionModel {
     boolean isAvailable();
 
     /**
+     * Initialize the model.
+     * 
+     * This method should be called at application startup to load
+     * the ML model into memory. Returns a Mono that completes when
+     * initialization is done.
+     * 
+     * @return Mono that completes when initialization is done
+     */
+    default Mono<Void> initialize() {
+        return Mono.empty();
+    }
+
+    /**
      * Object detection using YOLO.
      * 
      * @param imageData The input image data

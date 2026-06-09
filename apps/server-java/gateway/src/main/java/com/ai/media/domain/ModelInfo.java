@@ -1,5 +1,6 @@
 package com.ai.media.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,10 +54,12 @@ public final class ModelInfo {
         return description;
     }
 
+    @JsonProperty("supported_tasks")
     public List<String> supportedTasks() {
         return supportedTasks;
     }
 
+    @JsonProperty("is_default")
     public boolean isDefault() {
         return isDefault;
     }

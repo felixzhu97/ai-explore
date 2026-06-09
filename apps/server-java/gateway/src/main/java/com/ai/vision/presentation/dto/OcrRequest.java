@@ -1,13 +1,14 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request DTO for OCR text recognition.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record OcrRequest(
-    boolean includeBboxes,
+    @JsonProperty("include_bboxes") boolean includeBboxes,
     String language
 ) {
     public OcrRequest {

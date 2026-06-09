@@ -1,16 +1,17 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record VideoStatusResponse(
-    String taskId,
+    @JsonProperty("task_id") String taskId,
     String status,
-    String videoUrl,
-    String thumbnailUrl,
+    @JsonProperty("video_url") String videoUrl,
+    @JsonProperty("thumbnail_url") String thumbnailUrl,
     String error,
-    Double processingTimeSeconds,
+    @JsonProperty("processing_time_seconds") Double processingTimeSeconds,
     Map<String, Object> metadata
 ) {}

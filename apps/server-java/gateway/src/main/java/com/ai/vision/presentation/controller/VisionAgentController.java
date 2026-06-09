@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/vision")
@@ -77,15 +79,28 @@ public class VisionAgentController {
 
     /**
      * Object detection endpoint using YOLO.
+     * Supports both multipart/form-data (legacy) and application/json.
      * Python API: POST /vision/detect
      */
-    @PostMapping(value = "/detect", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/detect", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Mono<ResponseEntity<DetectionResponse>> detect(
-            @RequestPart("image") FilePart image,
+            @RequestBody(required = false) ImageRequest jsonRequest,
+            @RequestPart(value = "image", required = false) FilePart image,
             @RequestParam(value = "conf", defaultValue = "0.25") float confidence) {
         
         log.info("Received detect request, confidence: {}", confidence);
-        return extractBytesFromFilePart(image)
+        
+        Mono<byte[]> imageDataMono;
+        if (jsonRequest != null && jsonRequest.hasImageData()) {
+            float conf = jsonRequest.confidence() != null ? jsonRequest.confidence() : confidence;
+            imageDataMono = extractImageData(jsonRequest);
+        } else if (image != null) {
+            imageDataMono = extractBytesFromFilePart(image);
+        } else {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        return imageDataMono
             .flatMap(imageBytes -> visionService.detectObjects(imageBytes, confidence))
             .map(ResponseEntity::ok)
             .onErrorResume(e -> {
@@ -96,14 +111,26 @@ public class VisionAgentController {
 
     /**
      * Image captioning endpoint using BLIP.
+     * Supports both multipart/form-data (legacy) and application/json.
      * Python API: POST /vision/caption
      */
-    @PostMapping(value = "/caption", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/caption", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Mono<ResponseEntity<CaptionResponse>> caption(
-            @RequestPart("image") FilePart image) {
+            @RequestBody(required = false) ImageRequest jsonRequest,
+            @RequestPart(value = "image", required = false) FilePart image) {
         
         log.info("Received caption request");
-        return extractBytesFromFilePart(image)
+        
+        Mono<byte[]> imageDataMono;
+        if (jsonRequest != null && jsonRequest.hasImageData()) {
+            imageDataMono = extractImageData(jsonRequest);
+        } else if (image != null) {
+            imageDataMono = extractBytesFromFilePart(image);
+        } else {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        return imageDataMono
             .flatMap(imageBytes -> visionService.captionImage(imageBytes))
             .map(ResponseEntity::ok)
             .onErrorResume(e -> {
@@ -114,16 +141,28 @@ public class VisionAgentController {
 
     /**
      * OCR text recognition endpoint.
+     * Supports both multipart/form-data (legacy) and application/json.
      * Python API: POST /vision/ocr
      */
-    @PostMapping(value = "/ocr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/ocr", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Mono<ResponseEntity<OcrResponse>> ocr(
-            @RequestPart("image") FilePart image,
+            @RequestBody(required = false) ImageRequest jsonRequest,
+            @RequestPart(value = "image", required = false) FilePart image,
             @RequestParam(value = "engine", defaultValue = "easyocr") String engine) {
         
         log.info("Received OCR request, engine: {}", engine);
-        return extractBytesFromFilePart(image)
-            .flatMap(imageBytes -> visionService.recognizeText(imageBytes, "eng"))
+        
+        Mono<byte[]> imageDataMono;
+        if (jsonRequest != null && jsonRequest.hasImageData()) {
+            imageDataMono = extractImageData(jsonRequest);
+        } else if (image != null) {
+            imageDataMono = extractBytesFromFilePart(image);
+        } else {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        return imageDataMono
+            .flatMap(imageBytes -> visionService.recognizeText(imageBytes, engine))
             .map(ResponseEntity::ok)
             .onErrorResume(e -> {
                 log.error("OCR failed: {}", e.getMessage());
@@ -230,15 +269,28 @@ public class VisionAgentController {
 
     /**
      * Combined vision analysis endpoint.
+     * Supports both multipart/form-data (legacy) and application/json.
      * Python API: POST /vision/analyze
      */
-    @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/analyze", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public Mono<ResponseEntity<Map<String, Object>>> analyze(
-            @RequestPart("image") FilePart image,
+            @RequestBody(required = false) ImageRequest jsonRequest,
+            @RequestPart(value = "image", required = false) FilePart image,
             @RequestParam(value = "task", defaultValue = "caption_image") String task) {
         
         log.info("Received analyze request, task: {}", task);
-        return extractBytesFromFilePart(image)
+        
+        Mono<byte[]> imageDataMono;
+        if (jsonRequest != null && jsonRequest.hasImageData()) {
+            String analyzeTask = jsonRequest.task() != null ? jsonRequest.task() : task;
+            imageDataMono = extractImageData(jsonRequest);
+        } else if (image != null) {
+            imageDataMono = extractBytesFromFilePart(image);
+        } else {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        return imageDataMono
             .flatMap(imageBytes -> visionService.analyzeImage(imageBytes, task))
             .map(ResponseEntity::ok)
             .onErrorResume(e -> {
@@ -353,5 +405,68 @@ public class VisionAgentController {
                 }
                 return result;
             });
+    }
+
+    /**
+     * Extract image bytes from ImageRequest (URL or base64).
+     */
+    private Mono<byte[]> extractImageData(ImageRequest request) {
+        if (request.hasImageUrl()) {
+            return fetchFromUrl(request.imageUrl());
+        } else if (request.hasImage()) {
+            return decodeBase64(request.image());
+        } else {
+            return Mono.error(new IllegalArgumentException("No image data provided"));
+        }
+    }
+
+    /**
+     * Fetch image from URL.
+     */
+    private Mono<byte[]> fetchFromUrl(String url) {
+        return Mono.fromCallable(() -> {
+            try {
+                URI uri = new URI(url);
+                byte[] data;
+                if ("file".equalsIgnoreCase(uri.getScheme())) {
+                    java.nio.file.Path path = java.nio.file.Paths.get(uri);
+                    data = java.nio.file.Files.readAllBytes(path);
+                } else {
+                    java.net.URL imageUrl = uri.toURL();
+                    java.net.HttpURLConnection connection = (java.net.HttpURLConnection) imageUrl.openConnection();
+                    connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+                    connection.setConnectTimeout(10000);
+                    connection.setReadTimeout(10000);
+                    try (java.io.InputStream is = connection.getInputStream()) {
+                        data = is.readAllBytes();
+                    }
+                }
+                log.info("Fetched image from URL: {} ({} bytes)", url, data.length);
+                return data;
+            } catch (Exception e) {
+                log.error("Failed to fetch image from URL: {}", url, e);
+                throw new RuntimeException("Failed to fetch image from URL: " + e.getMessage(), e);
+            }
+        }).subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic());
+    }
+
+    /**
+     * Decode base64 encoded image string.
+     */
+    private Mono<byte[]> decodeBase64(String base64String) {
+        return Mono.fromCallable(() -> {
+            try {
+                String cleanedBase64 = base64String;
+                if (base64String.contains(",")) {
+                    cleanedBase64 = base64String.substring(base64String.indexOf(",") + 1);
+                }
+                byte[] data = Base64.getDecoder().decode(cleanedBase64);
+                log.info("Decoded base64 image ({} bytes)", data.length);
+                return data;
+            } catch (Exception e) {
+                log.error("Failed to decode base64 image", e);
+                throw new RuntimeException("Failed to decode base64 image: " + e.getMessage(), e);
+            }
+        }).subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic());
     }
 }

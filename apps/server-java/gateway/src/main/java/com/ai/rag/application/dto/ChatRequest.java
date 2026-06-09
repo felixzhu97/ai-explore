@@ -1,5 +1,6 @@
 package com.ai.rag.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -7,10 +8,10 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record ChatRequest(
         @NotBlank(message = "Query is required") String query,
-        String sessionId,
-        Integer topK,
+        @JsonProperty("session_id") String sessionId,
+        @JsonProperty("top_k") Integer topK,
         Double temperature,
-        String[] docIds
+        @JsonProperty("doc_ids") String[] docIds
 ) {
 
     /**

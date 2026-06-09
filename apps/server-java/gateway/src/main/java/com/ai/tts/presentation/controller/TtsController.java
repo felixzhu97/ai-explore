@@ -123,6 +123,30 @@ public class TtsController {
         return ResponseEntity.ok(info);
     }
 
+    @GetMapping("/models")
+    public ResponseEntity<Map<String, Object>> listModels(
+            @RequestParam(required = false) String provider) {
+        List<Voice> voices = ttsService.listVoices(null, provider);
+        List<ProviderInfo> providers = ttsService.listAllProviders();
+
+        return ResponseEntity.ok(Map.of(
+            "provider", provider != null ? provider : ttsService.getDefaultProvider().name(),
+            "models", voices.stream().map(voice -> Map.of(
+                "id", voice.id(),
+                "name", voice.name(),
+                "language", voice.language(),
+                "provider", voice.provider(),
+                "is_default", voice.isDefault()
+            )).toList(),
+            "count", voices.size(),
+            "available_providers", providers.stream().map(p -> Map.of(
+                "name", p.name(),
+                "display_name", p.displayName(),
+                "is_active", p.isActive()
+            )).toList()
+        ));
+    }
+
     @GetMapping("/health")
     public ResponseEntity<HealthResponse> health(
             @RequestParam(required = false) String provider) {

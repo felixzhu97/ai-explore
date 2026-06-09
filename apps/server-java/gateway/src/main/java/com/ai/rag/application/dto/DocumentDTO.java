@@ -1,6 +1,7 @@
 package com.ai.rag.application.dto;
 
-import com.ai.rag.domain.*;
+import com.ai.rag.domain.Document;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
@@ -11,11 +12,11 @@ import java.time.LocalDateTime;
 public record DocumentDTO(
         String id,
         String title,
-        String contentType,
+        @JsonProperty("content_type") String contentType,
         Long size,
-        int chunkCount,
+        @JsonProperty("chunk_count") int chunkCount,
         String status,
-        LocalDateTime createdAt
+        @JsonProperty("created_at") LocalDateTime createdAt
 ) {
 
     /**

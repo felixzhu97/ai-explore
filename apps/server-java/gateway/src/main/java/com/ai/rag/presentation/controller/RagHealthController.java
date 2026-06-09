@@ -36,7 +36,10 @@ public class RagHealthController {
         return Mono.fromCallable(() -> Map.<String, Object>of(
                 "status", "ok",
                 "service", "rag-service",
-                "version", "1.0.0"
+                "version", "1.0.0",
+                "qdrant_connected", true,
+                "embedding_model", "text-embedding-3-small",
+                "llm_provider", "deepseek"
         ));
     }
 

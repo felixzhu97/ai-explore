@@ -1,5 +1,6 @@
 package com.ai.media.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +34,7 @@ public final class GeneratedImage {
         return new Builder();
     }
 
+    @JsonProperty("base64_data")
     public String base64Data() {
         return base64Data;
     }

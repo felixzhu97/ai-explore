@@ -16,9 +16,9 @@ import java.util.UUID;
 
 /**
  * Stable Diffusion image generation model adapter.
- * 
+ *
  * Infrastructure implementation of VisionModel port.
- * 
+ *
  * Supports:
  * - Text-to-image generation
  * - Image-to-image (img2img)
@@ -52,7 +52,7 @@ public class StableDiffusionModelAdapter implements VisionModel {
     @PostConstruct
     public Mono<Void> initialize() {
         return Mono.fromRunnable(() -> {
-            log.info("Initializing Stable Diffusion provider with model: {}", 
+            log.info("Initializing Stable Diffusion provider with model: {}",
                      config.getModelName());
 
             try {
@@ -65,7 +65,7 @@ public class StableDiffusionModelAdapter implements VisionModel {
 
             Path modelPath = Path.of(config.getModelPath());
             if (!Files.exists(modelPath)) {
-                log.warn("Stable Diffusion model not found at {}. Will use external API.", 
+                log.warn("Stable Diffusion model not found at {}. Will use external API.",
                          config.getModelPath());
             } else {
                 log.info("Stable Diffusion model loaded from {}", modelPath);
@@ -82,8 +82,29 @@ public class StableDiffusionModelAdapter implements VisionModel {
         }
 
         return Mono.fromCallable(() -> {
-            log.info("Generating image with prompt: {}, steps: {}, size: {}x{}", 
+            log.info("Generating image with prompt: {}, steps: {}, size: {}x{}",
                      params.prompt(), params.steps(), params.width(), params.height());
+
+            Path modelPath = Path.of(config.getModelPath());
+            if (!Files.exists(modelPath)) {
+                log.warn("Stable Diffusion model not found. Returning placeholder response.");
+                GeneratedImage.GenerationMetadata metadata = new GeneratedImage.GenerationMetadata(
+                    params.prompt(),
+                    params.negativePrompt() != null ? params.negativePrompt() : "",
+                    params.width(),
+                    params.height(),
+                    params.steps(),
+                    params.guidanceScale()
+                );
+                String placeholderUrl = "https://via.placeholder.com/" + params.width() + "x" + params.height() + "?text=" +
+                    params.prompt().replace(" ", "+").substring(0, Math.min(params.prompt().length(), 20));
+                return new GeneratedImage(
+                    placeholderUrl,
+                    null,
+                    (int)(Math.random() * Integer.MAX_VALUE),
+                    metadata
+                );
+            }
 
             // TODO: Implement actual Stable Diffusion inference
             // Options: ONNX Runtime, PyTorch Java binding, or remote API

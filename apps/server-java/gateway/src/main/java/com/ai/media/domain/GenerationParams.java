@@ -1,5 +1,6 @@
 package com.ai.media.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 /**
@@ -43,6 +44,7 @@ public final class GenerationParams {
         return prompt;
     }
 
+    @JsonProperty("negative_prompt")
     public String negativePrompt() {
         return negativePrompt;
     }
@@ -59,6 +61,7 @@ public final class GenerationParams {
         return steps;
     }
 
+    @JsonProperty("cfg_scale")
     public float cfgScale() {
         return cfgScale;
     }

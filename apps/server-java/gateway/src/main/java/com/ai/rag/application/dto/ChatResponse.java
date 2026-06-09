@@ -1,6 +1,7 @@
 package com.ai.rag.application.dto;
 
 import com.ai.rag.domain.SourceDocument;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public record ChatResponse(
         String answer,
-        String sessionId,
+        @JsonProperty("session_id") String sessionId,
         List<SourceDocument> sources
 ) {
 

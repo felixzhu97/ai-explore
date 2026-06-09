@@ -1,15 +1,17 @@
 package com.ai.vision.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Parameters for image generation task.
  */
 public record GenerateParams(
     String prompt,
-    String negativePrompt,
+    @JsonProperty("negative_prompt") String negativePrompt,
     int width,
     int height,
     int steps,
-    float guidanceScale,
+    @JsonProperty("guidance_scale") float guidanceScale,
     String language
 ) {
     public GenerateParams {

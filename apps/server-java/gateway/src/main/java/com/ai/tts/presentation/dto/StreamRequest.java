@@ -1,6 +1,7 @@
 package com.ai.tts.presentation.dto;
 
 import com.ai.tts.domain.OutputFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,7 @@ public record StreamRequest(
     @Max(value = 4, message = "Speed must not exceed 4.0")
     float speed,
 
-    OutputFormat outputFormat,
+    @JsonProperty("output_format") OutputFormat outputFormat,
 
     String provider
 ) {

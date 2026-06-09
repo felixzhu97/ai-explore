@@ -1,5 +1,7 @@
 package com.ai.rag.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Value object representing a text chunk from a document.
  * Immutable and identified by its position within the document.
@@ -7,7 +9,7 @@ package com.ai.rag.domain;
 public record Chunk(
         String text,
         int position,
-        DocumentId sourceDocumentId
+        @JsonProperty("source_document_id") DocumentId sourceDocumentId
 ) {
 
     public Chunk {

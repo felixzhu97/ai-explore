@@ -1,6 +1,7 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -10,6 +11,6 @@ public record VariationResponse(
     int seed,
     String prompt,
     float strength,
-    int inferenceSteps,
-    double processingTimeMs
+    @JsonProperty("inference_steps") int inferenceSteps,
+    @JsonProperty("processing_time_ms") double processingTimeMs
 ) {}

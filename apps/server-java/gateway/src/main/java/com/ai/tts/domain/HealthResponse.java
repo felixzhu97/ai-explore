@@ -1,11 +1,14 @@
 package com.ai.tts.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 import java.util.Map;
 
 public record HealthResponse(
     String status,
     String provider,
-    String providerStatus,
+    @JsonProperty("provider_status") String providerStatus,
     String version,
     Map<String, String> components
 ) {

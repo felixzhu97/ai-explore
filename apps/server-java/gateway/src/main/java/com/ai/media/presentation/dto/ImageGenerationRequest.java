@@ -1,5 +1,7 @@
 package com.ai.media.presentation.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +13,7 @@ public record ImageGenerationRequest(
         @NotBlank(message = "Prompt is required")
         String prompt,
 
-        String negativePrompt,
+        @JsonProperty("negative_prompt") String negativePrompt,
 
         @Min(value = 256, message = "Width must be at least 256")
         @Max(value = 1024, message = "Width must not exceed 1024")
@@ -25,7 +27,7 @@ public record ImageGenerationRequest(
         @Max(value = 100, message = "Steps must not exceed 100")
         Integer steps,
 
-        @Min(value = 1, message = "CFG scale must be at least 1")
+        @JsonProperty("cfg_scale") @Min(value = 1, message = "CFG scale must be at least 1")
         @Max(value = 20, message = "CFG scale must not exceed 20")
         Float cfgScale,
 

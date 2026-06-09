@@ -1,6 +1,7 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -9,9 +10,9 @@ public record DetectionResponse(
     String task,
     String model,
     List<DetectedObject> objects,
-    int imageWidth,
-    int imageHeight,
-    double processingTimeMs
+    @JsonProperty("image_width") int imageWidth,
+    @JsonProperty("image_height") int imageHeight,
+    @JsonProperty("processing_time_ms") double processingTimeMs
 ) {
     public record DetectedObject(
         String label,

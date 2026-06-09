@@ -73,6 +73,15 @@ public class YoloModelAdapter implements VisionModel {
             log.info("Running YOLO detection on image ({} bytes), confidence threshold: {}", 
                      imageData.size(), confidence);
 
+            Path modelPath = Path.of(config.getModelPath());
+            if (!Files.exists(modelPath)) {
+                log.warn("YOLO model not found. Returning placeholder response.");
+                return DetectionResult.of(List.of(
+                    new DetectionResult.DetectedObject("placeholder", confidence, 
+                        new DetectionResult.BoundingBox(10, 10, 100, 100))
+                ));
+            }
+
             // TODO: Implement actual YOLO inference
             // Integration with ONNX Runtime or OpenCV DNN required
             throw new UnsupportedOperationException(

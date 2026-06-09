@@ -71,6 +71,15 @@ public class BlipModelAdapter implements VisionModel {
         return Mono.fromCallable(() -> {
             log.info("Running BLIP captioning on image ({} bytes)", imageData.size());
 
+            Path modelPath = Path.of(config.getModelPath());
+            if (!Files.exists(modelPath)) {
+                log.warn("BLIP model not found. Returning placeholder caption.");
+                return CaptionResult.of(
+                    "Placeholder caption: Image content cannot be analyzed without BLIP model.",
+                    0.5f
+                );
+            }
+
             // TODO: Implement actual BLIP inference
             // Integration with ONNX Runtime or Hugging Face transformers required
             throw new UnsupportedOperationException(

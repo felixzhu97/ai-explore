@@ -30,13 +30,17 @@ public class RagChatApplicationService {
      * Non-streaming chat with RAG context.
      */
     public ChatResponseDto chat(ChatRequest request) {
+        long startTime = System.currentTimeMillis();
         List<SourceDocument> sources = searchSources(request.query(), request.effectiveTopK());
 
         if (sources.isEmpty()) {
+            long processingTime = System.currentTimeMillis() - startTime;
             return ChatResponseDto.of(
                     "I don't have relevant information in my knowledge base to answer this question.",
                     request.sessionId(),
-                    List.of()
+                    List.of(),
+                    "deepseek-v4-flash",
+                    processingTime
             );
         }
 
@@ -49,8 +53,9 @@ public class RagChatApplicationService {
         // Note: Full implementation requires LLM integration
         // For now, return context as the answer
         String answer = "Based on the available information:\n\n" + context;
-        
-        return ChatResponseDto.of(answer, request.sessionId(), sources);
+        long processingTime = System.currentTimeMillis() - startTime;
+
+        return ChatResponseDto.of(answer, request.sessionId(), sources, "deepseek-v4-flash", processingTime);
     }
 
     /**

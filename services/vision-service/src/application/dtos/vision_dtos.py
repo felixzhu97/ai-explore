@@ -1,6 +1,6 @@
 """Vision-related DTOs for API requests and responses."""
 
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict, Union
 from enum import Enum
 from pydantic import BaseModel, Field
 
@@ -11,6 +11,28 @@ class TaskType(str, Enum):
     CAPTION_IMAGE = "caption_image"
     EXTRACT_TEXT = "extract_text"
     ANALYZE_IMAGE = "analyze_image"
+
+
+class ImageRequestDTO(BaseModel):
+    """Unified request DTO for image-based endpoints.
+    
+    Supports both URL-based (imageUrl) and base64-encoded (image) inputs.
+    """
+    imageUrl: Optional[str] = Field(None, description="URL to fetch the image from")
+    image: Optional[str] = Field(None, description="Base64-encoded image data")
+    confidence: Optional[float] = Field(0.25, description="Confidence threshold for detection")
+    language: Optional[str] = Field("eng", description="Language code for OCR")
+    task: Optional[TaskType] = Field(TaskType.CAPTION_IMAGE, description="Vision task type")
+    engine: Optional[str] = Field("easyocr", description="OCR engine to use")
+    
+    def has_image_url(self) -> bool:
+        return bool(self.imageUrl and self.imageUrl.strip())
+    
+    def has_image(self) -> bool:
+        return bool(self.image and self.image.strip())
+    
+    def has_image_data(self) -> bool:
+        return self.has_image_url() or self.has_image()
 
 
 class DetectionResult(BaseModel):

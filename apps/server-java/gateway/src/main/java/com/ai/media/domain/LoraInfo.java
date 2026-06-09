@@ -1,5 +1,6 @@
 package com.ai.media.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 /**
@@ -44,10 +45,12 @@ public final class LoraInfo {
         return description;
     }
 
+    @JsonProperty("trigger_word")
     public String triggerWord() {
         return triggerWord;
     }
 
+    @JsonProperty("is_installed")
     public boolean isInstalled() {
         return isInstalled;
     }

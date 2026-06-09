@@ -1,6 +1,7 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -11,7 +12,7 @@ import jakarta.validation.constraints.Size;
 public record GenerateRequest(
     @Size(min = 1, max = 4000) String prompt,
 
-    @Size(max = 2000) String negativePrompt,
+    @JsonProperty("negative_prompt") @Size(max = 2000) String negativePrompt,
 
     @Min(256) @Max(2048) int width,
 
@@ -19,13 +20,13 @@ public record GenerateRequest(
 
     @Min(1) @Max(150) int steps,
 
-    @DecimalMin("1.0") @DecimalMax("20.0") float guidanceScale,
+    @JsonProperty("guidance_scale") @DecimalMin("1.0") @DecimalMax("20.0") float guidanceScale,
 
     Integer seed,
 
-    @Min(1) @Max(4) int numImages,
+    @JsonProperty("num_images") @Min(1) @Max(4) int numImages,
 
-    String stylePreset
+    @JsonProperty("style_preset") String stylePreset
 ) {
     public GenerateRequest {
         if (width <= 0) width = 1024;

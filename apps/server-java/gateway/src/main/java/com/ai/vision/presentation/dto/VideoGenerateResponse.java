@@ -1,11 +1,12 @@
 package com.ai.vision.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record VideoGenerateResponse(
-    String taskId,
+    @JsonProperty("task_id") String taskId,
     String status,
     String message,
-    String createdAt
+    @JsonProperty("created_at") String createdAt
 ) {}

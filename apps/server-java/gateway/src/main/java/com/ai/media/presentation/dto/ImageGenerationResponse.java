@@ -1,6 +1,7 @@
 package com.ai.media.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -15,9 +16,9 @@ public record ImageGenerationResponse(
         String prompt,
         int width,
         int height,
-        int numInferenceSteps,
-        float guidanceScale,
-        double processingTimeMs,
+        @JsonProperty("num_inference_steps") int numInferenceSteps,
+        @JsonProperty("guidance_scale") float guidanceScale,
+        @JsonProperty("processing_time_ms") double processingTimeMs,
         boolean success,
         String error
 ) {

@@ -1,6 +1,7 @@
 package com.ai.tts.presentation.dto;
 
 import com.ai.tts.domain.OutputFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,7 +24,7 @@ public record SynthesizeRequest(
     @Max(value = 20, message = "Pitch must not exceed 20")
     float pitch,
 
-    OutputFormat outputFormat,
+    @JsonProperty("output_format") OutputFormat outputFormat,
 
     AudioConfig audioConfig,
 

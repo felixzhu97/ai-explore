@@ -11,14 +11,14 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^20.0.0",
-    "@angular/common": "^20.0.0",
-    "@angular/compiler": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "@angular/forms": "^20.0.0",
-    "@angular/platform-browser": "^20.0.0",
-    "@angular/platform-browser-dynamic": "^20.0.0",
-    "@angular/router": "^20.0.0",
+    "@angular/animations": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/platform-browser-dynamic": "^22.0.0",
+    "@angular/router": "^22.0.0",
     "nanoid": "^5.1.11",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.0",
@@ -26,13 +26,13 @@
   },
   "devDependencies": {
     "@analogjs/vitest-angular": "^2.6.0",
-    "@angular-devkit/build-angular": "^20.0.0",
-    "@angular/cli": "^20.0.0",
-    "@angular/compiler-cli": "^20.0.0",
+    "@angular/build": "^22.0.0",
+    "@angular/cli": "^22.0.0",
+    "@angular/compiler-cli": "^22.0.0",
     "@types/node": "^22.0.0",
-    "@vitest/ui": "^3.0.0",
+    "@vitest/ui": "^4.0.8",
     "jsdom": "^26.0.0",
-    "typescript": "~5.8.0",
-    "vitest": "^3.0.0"
+    "typescript": "~6.0.0",
+    "vitest": "^4.0.8"
   }
 }

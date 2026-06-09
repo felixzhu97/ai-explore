@@ -68,4 +68,8 @@ subprojects {
             xml.required = true
         }
     }
+
+    tasks.withType(Test).configureEach {
+        finalizedBy jacocoTestReport
+    }
 }

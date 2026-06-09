@@ -108,6 +108,62 @@ describe('AiService', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
+
+    it('should handle non-ok response', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+      } as any);
+
+      const onError = vi.fn();
+      const onDone = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        onDone,
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should handle response body without reader', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: undefined,
+      } as any);
+
+      const onError = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should not call onError on AbortError', async () => {
+      const abortError = new DOMException('Aborted', 'AbortError');
+      vi.spyOn(global, 'fetch').mockRejectedValue(abortError);
+
+      const onError = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).not.toHaveBeenCalled();
+    });
   });
 
   describe('getTextServiceHealth', () => {
@@ -376,6 +432,46 @@ describe('AiService', () => {
       );
 
       await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should handle non-ok response', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+      } as any);
+
+      const onError = vi.fn();
+
+      service.ragChat(
+        { query: 'What is AI?', session_id: 'session123' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should handle response body without reader', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: undefined,
+      } as any);
+
+      const onError = vi.fn();
+
+      service.ragChat(
+        { query: 'What is AI?', session_id: 'session123' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
     });
   });
 

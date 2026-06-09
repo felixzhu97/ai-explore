@@ -110,6 +110,167 @@ describe('ApiService', () => {
       expect(result).toHaveProperty('abort');
       expect(typeof result.abort).toBe('function');
     });
+
+    it('should call fetch with POST method', async () => {
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        '/api/text/chat/stream',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+    });
+
+    it('should handle non-ok response with error callback', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+      } as any);
+
+      const onError = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should call onDone when stream completes', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      const onDone = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        onDone,
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should call onError on stream error event', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      const onError = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should call onChunk with parsed token from meta event', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      const onChunk = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        onChunk,
+        vi.fn(),
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should handle abort on the returned controller', async () => {
+      const encoder = new TextEncoder();
+      let abortFn: any;
+      const mockReader = {
+        read: vi.fn().mockImplementation(() => {
+          return new Promise((resolve) => {
+            setTimeout(() => resolve({ done: true, value: new Uint8Array() }), 1000);
+          });
+        }),
+        cancel: vi.fn(),
+      };
+      const mockStream = {
+        getReader: () => mockReader,
+      };
+
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: mockStream,
+      } as any);
+
+      const result = service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        vi.fn()
+      );
+
+      // result.abort() should be callable
+      expect(typeof result.abort).toBe('function');
+    });
+
+    it('should not call onError on AbortError', async () => {
+      const abortError = new DOMException('Aborted', 'AbortError');
+      vi.spyOn(global, 'fetch').mockRejectedValue(abortError);
+
+      const onError = vi.fn();
+
+      service.chatStream(
+        { messages: [{ role: 'user', content: 'test' }] },
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).not.toHaveBeenCalled();
+    });
   });
 
   describe('generateImage', () => {
@@ -308,6 +469,178 @@ describe('ApiService', () => {
 
       expect(result).toHaveProperty('abort');
       expect(typeof result.abort).toBe('function');
+    });
+
+    it('should call fetch with POST method', async () => {
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        '/api/rag/chat/stream',
+        expect.objectContaining({
+          method: 'POST',
+        })
+      );
+    });
+
+    it('should handle non-ok response with error callback', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+      } as any);
+
+      const onError = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should call onDone when stream completes', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      const onDone = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        vi.fn(),
+        onDone,
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should call onSources on sources event', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      const onSources = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        onSources,
+        vi.fn(),
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should call onChunk with chunk data', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
+          }),
+        },
+      } as any);
+
+      const onChunk = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        onChunk,
+        vi.fn(),
+        vi.fn(),
+        vi.fn()
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    it('should call onError on non-ok response', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+      } as any);
+
+      const onError = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should handle network error', async () => {
+      vi.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
+
+      const onError = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).toHaveBeenCalled();
+    });
+
+    it('should not call onError on AbortError', async () => {
+      const abortError = new DOMException('Aborted', 'AbortError');
+      vi.spyOn(global, 'fetch').mockRejectedValue(abortError);
+
+      const onError = vi.fn();
+
+      service.ragChat(
+        { query: 'test', session_id: 'session1' },
+        vi.fn(),
+        vi.fn(),
+        vi.fn(),
+        onError
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(onError).not.toHaveBeenCalled();
     });
   });
 

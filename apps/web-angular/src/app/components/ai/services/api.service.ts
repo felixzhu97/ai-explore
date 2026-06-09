@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 
 
 
@@ -124,9 +124,11 @@ export class ApiService {
   }
 
   getModels(provider: string): Observable<ModelInfo[]> {
-    return this.http.get<ModelInfo[]>(`${TEXT_SERVICE_URL}/models`, {
-      params: { provider },
-    }).pipe(
+    return this.http.get<{ provider: string; models: ModelInfo[]; count: number }>(
+      `${TEXT_SERVICE_URL}/models`,
+      { params: { provider } }
+    ).pipe(
+      map(response => response.models),
       catchError(() => {
         const providerData: Record<string, string[]> = {
           openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],

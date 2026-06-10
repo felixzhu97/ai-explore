@@ -35,7 +35,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'bash scripts/app/start.sh dev',
+    command: 'npm run docker:up && npm run java:dev && npm run angular:dev',
     url: 'http://localhost:4200',
     reuseExistingServer: !process.env.CI,
     timeout: 300 * 1000,

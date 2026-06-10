@@ -10,11 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "pnpm -r run clean",
-    "start": "bash scripts/app/start.sh",
-    "start:dev": "bash scripts/app/start.sh dev",
-    "start:prod": "bash scripts/app/start.sh prod",
-    "stop": "bash scripts/app/stop.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docker:up": "docker compose up -d",
+    "java:dev": "cd apps/server-java && ./gradlew bootRun",
+    "angular:dev": "cd apps/web-angular && npm start",
+    "services:start": "npm run docker:up && npm run java:dev && npm run angular:dev"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

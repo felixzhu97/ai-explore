@@ -1,74 +1,74 @@
 ---
-description: DDD 领域驱动设计规范。涵盖实体、值对象、聚合、仓储、领域服务、领域事件的设计原则。
+description: DDD Domain-Driven Design Standards. Covers design principles for Entities, Value Objects, Aggregates, Repositories, Domain Services, and Domain Events.
 globs: **/*.java **/*.kt
 alwaysApply: true
 ---
 
-# DDD 领域驱动设计规范
+# DDD Domain-Driven Design Standards
 
-## 充血模型原则
+## Rich Domain Model Principles
 
-> **业务逻辑必须在领域对象内部，不在 Service 层。**
+> **Business logic must be inside domain objects, not in the Service layer.**
 
-Service 层只做协调（编排用例），不包含业务规则。
+The Service layer only orchestrates (coordinates use cases) and does not contain business rules.
 
-## 实体规范
+## Entity Standards
 
-### 必须
+### Must Have
 
-- 有唯一标识（Id）
-- 包含业务行为方法
-- 自验证（构造时/变更时）
-- 通过方法暴露状态变更
+- Unique identifier (Id)
+- Contains business behavior methods
+- Self-validating (at construction/change time)
+- State changes exposed through methods
 
-### 禁止
+### Must NOT Have
 
-- 公开的 setter
-- 直接修改字段（通过业务方法修改）
-- 贫血模型（只有 getter/setter）
+- Public setters
+- Direct field modification (use business methods)
+- Anemic Domain Model (only getter/setter)
 
 ```java
-// ✅ 充血模型
+// ✅ Rich Domain Model
 public class Order extends AggregateRoot {
     private OrderId id;
     private OrderStatus status;
 
     public void place() {
         if (this.status != OrderStatus.DRAFT) {
-            throw new OrderInvalidStateException("只有草稿状态才能放置");
+            throw new OrderInvalidStateException("Only draft orders can be placed");
         }
         this.status = OrderStatus.PLACED;
         addDomainEvent(new OrderPlacedEvent(this.id));
     }
 
-    // 状态只能通过业务方法变更
-    // 无 public setter
+    // State can only be changed through business methods
+    // No public setter
 }
 
-// ❌ 贫血模型
+// ❌ Anemic Domain Model
 public class Order {
     private OrderId id;
     private OrderStatus status;
 
-    // 只有 getter/setter，无业务逻辑
+    // Only getter/setter, no business logic
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
 }
 ```
 
-## 值对象规范
+## Value Object Standards
 
-### 必须
+### Must Have
 
-- 不可变（无 setter，所有字段 final）
-- 无唯一标识
-- 通过属性值判断相等
-- 自验证
+- Immutable (no setters, all fields final)
+- No unique identifier
+- Equality based on attribute values
+- Self-validating
 
-### 实现方式
+### Implementation
 
 ```java
-// ✅ Java Record (推荐)
+// ✅ Java Record (Recommended)
 public record Money {
     private final BigDecimal amount;
     private final Currency currency;
@@ -88,63 +88,63 @@ public record Money {
     }
 }
 
-// 使用
+// Usage
 Money price = new Money(BigDecimal.valueOf(100), Currency.USD);
-// price.add() 返回新实例，原实例不变
+// price.add() returns new instance, original unchanged
 Money total = price.add(Money.of(50, Currency.USD));
 ```
 
-## 聚合规范
+## Aggregate Standards
 
-### 设计原则
+### Design Principles
 
-- 聚合是**一致性边界**
-- 通过**聚合根**对外访问
-- 聚合内实体间强一致性，聚合间最终一致性
-- 聚合应尽量小（一个聚合 = 一个事务）
+- Aggregates are **consistency boundaries**
+- Access externally through the **Aggregate Root**
+- Strong consistency within aggregate, eventual consistency between aggregates
+- Aggregates should be small (one aggregate = one transaction)
 
-### 规范
+### Standards
 
 ```java
-// ✅ 聚合根
+// ✅ Aggregate Root
 public class Order extends AggregateRoot {
     private List<OrderLine> lines;
 
-    // 外部只能通过聚合根添加行
+    // External access only through aggregate root
     public void addLine(Product product, int quantity) {
         validateQuantity(quantity);
         lines.add(new OrderLine(product.getId(), quantity));
     }
 
-    // 返回不可变视图
+    // Return immutable view
     public List<OrderLine> getLines() {
         return Collections.unmodifiableList(lines);
     }
 
-    // 无 public setter
+    // No public setter
 }
 
-// ❌ 错误：暴露内部实体
+// ❌ Incorrect: Exposing internal entities
 public class BadOrder {
-    public List<OrderLine> lines;  // 直接暴露
+    public List<OrderLine> lines;  // Directly exposed
 }
 ```
 
-## 仓储规范
+## Repository Standards
 
-### 接口位置
+### Interface Location
 
-- 接口定义在 **Domain 层**
-- 实现放在 **Infrastructure 层**
+- Interfaces defined in **Domain layer**
+- Implementations in **Infrastructure layer**
 
-### 设计原则
+### Design Principles
 
-- 只操作聚合根
-- 返回聚合根或值对象
-- 不返回 JPA Entity
+- Operate only on aggregate roots
+- Return aggregate roots or value objects
+- Do not return JPA Entities
 
 ```java
-// ✅ Domain 层：接口定义
+// ✅ Domain layer: Interface definition
 package com.ai.domain.repository;
 
 public interface OrderRepository {
@@ -153,7 +153,7 @@ public interface OrderRepository {
     void delete(OrderId id);
 }
 
-// ✅ Infrastructure 层：实现
+// ✅ Infrastructure layer: Implementation
 package com.ai.infrastructure.persistence;
 
 @Repository
@@ -166,21 +166,21 @@ public class JpaOrderRepository implements OrderRepository {
 }
 ```
 
-## 领域服务规范
+## Domain Service Standards
 
-### 使用场景
+### Use Cases
 
-- 跨多个实体的业务逻辑
-- 不属于任何单一实体的操作
+- Business logic spanning multiple entities
+- Operations not belonging to any single entity
 
-### 设计原则
+### Design Principles
 
-- 无状态
-- 接收领域对象作为参数
-- 不持有领域对象引用
+- Stateless
+- Accept domain objects as parameters
+- Do not hold references to domain objects
 
 ```java
-// ✅ 领域服务
+// ✅ Domain Service
 public class PricingService {
     
     public Money calculatePrice(List<CartItem> items, Customer customer) {
@@ -189,16 +189,16 @@ public class PricingService {
             .reduce(Money.ZERO, Money::add);
 
         if (customer.isVip()) {
-            return subtotal.multiply(0.9); // VIP 9折
+            return subtotal.multiply(0.9); // VIP 10% discount
         }
         return subtotal;
     }
 }
 
-// ❌ 错误：Service 承担所有业务逻辑
+// ❌ Incorrect: Service takes all business logic
 public class BadOrderService {
     public void placeOrder(Order order) {
-        // 大量业务逻辑在 Service 中
+        // Too much business logic in Service
         if (order.getLines().isEmpty()) throw new EmptyOrderException();
         if (order.getTotal().isNegative()) throw new InvalidAmountException();
         // ...
@@ -206,12 +206,12 @@ public class BadOrderService {
 }
 ```
 
-## 领域事件规范
+## Domain Event Standards
 
-### 定义
+### Definition
 
 ```java
-// ✅ 不可变事件
+// ✅ Immutable event
 public record OrderPlacedEvent(
     OrderId orderId,
     CustomerId customerId,
@@ -219,14 +219,14 @@ public record OrderPlacedEvent(
     Instant occurredAt
 ) {}
 
-// ✅ 聚合根发布事件
+// ✅ Aggregate root publishes events
 public class Order extends AggregateRoot {
     private List<DomainEvent> events = new ArrayList<>();
 
     public void place() {
-        // 业务逻辑
+        // Business logic
         this.status = OrderStatus.PLACED;
-        // 发布事件
+        // Publish event
         events.add(new OrderPlacedEvent(id, customerId, totalAmount, Instant.now()));
     }
 
@@ -239,12 +239,12 @@ public class Order extends AggregateRoot {
 }
 ```
 
-## 常见反模式
+## Common Anti-Patterns
 
-| 反模式 | 表现 | 修正 |
-|--------|------|------|
-| 贫血模型 | Entity 只有 getter/setter | 将业务逻辑移入 Entity |
-| 充血过度 | 所有逻辑在 Entity | 合理使用 Domain Service |
-| 聚合过大 | 一个聚合包含整个系统 | 拆分聚合 |
-| 聚合间直接引用 | `order.getCustomer()` 跨边界 | 使用 CustomerId |
-| 仓储操作非聚合根 | `save(OrderLine line)` | 只操作聚合根 |
+| Anti-Pattern | Symptoms | Correction |
+|-------------|----------|------------|
+| Anemic Domain Model | Entity only has getter/setter | Move business logic into Entity |
+| Too Rich | All logic in Entity | Use Domain Service appropriately |
+| Large Aggregate | One aggregate contains entire system | Split aggregates |
+| Direct reference between aggregates | `order.getCustomer()` crosses boundary | Use CustomerId |
+| Repository operates on non-aggregate-root | `save(OrderLine line)` | Operate only on aggregate roots |

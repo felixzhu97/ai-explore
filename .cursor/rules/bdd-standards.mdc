@@ -1,71 +1,71 @@
 ---
-description: BDD 行为驱动开发规范。涵盖 Gherkin 语法、Scenario 编写、Step Definitions 实现、与 TDD 集成。
+description: BDD Behavior-Driven Development Standards. Covers Gherkin syntax, Scenario writing, Step Definitions implementation, and TDD integration.
 globs: **/*.feature **/*.ts **/*.java
 alwaysApply: true
 ---
 
-# BDD 行为驱动开发规范
+# BDD Behavior-Driven Development Standards
 
-## 核心原则
+## Core Principles
 
-- **Given-When-Then** 结构
-- **业务语言**描述，不暴露实现
-- **单一职责**每个 Scenario
-- **可执行文档**即测试
+- **Given-When-Then** structure
+- Describe in **business language**, not exposing implementation
+- **Single responsibility** for each Scenario
+- **Executable documentation** is the test
 
-## Gherkin 语法
+## Gherkin Syntax
 
-### Feature 文件结构
+### Feature File Structure
 
 ```gherkin
-Feature: 订单免运费计算
-  作为在线购物客户
-  我希望订单满100元免运费
-  以便降低购物成本
+Feature: Order Free Shipping Calculation
+  As an online shopping customer
+  I want free shipping on orders over 100 yuan
+  So that I can reduce shopping costs
 
-  Scenario: 订单金额超过100元，享受免运费
-    Given 我的购物车有商品
-      | 商品名称 | 单价 | 数量 |
-      | 笔记本电脑 | 5000 | 1   |
-      | 无线鼠标   | 200  | 1   |
-    When 我点击"提交订单"
-    Then 运费应该为 0 元
-    And 系统应提示"订单满100元，免运费"
+  Scenario: Order amount exceeds 100 yuan, enjoy free shipping
+    Given my shopping cart has items
+      | Item Name | Unit Price | Quantity |
+      | Laptop    | 5000       | 1        |
+      | Wireless Mouse | 200    | 1        |
+    When I click "Submit Order"
+    Then shipping fee should be 0 yuan
+    And system should show message "Order over 100 yuan, free shipping"
 
-  Scenario: 订单金额不足100元，收取运费
-    Given 我的购物车商品总价为 50 元
-    When 我点击"提交订单"
-    Then 运费应该为 10 元
-    And 系统应提示"订单金额不足100元，收取10元运费"
+  Scenario: Order amount below 100 yuan, shipping fee charged
+    Given my shopping cart total is 50 yuan
+    When I click "Submit Order"
+    Then shipping fee should be 10 yuan
+    And system should show message "Order below 100 yuan, 10 yuan shipping fee"
 
-  Scenario: 订单刚好100元，享受免运费
-    Given 我的购物车商品总价为 100 元
-    When 我点击"提交订单"
-    Then 运费应该为 0 元
+  Scenario: Order exactly 100 yuan, enjoy free shipping
+    Given my shopping cart total is 100 yuan
+    When I click "Submit Order"
+    Then shipping fee should be 0 yuan
 ```
 
-### 关键词说明
+### Keyword Definitions
 
-| 关键词 | 用途 | 可重复 |
-|--------|------|--------|
-| Feature | 功能名称 | 每文件一次 |
-| Background | 所有 Scenario 共用前置条件 | 每文件一次 |
-| Scenario | 具体场景 | 多个 |
-| Given | 前置条件 | 可多个 |
-| When | 触发动作 | 每个 Scenario 一次 |
-| Then | 预期结果 | 可多个 |
-| And | 附加条件 | 可用于 Given/When/Then |
-| But | 附加条件 | 同 And |
-| Scenario Outline | 参数化场景 | 一个，多 Examples |
-| Examples | 参数表 | 每个 Outline 一次 |
+| Keyword | Purpose | Repeatable |
+|---------|---------|------------|
+| Feature | Feature name | Once per file |
+| Background | Shared preconditions for all Scenarios | Once per file |
+| Scenario | Specific scenario | Multiple |
+| Given | Precondition | Multiple |
+| When | Trigger action | Once per Scenario |
+| Then | Expected result | Multiple |
+| And | Additional condition | Can be used with Given/When/Then |
+| But | Additional condition | Same as And |
+| Scenario Outline | Parameterized scenario | One, with multiple Examples |
+| Examples | Parameter table | Once per Outline |
 
-### 场景参数化
+### Scenario Parameterization
 
 ```gherkin
-Scenario Outline: 不同金额段的运费计算
-  Given 我的购物车商品总价为 <total> 元
-  When 我点击"提交订单"
-  Then 运费应该为 <shipping_fee> 元
+Scenario Outline: Shipping fee calculation for different amounts
+  Given my shopping cart total is <total> yuan
+  When I click "Submit Order"
+  Then shipping fee should be <shipping_fee> yuan
 
   Examples:
     | total | shipping_fee |
@@ -77,57 +77,57 @@ Scenario Outline: 不同金额段的运费计算
     | 1000  | 0            |
 ```
 
-### 数据表格
+### Data Tables
 
 ```gherkin
-Scenario: 批量添加商品到购物车
-  Given 我的购物车为空
-  When 我添加以下商品:
-    | 商品编号 | 商品名称 | 单价 | 数量 |
-    | P001    | 笔记本   | 5000 | 1   |
-    | P002    | 鼠标     | 200  | 2   |
-    | P003    | 键盘     | 300  | 1   |
-  Then 购物车应有 3 种商品
-  And 购物车总金额应为 5700 元
+Scenario: Batch add items to shopping cart
+  Given my shopping cart is empty
+  When I add the following items:
+    | Item ID | Item Name | Unit Price | Quantity |
+    | P001    | Laptop    | 5000       | 1        |
+    | P002    | Mouse     | 200        | 2        |
+    | P003    | Keyboard  | 300        | 1        |
+  Then shopping cart should have 3 items
+  And shopping cart total should be 5700 yuan
 ```
 
-## Scenario 编写规范
+## Scenario Writing Standards
 
-### 良好命名
+### Good Naming
 
 ```gherkin
-# ✅ 清晰表达业务价值
-Scenario: VIP会员享受九折优惠
-Scenario: 订单金额达到免运费门槛时运费为零
-Scenario: 支付失败后订单保持待支付状态
+# ✅ Clearly express business value
+Scenario: VIP member enjoys 10% discount
+Scenario: Shipping fee is zero when order reaches free shipping threshold
+Scenario: Order remains pending after payment failure
 
-# ❌ 模糊或暴露实现
-Scenario: 调用calculateDiscount方法
-Scenario: 点击保存按钮后保存方法被调用
+# ❌ Vague or exposing implementation
+Scenario: Call calculateDiscount method
+Scenario: Save method called after clicking save button
 ```
 
-### 避免过度细化
+### Avoid Over-Detailing
 
 ```gherkin
-# ✅ 关注业务结果
-Scenario: 结算时自动应用可用优惠
-  Given 购物车有商品且有可用优惠卷
-  When 完成结算
-  Then 优惠金额应从总价中扣除
+# ✅ Focus on business results
+Scenario: Automatically apply available discount at checkout
+  Given shopping cart has items and has available coupon
+  When checkout is completed
+  Then discount amount should be deducted from total
 
-# ❌ 过度步骤
-Scenario: 结算时自动应用优惠
-  Given 购物车有商品
-  When 用户点击结算按钮
-  Then 系统调用优惠服务
-  And 优惠服务查询用户优惠卷
-  And 返回优惠信息
-  And 系统计算折后价格
+# ❌ Over-detailed steps
+Scenario: Automatically apply discount at checkout
+  Given shopping cart has items
+  When user clicks checkout button
+  Then system calls discount service
+  And discount service queries user coupons
+  And returns discount information
+  And system calculates discounted price
 ```
 
 ## Step Definitions
 
-### Java 实现
+### Java Implementation
 
 ```java
 public class OrderShippingSteps {
@@ -135,43 +135,43 @@ public class OrderShippingSteps {
     private Order order;
     private Money shippingFee;
 
-    @Given("我的购物车商品总价为 {int} 元")
+    @Given("my shopping cart total is {int} yuan")
     public void given_my_cart_total_is(int amount) {
         order = new Order(List.of(new OrderLine(product(), amount)));
     }
 
-    @Given("我的购物车有商品")
+    @Given("my shopping cart has items")
     public void given_my_cart_has_items(DataTable dataTable) {
         List<OrderLine> lines = dataTable.asList().stream()
             .map(row -> new OrderLine(
-                row.get("商品名称"),
-                new Money(new BigDecimal(row.get("单价")), Currency.USD),
-                Integer.parseInt(row.get("数量"))
+                row.get("Item Name"),
+                new Money(new BigDecimal(row.get("Unit Price")), Currency.USD),
+                Integer.parseInt(row.get("Quantity"))
             ))
             .toList();
         order = new Order(lines);
     }
 
-    @When("我点击{string}")
+    @When("I click {string}")
     public void when_i_click(String button) {
-        if (button.contains("提交订单")) {
+        if (button.contains("Submit Order")) {
             shippingFee = order.calculateShippingFee();
         }
     }
 
-    @Then("运费应该为 {int} 元")
+    @Then("shipping fee should be {int} yuan")
     public void then_shipping_fee_should_be(int expected) {
         assertThat(shippingFee).isEqualTo(Money.of(expected));
     }
 
-    @And("系统应提示{string}")
+    @And("system should show message {string}")
     public void and_system_should_show_message(String message) {
         assertThat(order.getLastMessage()).isEqualTo(message);
     }
 }
 ```
 
-### TypeScript 实现
+### TypeScript Implementation
 
 ```typescript
 import { Given, When, Then, DataTable } from '@cucumber/cucumber';
@@ -179,59 +179,59 @@ import { Given, When, Then, DataTable } from '@cucumber/cucumber';
 let order: Order;
 let shippingFee: Money;
 
-Given('我的购物车商品总价为 {int} 元', async function (amount: number) {
+Given('my shopping cart total is {int} yuan', async function (amount: number) {
   order = new Order([new OrderLine(product(), amount)]);
 });
 
-When('我点击{string}', async function (button: string) {
-  if (button.includes('提交订单')) {
+When('I click {string}', async function (button: string) {
+  if (button.includes('Submit Order')) {
     shippingFee = order.calculateShippingFee();
   }
 });
 
-Then('运费应该为 {int} 元', async function (expected: number) {
+Then('shipping fee should be {int} yuan', async function (expected: number) {
   expect(shippingFee.value).toBe(expected);
 });
 ```
 
-## BDD 与 TDD 集成
+## BDD and TDD Integration
 
 ```
-BDD 验收测试（What）
-    ↓ 需求来源
-TDD 单元测试（How）
-    ↓ 实现
-代码
+BDD Acceptance Tests (What)
+    ↓ Source of Requirements
+TDD Unit Tests (How)
+    ↓ Implementation
+Code
 ```
 
-### 映射关系
+### Mapping Relationship
 
-| BDD 层 | TDD 层 | 目的 |
-|--------|--------|------|
-| Feature | Test Suite | 按功能组织 |
-| Scenario | Integration Test | 端到端流程 |
-| Step | Unit Test | 具体行为 |
+| BDD Layer | TDD Layer | Purpose |
+|-----------|-----------|---------|
+| Feature | Test Suite | Organize by feature |
+| Scenario | Integration Test | End-to-end flow |
+| Step | Unit Test | Specific behavior |
 
-### 示例
+### Example
 
 ```gherkin
-# BDD: Feature 文件
-Feature: VIP会员折扣
-  Scenario: VIP会员购买商品享受九折
-    Given 客户张伟是VIP会员
-    And 购物车有商品总价1000元
-    When 完成结算
-    Then 实际支付金额应为900元
+# BDD: Feature file
+Feature: VIP Member Discount
+  Scenario: VIP member enjoys 10% discount on purchase
+    Given customer Zhang Wei is a VIP member
+    And shopping cart total is 1000 yuan
+    When checkout is completed
+    Then actual payment amount should be 900 yuan
 ```
 
 ```java
-// TDD: 单元测试
+// TDD: Unit tests
 class VipDiscountTest {
 
     @Test
     void shouldApplyTenPercentDiscountForVipCustomers() {
         // Given
-        Customer vipCustomer = Customer.createVip("张伟");
+        Customer vipCustomer = Customer.createVip("Zhang Wei");
         Order order = new Order(List.of(new OrderLine(product(), Money.of(1000))));
         
         // When
@@ -243,38 +243,38 @@ class VipDiscountTest {
 }
 ```
 
-## Scenario 评审清单
+## Scenario Review Checklist
 
-### 业务价值
+### Business Value
 
-- [ ] Scenario 有明确业务背景
-- [ ] 描述了用户/角色
-- [ ] 说明了业务价值
+- [ ] Scenario has clear business context
+- [ ] Describes user/role
+- [ ] Explains business value
 
-### 完整性
+### Completeness
 
-- [ ] 覆盖正向流程
-- [ ] 覆盖异常流程
-- [ ] 覆盖边界条件
+- [ ] Covers positive flows
+- [ ] Covers exception flows
+- [ ] Covers boundary conditions
 
-### 可读性
+### Readability
 
-- [ ] 使用业务术语
-- [ ] 无技术实现细节
-- [ ] Given/When/Then 结构清晰
+- [ ] Uses business terminology
+- [ ] No technical implementation details
+- [ ] Given/When/Then structure is clear
 
-### 可执行性
+### Executability
 
-- [ ] 每个 Step 可自动化
-- [ ] 无手动步骤
-- [ ] 数据明确
+- [ ] Each Step can be automated
+- [ ] No manual steps
+- [ ] Data is explicit
 
-## 常见错误
+## Common Mistakes
 
-| 错误 | 表现 | 修正 |
-|------|------|------|
-| 技术描述 | "点击按钮调用 API" | "用户登录系统" |
-| 实现泄露 | "输入用户ID获取用户" | "查找用户" |
-| 过度步骤 | 10+ 步骤 | 提炼子步骤 |
-| 模糊断言 | "订单状态正确" | "订单状态应为已支付" |
-| 重复场景 | 多 Scenario 测试相同行为 | 合并或参数化 |
+| Mistake | Symptoms | Correction |
+|---------|----------|------------|
+| Technical description | "Click button calls API" | "User logs into system" |
+| Implementation leakage | "Input user ID to get user" | "Find user" |
+| Too many steps | 10+ steps | Extract substeps |
+| Vague assertion | "Order status correct" | "Order status should be paid" |
+| Duplicate scenarios | Multiple Scenarios test same behavior | Merge or parameterize |

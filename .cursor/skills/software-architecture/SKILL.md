@@ -1,38 +1,38 @@
 ---
 name: software-architecture
-description: 软件架构设计方法论指南。涵盖 Clean Architecture、DDD 限界上下文、充血模型设计、六边形架构、事件驱动架构、微服务设计模式。
+description: Software Architecture Design Methodology Guide. Covers Clean Architecture, DDD Bounded Contexts, Rich Domain Model Design, Hexagonal Architecture, Event-Driven Architecture, and Microservices Design Patterns.
 ---
 
-# 软件架构
+# Software Architecture
 
-## 架构设计原则
+## Architecture Design Principles
 
-### SOLID 原则
+### SOLID Principles
 
-| 原则 | 说明 | 违反表现 |
-|------|------|----------|
-| **S**ingle Responsibility | 单一职责，类只有一个变化原因 | 一个类做太多事情 |
-| **O**pen/Closed | 开闭原则，对扩展开放，对修改关闭 | 修改现有代码添加新功能 |
-| **L**iskov Substitution | 里氏替换，子类可替换父类 | instanceof 检查、强制类型转换 |
-| **I**nterface Segregation | 接口隔离，小而专注的接口 | 胖接口、强迫实现不需要的方法 |
-| **D**ependency Inversion | 依赖倒置，依赖抽象而非具体 | 直接依赖具体类 |
+| Principle | Description | Violation Symptoms |
+|-----------|-------------|-------------------|
+| **S**ingle Responsibility | A class should have only one reason to change | A class does too many things |
+| **O**pen/Closed | Open for extension, closed for modification | Modifying existing code to add new features |
+| **L**iskov Substitution | Subclasses can replace parent classes | instanceof checks, type casting |
+| **I**nterface Segregation | Small, focused interfaces | Fat interfaces, forced implementation of unused methods |
+| **D**ependency Inversion | Depend on abstractions, not concretions | Direct dependency on concrete classes |
 
-### 架构腐化警示
+### Signs of Architecture Decay
 
-- 循环依赖：模块 A → B → C → A
-- 散弹式修改：改一个功能要改多个类
-- 依恋情节：类花更多时间计算其他类数据
-- 冗余重复：重复代码散布各处
-- 过早抽象：YAGNI 违背，添加不必要的间接层
+- Circular dependencies: Module A → B → C → A
+- Shotgun surgery: Changing one feature requires modifying multiple classes
+- Feature envy: A class spends more time accessing other class's data than its own
+- Duplicated code: Repeated code scattered across the codebase
+- Premature abstraction: Violating YAGNI, adding unnecessary indirection
 
-## Clean Architecture（整洁架构）
+## Clean Architecture
 
-### 层次模型
+### Layer Model
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Frameworks & Drivers                  │
-│         Web框架、ORM、UI框架、数据库、外部服务           │
+│         Web frameworks, ORM, UI frameworks, DB, external services │
 ├─────────────────────────────────────────────────────────┤
 │                   Interface Adapters                     │
 │      Controllers, Gateways, Presenters, Mappers         │
@@ -44,61 +44,61 @@ description: 软件架构设计方法论指南。涵盖 Clean Architecture、DDD
 │                      Domain Layer                        │
 │    Entities, Value Objects, Aggregates, Domain Events    │
 │           Domain Services, Repository Interfaces          │
-│                    (无外部依赖)                          │
+│                    (No external dependencies)           │
 └─────────────────────────────────────────────────────────┘
-         ↑ 依赖只能向内，外层依赖内层，内层不知外层
+         ↑ Dependencies only point inward, outer layers depend on inner layers, inner layers know nothing about outer layers
 ```
 
-### 依赖规则
+### Dependency Rules
 
-1. **领域层是核心**：不依赖任何外部框架、库、基础设施
-2. **依赖方向**：外层可以依赖内层，内层绝不知道外层存在
-3. **接口定义位置**：依赖方定义接口（被依赖方实现）
-4. **数据格式**：每层使用自己的数据格式，不直接传递外层格式
+1. **Domain Layer is the Core**: No dependencies on external frameworks, libraries, or infrastructure
+2. **Dependency Direction**: Outer layers can depend on inner layers, inner layers must never know about outer layers
+3. **Interface Definition Location**: The consumer defines the interface (producer implements it)
+4. **Data Format**: Each layer uses its own data format, outer layer formats must not be passed directly
 
-### 项目结构示例（Java）
+### Project Structure Example (Java)
 
 ```
 src/main/java/com/ai/
-├── domain/                    # 领域层（核心，无外部依赖）
+├── domain/                    # Domain layer (core, no external dependencies)
 │   ├── model/
-│   │   ├── entity/           # 实体
+│   │   ├── entity/           # Entities
 │   │   │   └── Order.java
-│   │   ├── vo/               # 值对象
+│   │   ├── vo/               # Value Objects
 │   │   │   ├── Money.java
 │   │   │   └── Email.java
-│   │   ├── aggregate/        # 聚合
+│   │   ├── aggregate/        # Aggregates
 │   │   │   └── OrderAggregate.java
-│   │   ├── event/           # 领域事件
+│   │   ├── event/           # Domain Events
 │   │   │   └── OrderPlacedEvent.java
-│   │   └── service/         # 领域服务
+│   │   └── service/         # Domain Services
 │   │       └── PricingService.java
-│   └── repository/          # 仓储接口
+│   └── repository/          # Repository interfaces
 │       └── OrderRepository.java
 │
-├── application/              # 应用层
-│   ├── command/             # 命令处理
+├── application/              # Application layer
+│   ├── command/             # Command handling
 │   │   └── placeorder/
 │   │       ├── PlaceOrderCommand.java
 │   │       └── PlaceOrderHandler.java
-│   ├── query/               # 查询处理
+│   ├── query/               # Query handling
 │   │   └── getorder/
 │   │       ├── GetOrderQuery.java
 │   │       └── GetOrderHandler.java
-│   └── service/             # 应用服务
+│   └── service/             # Application Services
 │       └── OrderApplicationService.java
 │
-├── infrastructure/           # 基础设施层
-│   ├── persistence/         # 持久化实现
+├── infrastructure/           # Infrastructure layer
+│   ├── persistence/         # Persistence implementations
 │   │   └── jpa/
 │   │       ├── OrderRepositoryImpl.java
 │   │       └── OrderJpaEntity.java
-│   ├── messaging/           # 消息实现
+│   ├── messaging/           # Messaging implementations
 │   │   └── OrderEventPublisher.java
-│   └── external/           # 外部服务适配器
+│   └── external/           # External service adapters
 │       └── PaymentGatewayAdapter.java
 │
-└── interface/               # 接口适配器层
+└── interface/               # Interface Adapters layer
     └── api/
         ├── controller/
         │   └── OrderController.java
@@ -107,39 +107,39 @@ src/main/java/com/ai/
             └── response/
 ```
 
-## DDD 领域驱动设计
+## DDD Domain-Driven Design
 
-### 战略设计
+### Strategic Design
 
-#### 限界上下文（Bounded Context）
+#### Bounded Context
 
-限界上下文是语义边界的显式边界，每个上下文有自己的：
+A Bounded Context is an explicit boundary around a semantic boundary, each context has its own:
 
-- **通用语言**：团队共享的术语和含义
-- **领域模型**：只属于该上下文的概念
-- **边界**：明确什么在里面，什么在外面
+- **Ubiquitous Language**: Terms and meanings shared by the team
+- **Domain Model**: Concepts that belong exclusively to this context
+- **Boundary**: Clear definition of what's inside and what's outside
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   订单上下文     │    │   库存上下文     │    │   支付上下文     │
-│                 │    │                 │    │                 │
+│   Order Context  │    │  Inventory Context │    │  Payment Context │
+│                  │    │                  │    │                  │
 │  - Order        │◄──►│  - Inventory    │◄──►│  - Payment      │
 │  - OrderItem    │    │  - Stock        │    │  - Transaction  │
 │  - Pricing      │    │  - Warehouse    │    │  - Gateway     │
-│                 │    │                 │    │                 │
-│  团队: 订单团队  │    │  团队: 仓储团队  │    │  团队: 支付团队  │
+│                  │    │                  │    │                  │
+│  Team: Order    │    │  Team: Warehouse │    │  Team: Payment  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-#### 核心域 / 支撑域 / 通用域
+#### Core Domain / Supporting Domain / Generic Domain
 
-| 类型 | 说明 | 投入 |
-|------|------|------|
-| **Core Domain** | 核心竞争力，唯一价值所在 | 最大投入，精雕细琢 |
-| **Supporting Domain** | 支撑核心域，需要定制开发 | 适度投入 |
-| **Generic Domain** | 通用解决方案，可直接购买 | 尽量少投入 |
+| Type | Description | Investment |
+|------|-------------|------------|
+| **Core Domain** | Core competency, unique value proposition | Maximum investment, carefully crafted |
+| **Supporting Domain** | Supports the core domain, requires custom development | Moderate investment |
+| **Generic Domain** | Generic solutions, can be purchased | Minimal investment |
 
-#### 上下文映射
+#### Context Mapping
 
 ```
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
@@ -150,27 +150,27 @@ src/main/java/com/ai/
        └────────────────────┴────────────────────┘
 ```
 
-- **Shared Kernel**：共享领域模型的子集
-- **Customer/Supplier**：上下游关系
-- **Conformist**：下游完全服从上游模型
-- **Anticorruption Layer**：转换层隔离不同模型
+- **Shared Kernel**: Subset of shared domain model
+- **Customer/Supplier**: Upstream/downstream relationship
+- **Conformist**: Downstream completely follows upstream model
+- **Anticorruption Layer**: Translation layer isolating different models
 
-### 战术设计
+### Tactical Design
 
-#### 实体（Entity）
+#### Entity
 
-有唯一标识，生命周期可延续的对象。
+Objects with unique identity whose lifecycle can continue.
 
 ```java
-// 充血模型：行为在实体内部
+// Rich Domain Model: Behavior inside the entity
 public class Order extends AggregateRoot {
-    private OrderId id;           // 唯一标识
+    private OrderId id;           // Unique identifier
     private CustomerId customerId;
     private List<OrderLine> lines;
     private OrderStatus status;
     private Money totalAmount;
 
-    // 工厂方法创建订单
+    // Factory method to create order
     public static Order create(CustomerId customerId, List<OrderLine> lines) {
         Order order = new Order();
         order.id = OrderId.generate();
@@ -181,7 +181,7 @@ public class Order extends AggregateRoot {
         return order;
     }
 
-    // 业务行为：放置订单
+    // Business behavior: Place order
     public void place() {
         if (status != OrderStatus.DRAFT) {
             throw new OrderInvalidStateException("Only draft order can be placed");
@@ -190,11 +190,11 @@ public class Order extends AggregateRoot {
             throw new OrderEmptyException("Order must have at least one line");
         }
         status = OrderStatus.PLACED;
-        // 发布领域事件
+        // Publish domain event
         addDomainEvent(new OrderPlacedEvent(this));
     }
 
-    // 业务行为：取消订单
+    // Business behavior: Cancel order
     public void cancel(String reason) {
         if (status == OrderStatus.SHIPPED || status == OrderStatus.DELIVERED) {
             throw new OrderCannotBeCancelledException();
@@ -203,17 +203,17 @@ public class Order extends AggregateRoot {
         addDomainEvent(new OrderCancelledEvent(this, reason));
     }
 
-    // 受保护构造函数（强制使用工厂方法）
+    // Protected constructor (enforce factory method usage)
     protected Order() {}
 }
 ```
 
-#### 值对象（Value Object）
+#### Value Object
 
-无唯一标识，不可变，通过属性值判断相等。
+No unique identity, immutable, equality based on attribute values.
 
 ```java
-// 不可变值对象
+// Immutable value object
 public record Money {
     private final BigDecimal amount;
     private final Currency currency;
@@ -226,7 +226,7 @@ public record Money {
         this.currency = Objects.requireNonNull(currency, "Currency is required");
     }
 
-    // 值对象的运算返回新实例
+    // Value object operations return new instances
     public Money add(Money other) {
         if (!this.currency.equals(other.currency)) {
             throw new CurrencyMismatchException(this.currency, other.currency);
@@ -238,7 +238,7 @@ public record Money {
         return new Money(this.amount.multiply(BigDecimal.valueOf(factor)), this.currency);
     }
 
-    // equals/hashCode 基于值
+    // equals/hashCode based on value
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -252,25 +252,25 @@ public record Money {
         return Objects.hash(amount, currency);
     }
 
-    // 无 setter，所有字段 final
+    // No setters, all fields final
     public BigDecimal amount() { return amount; }
     public Currency currency() { return currency; }
 }
 ```
 
-#### 聚合（Aggregate）
+#### Aggregate
 
-一致性边界，通过根实体对外访问。
+Consistency boundary, accessed externally through the root entity.
 
 ```java
-// 聚合根：Order 是 OrderLine 的访问入口
+// Aggregate root: Order is the access point for OrderLine
 public class Order extends AggregateRoot {
     private OrderId id;
-    private List<OrderLine> lines;  // 内部管理，不直接暴露
+    private List<OrderLine> lines;  // Internally managed, not directly exposed
 
-    // 外部只能通过聚合根添加行
+    // External access only through aggregate root
     public void addLine(Product product, int quantity) {
-        // 聚合根内验证一致性规则
+        // Invariant rules validated inside aggregate root
         validateLine(product, quantity);
         
         OrderLine line = new OrderLine(product.getId(), product.getPrice(), quantity);
@@ -278,39 +278,39 @@ public class Order extends AggregateRoot {
         recalculateTotal();
     }
 
-    // 禁止直接访问内部行
+    // No direct access to internal lines
     public List<OrderLine> getLines() {
         return Collections.unmodifiableList(lines);
     }
 
-    // 只能通过聚合根修改
+    // Modifications only through aggregate root
     public void removeLine(OrderLineId lineId) {
         lines.removeIf(line -> line.getId().equals(lineId));
         recalculateTotal();
     }
 }
 
-// 错误：暴露内部实现
+// Incorrect: Exposing internal implementation
 // public class BadOrder {
-//     public List<OrderLine> lines;  // 直接暴露，可被外部修改
+//     public List<OrderLine> lines;  // Directly exposed, can be modified externally
 // }
 ```
 
-#### 仓储（Repository）
+#### Repository
 
-聚合的集合抽象，只增删改查聚合根。
+Collection abstraction for aggregates, CRUD operations only on aggregate roots.
 
 ```java
-// 领域层：定义仓储接口（无实现依赖）
+// Domain layer: Define repository interface (no implementation dependencies)
 public interface OrderRepository {
     Optional<Order> findById(OrderId id);
-    Optional<Order> findByIdWithLines(OrderId id);  // 聚合加载策略
+    Optional<Order> findByIdWithLines(OrderId id);  // Aggregate loading strategy
     Page<Order> findByCustomer(CustomerId customerId, Pageable pageable);
     void save(Order order);
     void delete(Order order);
 }
 
-// 基础设施层：实现仓储
+// Infrastructure layer: Implement repository
 @Repository
 public class JpaOrderRepository implements OrderRepository {
     private final SpringDataOrderRepository delegate;
@@ -330,15 +330,15 @@ public class JpaOrderRepository implements OrderRepository {
 }
 ```
 
-#### 领域服务（Domain Service）
+#### Domain Service
 
-无法归入单个实体的业务逻辑。
+Business logic that cannot be attributed to a single entity.
 
 ```java
-// 跨实体的业务规则
+// Cross-entity business rules
 public class PricingService {
     
-    // 计算订单总价，考虑折扣规则
+    // Calculate order total, considering discount rules
     public Money calculateOrderPrice(List<OrderLine> lines, Customer customer, Promotion promotion) {
         Money subtotal = lines.stream()
             .map(line -> line.getPrice().multiply(line.getQuantity()))
@@ -351,28 +351,28 @@ public class PricingService {
     private Money calculateDiscount(Money subtotal, Customer customer, Promotion promotion) {
         Money discount = Money.ZERO;
         
-        // VIP 客户折扣
+        // VIP customer discount
         if (customer.isVip()) {
             discount = discount.add(subtotal.multiply(0.1));
         }
         
-        // 促销活动折扣
+        // Promotion discount
         if (promotion != null && promotion.isActive()) {
             discount = discount.add(promotion.applyTo(subtotal));
         }
         
-        // 不超过订单金额
+        // Cannot exceed order amount
         return discount.isGreaterThan(subtotal) ? subtotal : discount;
     }
 }
 ```
 
-#### 领域事件（Domain Event）
+#### Domain Event
 
-领域内发生的重要事件，用于解耦。
+Important events that occurred within the domain, used for decoupling.
 
 ```java
-// 领域事件定义
+// Domain event definition
 public record OrderPlacedEvent(
     OrderId orderId,
     CustomerId customerId,
@@ -380,12 +380,12 @@ public record OrderPlacedEvent(
     Instant occurredAt
 ) {}
 
-// 聚合根发布事件
+// Aggregate root publishes events
 public class Order extends AggregateRoot {
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     public void place() {
-        // ... 放置逻辑
+        // ... placement logic
         addDomainEvent(new OrderPlacedEvent(
             this.id,
             this.customerId,
@@ -402,39 +402,39 @@ public class Order extends AggregateRoot {
     }
 }
 
-// 事件处理器
+// Event handler
 @EventHandler
 public class OrderEventHandler {
     public void handle(OrderPlacedEvent event) {
-        // 发邮件、通知库存、更新报表等
+        // Send emails, notify inventory, update reports, etc.
     }
 }
 ```
 
-### 贫血模型 vs 充血模型
+### Anemic Domain Model vs Rich Domain Model
 
-| 特征 | 贫血模型（Anti-Pattern） | 充血模型（推荐） |
-|------|-------------------------|----------------|
-| 实体内容 | 只有字段 + getter/setter | 字段 + 业务行为 |
-| 业务逻辑位置 | Service 层 | 领域对象内部 |
-| 状态变更 | Service 直接修改字段 | 领域对象方法封装 |
-| 验证逻辑 | Service 或工具类 | 领域对象自验证 |
-| 可测试性 | 测试 Service | 测试领域对象 |
+| Characteristic | Anemic Domain Model (Anti-Pattern) | Rich Domain Model (Recommended) |
+|---------------|-----------------------------------|--------------------------------|
+| Entity content | Only fields + getter/setter | Fields + business behavior |
+| Business logic location | Service layer | Inside domain objects |
+| State changes | Service directly modifies fields | Domain object methods encapsulate changes |
+| Validation logic | Service or utility classes | Domain object self-validation |
+| Testability | Test Service | Test domain objects |
 
 ```java
-// 贫血模型（错误）
+// Anemic Domain Model (Incorrect)
 public class AnemicOrder {
     private UUID id;
     private List<OrderLine> lines;
     private OrderStatus status;
 
-    // 只有 getter/setter
+    // Only getter/setter
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
     // ...
 }
 
-// Service 承担所有业务逻辑（违反单一职责）
+// Service takes all business logic (violates Single Responsibility)
 public class AnemicOrderService {
     public void placeOrder(Order order) {
         if (order.getLines().isEmpty()) {
@@ -442,11 +442,11 @@ public class AnemicOrderService {
         }
         order.setStatus(OrderStatus.PLACED);
         repository.save(order);
-        // 发邮件、扣库存...
+        // Send emails, deduct inventory...
     }
 }
 
-// 充血模型（正确）
+// Rich Domain Model (Correct)
 public class Order {
     public void place() {
         if (this.lines.isEmpty()) {
@@ -457,7 +457,7 @@ public class Order {
 }
 ```
 
-## 六边形架构（Hexagonal Architecture）
+## Hexagonal Architecture (Ports and Adapters)
 
 ```
                     ┌─────────────────────┐
@@ -506,17 +506,17 @@ public class Order {
                     └──┴─────────────────┴──┘
 ```
 
-## 事件驱动架构
+## Event-Driven Architecture
 
-### 事件溯源（Event Sourcing）
+### Event Sourcing
 
 ```java
-// 事件存储替代状态存储
+// Event store instead of state store
 public class BankAccount {
     private AccountId id;
     private List<DomainEvent> events = new ArrayList();
 
-    // 从事件重放构建状态
+    // Reconstruct state from event replay
     public void replay(Iterable<DomainEvent> events) {
         events.forEach(this::mutate);
     }
@@ -532,7 +532,7 @@ public class BankAccount {
         this.balance = this.balance.add(e.amount());
     }
 
-    // 命令产生事件
+    // Commands produce events
     public void deposit(Money amount) {
         if (amount.isNegative()) throw new InvalidAmountException();
         events.add(new DepositedEvent(id, amount, Instant.now()));
@@ -541,7 +541,7 @@ public class BankAccount {
 }
 ```
 
-### CQRS（命令查询职责分离）
+### CQRS (Command Query Responsibility Segregation)
 
 ```
 ┌─────────────────┐         ┌─────────────────┐
@@ -549,8 +549,8 @@ public class BankAccount {
 │  (Write Model)  │         │  (Read Model)   │
 │                 │         │                 │
 │  CreateOrder    │────────►│  OrderSummary   │
-│  UpdateOrder    │  同步    │  OrderDetails   │
-│  CancelOrder    │  异步    │  OrderHistory   │
+│  UpdateOrder    │  sync    │  OrderDetails   │
+│  CancelOrder    │  async   │  OrderHistory   │
 │                 │         │                 │
 └────────┬────────┘         └────────▲────────┘
          │                            │
@@ -563,73 +563,73 @@ public class BankAccount {
     └─────────────────────────────────┘
 ```
 
-## 微服务设计模式
+## Microservices Design Patterns
 
-### 聚合式 vs 事件驱动
+### Aggregates vs Event-Driven
 
-| 模式 | 特点 | 适用场景 |
-|------|------|----------|
-| **聚合式** | 单体架构，按限界上下文划分 | 团队小、业务复杂度适中 |
-| **事件驱动** | 通过事件异步协作 | 独立部署、高并发、跨系统 |
-| **Saga** | 分布式事务管理 | 需要跨服务一致性 |
-| **CQRS** | 读写分离 | 读写比例差异大 |
+| Pattern | Characteristics | Applicable Scenarios |
+|---------|----------------|---------------------|
+| **Aggregates** | Monolithic architecture, divided by bounded contexts | Small teams, moderate business complexity |
+| **Event-Driven** | Async collaboration via events | Independent deployment, high concurrency, cross-system |
+| **Saga** | Distributed transaction management | Requires cross-service consistency |
+| **CQRS** | Read/write separation | Large read/write ratio differences |
 
-### 服务间通信
+### Inter-Service Communication
 
 ```
-同步通信：                        异步通信：
+Sync communication:                        Async communication:
 ┌─────┐    REST/gRPC    ┌─────┐   ┌─────┐    Event    ┌─────┐
 │ A   │ ───────────────► │ B   │   │ A   │ ─────────► │ B   │
 └─────┘                  └─────┘   └─────┘            └─────┘
-      响应                          发布/订阅          消费处理
+      Response                        Publish/Subscribe     Consume/Process
 ```
 
-## 架构决策记录（ADR）
+## Architecture Decision Records (ADR)
 
-每个重要架构决策需要记录：
+Each significant architecture decision should be documented:
 
 ```markdown
-# ADR-001: 使用充血模型设计订单聚合
+# ADR-001: Designing Order Aggregate Using Rich Domain Model
 
-## 状态
-已接受
+## Status
+Accepted
 
-## 背景
-订单业务逻辑分散在 OrderService 和各处，缺乏统一封装。
+## Context
+Order business logic is scattered across OrderService and various places, lacking unified encapsulation.
 
-## 决策
-采用充血模型，将订单状态变更、业务规则封装在 Order 实体内部。
+## Decision
+Adopt Rich Domain Model, encapsulate order state changes and business rules inside the Order entity.
 
-## 结果
-- 订单状态机完整封装
-- 业务规则内聚在领域对象
-- 易于单元测试
+## Consequences
+- Order state machine fully encapsulated
+- Business rules cohesive within domain objects
+- Easy to unit test
 
-## 后果
-- 需要团队学习 DDD 充血模型
-- 聚合设计需要仔细评审
+## Drawbacks
+- Team needs to learn DDD Rich Domain Model
+- Aggregate design requires careful review
 ```
 
-## 架构评审清单
+## Architecture Review Checklist
 
-### 代码级评审
+### Code-Level Review
 
-- [ ] 无循环依赖（模块/包级别）
-- [ ] 领域层无基础设施依赖
-- [ ] 实体包含业务行为（不只是字段）
-- [ ] 值对象不可变
-- [ ] 聚合边界清晰
-- [ ] 仓储只操作聚合根
+- [ ] No circular dependencies (module/package level)
+- [ ] Domain layer has no infrastructure dependencies
+- [ ] Entities contain business behavior (not just fields)
+- [ ] Value objects are immutable
+- [ ] Aggregate boundaries are clear
+- [ ] Repositories only operate on aggregate roots
 
-### 设计级评审
+### Design-Level Review
 
-- [ ] 限界上下文划分合理
-- [ ] 上下文映射关系明确
-- [ ] 核心域得到足够投入
-- [ ] 架构层次遵守依赖规则
+- [ ] Bounded Context division is reasonable
+- [ ] Context mapping relationships are clear
+- [ ] Core Domain receives sufficient investment
+- [ ] Architecture layers follow dependency rules
 
-### 变更影响分析
+### Change Impact Analysis
 
-- [ ] 变更会导致哪些模块/层需要修改
-- [ ] 新增功能应该放在哪个限界上下文
-- [ ] 是否需要创建新的聚合或服务
+- [ ] What modules/layers need modification for a given change
+- [ ] Where should new functionality be placed in bounded contexts
+- [ ] Need to create new aggregates or services

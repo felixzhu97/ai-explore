@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: optional:file:.env
   application:
     name: server-springai
   ai:
@@ -10,12 +8,62 @@ spring:
       chat:
         options:
           model: deepseek-v4-flash
+      embedding:
+        options:
+          model: text-embedding-3-small
+
+  # Database configuration
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/ai_rag}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # JPA configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+
+# RAG configuration
+rag:
+  mock:
+    embeddings: true
+  chunk:
+    size: ${RAG_CHUNK_SIZE:500}
+    overlap: ${RAG_CHUNK_OVERLAP:50}
+  retrieval:
+    top-k: ${RAG_TOP_K:5}
+    score-threshold: ${RAG_SCORE_THRESHOLD:0.5}
 
 server:
   port: 9000
+
+# Actuator for health checks
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
 
 logging:
   level:
     com.ai: DEBUG
     org.springframework.ai: DEBUG
     org.springframework.web: DEBUG
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

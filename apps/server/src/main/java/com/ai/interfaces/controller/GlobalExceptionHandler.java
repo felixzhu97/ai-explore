@@ -1,5 +1,7 @@
 package com.ai.interfaces.controller;
 
+import com.ai.domain.exception.DocumentNotFoundException;
+import com.ai.domain.exception.RagServiceException;
 import com.ai.domain.model.AiServiceException;
 import com.ai.domain.model.ChatSessionNotFoundException;
 import org.slf4j.Logger;
@@ -35,6 +37,25 @@ public class GlobalExceptionHandler {
         log.error("AI service error", e);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(errorResponse("AI_SERVICE_ERROR", e.getMessage()));
+    }
+
+    @ExceptionHandler(DocumentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleDocumentNotFound(DocumentNotFoundException e) {
+        log.warn("Document not found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of(
+                "error", "Document not found",
+                "documentId", e.getMessage().replace("Document not found: ", ""),
+                "type", "error",
+                "timestamp", Instant.now().toString()
+            ));
+    }
+
+    @ExceptionHandler(RagServiceException.class)
+    public ResponseEntity<Map<String, Object>> handleRagServiceError(RagServiceException e) {
+        log.error("RAG service error", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(errorResponse("RAG_SERVICE_ERROR", e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

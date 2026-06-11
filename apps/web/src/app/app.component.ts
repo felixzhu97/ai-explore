@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { I18nService, languageNames, SUPPORTED_LANGUAGES, Language, Translations } from './i18n';
+import { ToastComponent } from './shared/components/toast/toast.component';
 
 interface Tab {
   key: string;
@@ -18,8 +19,9 @@ interface Tab {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, ToastComponent],
   template: `
+    <app-toast />
     <div class="app-container">
       <nav class="navbar">
         <div class="nav-content">

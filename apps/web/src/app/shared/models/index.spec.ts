@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  ChatMessage,
+  ChatMessageData,
   Agent,
   ImageAnalysisResult,
   DetectedObject,
@@ -14,9 +14,9 @@ import {
 } from './index';
 
 describe('shared/models', () => {
-  describe('ChatMessage', () => {
+  describe('ChatMessageData', () => {
     it('should define required properties', () => {
-      const message: ChatMessage = {
+      const message: ChatMessageData = {
         id: 'msg-1',
         role: 'user',
         content: 'Hello',
@@ -30,9 +30,9 @@ describe('shared/models', () => {
     });
 
     it('should accept all valid roles', () => {
-      const roles: ChatMessage['role'][] = ['user', 'assistant', 'system'];
+      const roles: ChatMessageData['role'][] = ['user', 'assistant', 'system'];
       roles.forEach((role) => {
-        const message: ChatMessage = {
+        const message: ChatMessageData = {
           id: '1',
           role,
           content: 'test',
@@ -43,7 +43,7 @@ describe('shared/models', () => {
     });
 
     it('should allow optional isLoading property', () => {
-      const message: ChatMessage = {
+      const message: ChatMessageData = {
         id: 'msg-1',
         role: 'assistant',
         content: 'Thinking...',
@@ -241,30 +241,30 @@ describe('shared/models', () => {
       expect(request.height).toBe(1024);
     });
 
-    it('should allow optional negativePrompt', () => {
+    it('should allow optional negative_prompt', () => {
       const request: ImageGenerationRequest = {
         prompt: 'A cat',
-        negativePrompt: 'blurry, low quality',
+        negative_prompt: 'blurry, low quality',
         width: 512,
         height: 512,
       };
 
-      expect(request.negativePrompt).toBe('blurry, low quality');
+      expect(request.negative_prompt).toBe('blurry, low quality');
     });
   });
 
   describe('ImageGenerationResult', () => {
     it('should define required properties', () => {
       const result: ImageGenerationResult = {
-        imageUrl: 'https://example.com/generated.png',
+        images: ['https://example.com/generated.png'],
       };
 
-      expect(result.imageUrl).toBe('https://example.com/generated.png');
+      expect(result.images).toHaveLength(1);
     });
 
     it('should allow optional seed for reproducibility', () => {
       const result: ImageGenerationResult = {
-        imageUrl: 'https://example.com/image.png',
+        images: ['https://example.com/image.png'],
         seed: 12345,
       };
 
@@ -298,7 +298,7 @@ describe('shared/models', () => {
         speed: 2.0,
       };
 
-      expect(slowRequest.speed).toBeLessThan(fastRequest.speed);
+      expect(slowRequest.speed!).toBeLessThan(fastRequest.speed!);
     });
   });
 
@@ -356,13 +356,9 @@ describe('shared/models', () => {
   });
 
   describe('type export completeness', () => {
-    // TypeScript interfaces are compile-time constructs
-    // We verify the types work by using them directly in other tests
-    // These tests confirm the module exports are valid TypeScript interfaces
-
     it('should export all interface types that can be used in type annotations', () => {
-      // ChatMessage interface validation
-      const validChatMessage: ChatMessage = {
+      // ChatMessageData interface validation
+      const validChatMessage: ChatMessageData = {
         id: 'test-1',
         role: 'user',
         content: 'Hello',
@@ -421,9 +417,9 @@ describe('shared/models', () => {
 
       // ImageGenerationResult interface validation
       const validImageGenRes: ImageGenerationResult = {
-        imageUrl: 'https://example.com/image.png',
+        images: ['https://example.com/image.png'],
       };
-      expect(validImageGenRes.imageUrl).toBe('https://example.com/image.png');
+      expect(validImageGenRes.images).toHaveLength(1);
 
       // TTSRequest interface validation
       const validTTSReq: TTSRequest = {

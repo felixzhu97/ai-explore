@@ -138,37 +138,6 @@ describe('AppComponent', () => {
     });
   });
 
-  describe('document:mousedown host listener', () => {
-    // Skip these tests as jsdom event.target can be null in certain conditions
-    // These are browser API tests that work correctly in real browser environment
-    it.skip('should close dropdown when clicking outside', () => {
-      component.dropdownOpen.set(true);
-      const clickEvent = new MouseEvent('mousedown', {
-        bubbles: true,
-        target: document.createElement('div'),
-      });
-      component.onDocumentClick(clickEvent as any);
-      expect(component.dropdownOpen()).toBe(false);
-    });
-
-    it.skip('should not close dropdown when clicking inside language-selector', () => {
-      component.dropdownOpen.set(true);
-      const dropdownElement = document.createElement('div');
-      dropdownElement.className = 'language-selector';
-      const innerElement = document.createElement('button');
-      dropdownElement.appendChild(innerElement);
-      document.body.appendChild(dropdownElement);
-
-      const clickEvent = new MouseEvent('mousedown', {
-        bubbles: true,
-        target: innerElement,
-      });
-      component.onDocumentClick(clickEvent as any);
-      expect(component.dropdownOpen()).toBe(true);
-      document.body.removeChild(dropdownElement);
-    });
-  });
-
   describe('template rendering', () => {
     it('should render navbar with tabs', () => {
       fixture.detectChanges();

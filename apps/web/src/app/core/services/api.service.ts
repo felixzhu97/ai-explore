@@ -13,7 +13,7 @@ import {
   Detection,
   VisionResult,
   DocumentListResponse,
-} from '../../shared/models';
+} from '@shared/models';
 
 // ==================== Service URL ====================
 

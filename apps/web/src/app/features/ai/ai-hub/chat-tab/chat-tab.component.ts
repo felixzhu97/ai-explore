@@ -14,9 +14,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ApiService } from '../../../../core/services/api.service';
-import { I18nService } from '../../../../i18n';
-import { ChatMessage, ProviderInfo, ModelInfo } from '../../../../shared/models';
+import { ApiService } from '@core/services/api.service';
+import { I18nService } from '@i18n';
+import { ChatMessage, ProviderInfo, ModelInfo } from '@shared/models';
 
 export interface ChatTabState {
   provider: string;

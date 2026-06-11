@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RagChatComponent } from './rag-chat.component';
-import { ApiService } from '../../../core/services/api.service';
-import { I18nService } from '../../../i18n';
+import { ApiService } from '@core/services/api.service';
+import { I18nService } from '@i18n';
 import { of } from 'rxjs';
 
 describe('RagChatComponent', () => {

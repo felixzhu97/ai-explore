@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AiHubComponent } from './ai-hub.component';
-import { SegmentedControlComponent } from '../../../shared/components/ui/segmented-control/segmented-control.component';
-import { I18nService } from '../../../i18n';
+import { SegmentedControlComponent } from '@shared/components/ui/segmented-control/segmented-control.component';
+import { I18nService } from '@i18n';
 
 describe('AiHubComponent', () => {
   let fixture: ComponentFixture<AiHubComponent>;

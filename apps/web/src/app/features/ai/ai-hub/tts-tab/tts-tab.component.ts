@@ -8,9 +8,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../../core/services/api.service';
-import { I18nService } from '../../../../i18n';
-import { Voice } from '../../../../shared/models';
+import { ApiService } from '@core/services/api.service';
+import { I18nService } from '@i18n';
+import { Voice } from '@shared/models';
 
 @Component({
   selector: 'app-tts-tab',

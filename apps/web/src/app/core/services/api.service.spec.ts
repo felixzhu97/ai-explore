@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ApiService } from './api.service';
-import type { ProviderInfo } from '../../shared/models';
+import type { ProviderInfo } from '@shared/models';
 
 describe('ApiService', () => {
   let service: ApiService;

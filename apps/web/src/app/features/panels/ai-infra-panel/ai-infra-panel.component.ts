@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { environment } from '../../../../environments/environment';
-import { I18nService } from '../../../i18n';
-import { SegmentedControlComponent, SegmentedControlOption } from '../../../shared/components/ui/segmented-control/segmented-control.component';
-import { AgentPanelComponent } from '../agent-panel/agent-panel.component';
-import { AgentChatComponent } from '../../agents/agent-chat/agent-chat.component';
-import { StatusBadgeComponent } from '../../agents/status-badge/status-badge.component';
+import { environment } from '@env/environment';
+import { I18nService } from '@i18n';
+import { SegmentedControlComponent, SegmentedControlOption } from '@shared/components/ui/segmented-control/segmented-control.component';
+import { AgentPanelComponent } from '@features/panels/agent-panel/agent-panel.component';
+import { AgentChatComponent } from '@features/agents/agent-chat/agent-chat.component';
+import { StatusBadgeComponent } from '@features/agents/status-badge/status-badge.component';
 
 type SubTabKey = 'supervisor' | 'k8s' | 'monitoring' | 'model' | 'llmops' | 'aiops' | 'vectordb';
 

@@ -1,8 +1,8 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ToolCall } from '../tool-result/tool-result.component';
-import { ToolResultComponent } from '../tool-result/tool-result.component';
-import type { ChatMessageData } from '../../../shared/models';
+import { ToolCall } from '@features/agents/tool-result/tool-result.component';
+import { ToolResultComponent } from '@features/agents/tool-result/tool-result.component';
+import type { ChatMessageData } from '@shared/models';
 export type { ChatMessageData };
 
 @Component({

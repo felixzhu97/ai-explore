@@ -13,9 +13,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { ApiService } from '../../../core/services/api.service';
-import { I18nService } from '../../../i18n';
-import { SourceDocument } from '../../../shared/models';
+import { ApiService } from '@core/services/api.service';
+import { I18nService } from '@i18n';
+import { SourceDocument } from '@shared/models';
 
 interface Message {
   id: string;

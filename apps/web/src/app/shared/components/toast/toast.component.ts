@@ -5,7 +5,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NotificationService, Toast } from '../../../core/services/notification.service';
+import { NotificationService, Toast } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-toast',

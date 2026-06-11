@@ -67,7 +67,7 @@ curl -I http://localhost:9000/endpoint
 curl -I -H "Origin: http://localhost:4200" http://localhost:9000/endpoint
 
 # 4. 查看 proxy 配置映射
-cat apps/web-angular/proxy.conf.json
+cat apps/web/proxy.conf.json
 ```
 
 ## URL 路径对齐检查表

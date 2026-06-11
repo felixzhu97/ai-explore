@@ -150,16 +150,11 @@ export class AiService {
     })
       .then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.body?.getReader();
-      })
-      .then((reader) => {
-        if (!reader) throw new Error('Response body not available');
-
+        const reader = response.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
-        let currentEvent = '';
 
-        const read = () => {
+        function read() {
           reader.read().then(({ done, value }) => {
             if (done) {
               onDone();
@@ -167,53 +162,31 @@ export class AiService {
             }
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-              if (line.startsWith('event: ')) {
-                currentEvent = line.slice(7).trim();
-              } else if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-
-                if (data === '[DONE]') {
-                  onDone();
-                  break;
-                } else if (currentEvent === 'done') {
-                  onDone();
-                } else if (currentEvent === 'error') {
-                  try {
-                    const errorData = JSON.parse(data);
-                    onError(new Error(errorData.error || 'Stream error'));
-                  } catch {
-                    onError(new Error('Stream error'));
-                  }
-                } else if (!currentEvent || currentEvent === 'meta') {
+            const parts = buffer.split('\n\n');
+            for (let i = 0; i < parts.length - 1; i++) {
+              const part = parts[i];
+              const dataLines = part.split('\n').filter(l => l.startsWith('data:'));
+              for (const dl of dataLines) {
+                const data = dl.slice(5).trim();
+                if (data && data !== '[DONE]') {
                   try {
                     const parsed = JSON.parse(data);
-                    if (parsed.token) {
-                      onChunk(parsed.token);
-                    }
+                    if (parsed.token) onChunk(parsed.token);
                   } catch {
-                    // Skip non-JSON data
+                    onChunk(data + ' ');
                   }
                 }
-              } else if (line.trim() === '') {
-                currentEvent = '';
               }
             }
 
-            if (!done) read();
-          });
-        };
+            buffer = parts[parts.length - 1];
+            read();
+          }).catch(onError);
+        }
 
         read();
       })
-      .catch((error) => {
-        if (error.name !== 'AbortError') {
-          onError(error);
-        }
-      });
+      .catch(onError);
   }
 
   getTextServiceHealth(): Observable<HealthResponse> {
@@ -333,16 +306,23 @@ export class AiService {
     })
       .then((response) => {
         if (!response.ok) throw new Error('Failed to get response');
-        return response.body?.getReader();
-      })
-      .then((reader) => {
-        if (!reader) throw new Error('Response body not available');
-
+        const reader = response.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
-        let currentEvent = '';
 
-        const read = () => {
+        function processText(text: string) {
+          // Try to parse as JSON, otherwise treat as plain text
+          try {
+            const parsed = JSON.parse(text);
+            if (parsed.token) onChunk(parsed.token);
+            return;
+          } catch {}
+          // Plain text
+          const cleanText = text.replace(/<br>/g, '\n').trim();
+          if (cleanText) onChunk(cleanText + ' ');
+        }
+
+        function read() {
           reader.read().then(({ done, value }) => {
             if (done) {
               onDone();
@@ -350,46 +330,62 @@ export class AiService {
             }
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
 
-            for (const line of lines) {
-              if (line.startsWith('event: ')) {
-                currentEvent = line.slice(7).trim();
-              } else if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-
-                if (currentEvent === 'sources') {
+            // Split by double newlines (SSE message separator) or process line by line
+            const parts = buffer.split('\n\n');
+            for (let i = 0; i < parts.length - 1; i++) {
+              const part = parts[i];
+              // Check if this is a sources event
+              if (part.includes('event:sources')) {
+                const dataMatch = part.match(/data:(\[.*\])/);
+                if (dataMatch) {
                   try {
-                    const sourcesData = JSON.parse(data);
-                    onSources(sourcesData);
-                  } catch {
-                    // Ignore parse errors
-                  }
-                  currentEvent = '';
-                } else if (data === '[DONE]') {
-                  onDone();
-                  break;
-                } else if (data.startsWith('Error:')) {
-                  onError(new Error(data.slice(6)));
-                  break;
-                } else {
-                  const text = data.replace(/<br>/g, '\n');
-                  onChunk(text);
+                    onSources(JSON.parse(dataMatch[1]));
+                  } catch {}
                 }
-              } else if (line.trim() === '') {
-                currentEvent = '';
+              } else {
+                // Extract data values
+                const dataLines = part.split('\n').filter(l => l.startsWith('data:'));
+                for (const dl of dataLines) {
+                  const data = dl.slice(5).trim();
+                  if (data && data !== '[DONE]') {
+                    processText(data);
+                  }
+                }
               }
             }
 
-            if (!done) read();
-          });
-        };
+            buffer = parts[parts.length - 1];
+            read();
+          }).catch(onError);
+        }
 
         read();
       })
-      .catch((error) => {
-        onError(error);
-      });
+      .catch(onError);
+  }
+
+  // ==================== Utility ====================
+
+  downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  downloadBase64Image(base64: string, filename: string): void {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'image/png' });
+    this.downloadBlob(blob, filename);
   }
 }

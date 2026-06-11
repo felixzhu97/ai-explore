@@ -19,7 +19,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/web-angular",
+            "outputPath": "dist/web",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -62,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "web-angular:build:production"
+              "buildTarget": "web:build:production"
             },
             "development": {
-              "buildTarget": "web-angular:build:development",
+              "buildTarget": "web:build:development",
               "proxyConfig": "proxy.conf.json"
             }
           },

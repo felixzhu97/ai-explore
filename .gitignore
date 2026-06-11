@@ -59,6 +59,9 @@ nunit-result-*.xml
 # Playwright
 .playwright-mcp/
 
+# Cursor MCP output
+.cursor/mcp-output/
+
 # Playwright E2E
 playwright-report/
 playwright/.cache/

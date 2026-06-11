@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService, SourceDocument } from '../services/api.service';
+import { AiService, SourceDocument } from '../services/ai.service';
 import { I18nService } from '../../../i18n';
 
 interface Message {
@@ -246,7 +246,8 @@ interface Toast {
       <div class="input-area">
         <textarea
           class="chat-input"
-          [ngModel]="input()"
+          [value]="input()"
+          (input)="input.set($any($event.target).value)"
           (keydown)="onInputKeyDown($event)"
           placeholder="{{ i18n.t().ragChat.inputPlaceholder }}"
           rows="1"
@@ -974,7 +975,7 @@ interface Toast {
   `]
 })
 export class RagChatComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private api = inject(AiService);
   protected readonly i18n = inject(I18nService);
   private sessionId = `session_${Date.now()}`;
 
@@ -1222,13 +1223,13 @@ export class RagChatComponent implements OnInit, OnDestroy {
 
     const streamResult = this.api.ragChat(
       requestBody,
-      (chunk) => {
+      (chunk: string) => {
         fullContent += chunk;
         this.messages.update((msgs) =>
           msgs.map((msg) => (msg.id === assistantMessageId ? { ...msg, content: fullContent } : msg))
         );
       },
-      (sources) => {
+      (sources: import('../services/ai.service').SourceDocument[]) => {
         this.messages.update((msgs) =>
           msgs.map((msg) => (msg.id === assistantMessageId ? { ...msg, sources } : msg))
         );

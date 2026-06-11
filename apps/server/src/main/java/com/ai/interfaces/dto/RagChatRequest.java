@@ -1,12 +1,12 @@
 package com.ai.interfaces.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * RAG chat request DTO.
  */
 public record RagChatRequest(
-    @NotBlank(message = "Question is required")
+    @JsonProperty("query")
     String question,
 
     String sessionId

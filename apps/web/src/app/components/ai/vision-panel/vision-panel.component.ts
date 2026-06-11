@@ -8,7 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { ApiService, Detection } from '../services/api.service';
+import { AiService, Detection } from '../services/ai.service';
 import { I18nService } from '../../../i18n';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../segmented-control/segmented-control.component';
 
@@ -473,7 +473,7 @@ interface VisionResult {
   `],
 })
 export class VisionPanelComponent {
-  private readonly api = inject(ApiService);
+  private readonly api = inject(AiService);
   protected readonly i18n = inject(I18nService);
 
   activeTask = signal<TaskType>('caption');

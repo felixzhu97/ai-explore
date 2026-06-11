@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ApiService, ChatMessage, ProviderInfo, ModelInfo, Voice } from '../services/api.service';
+import { AiService, ChatMessage, ProviderInfo, ModelInfo, Voice } from '../services/ai.service';
 import { I18nService } from '../../../i18n';
 import { SegmentedControlComponent, SegmentedControlOption } from '../../segmented-control/segmented-control.component';
 
@@ -1149,7 +1149,7 @@ interface ImageSize {
   `]
 })
 export class AiHubComponent implements OnInit, OnDestroy {
-  private readonly api = inject(ApiService);
+  private readonly api = inject(AiService);
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly i18n = inject(I18nService);
   private readonly sessionId = `aihub_${Date.now()}`;
@@ -1402,7 +1402,7 @@ export class AiHubComponent implements OnInit, OnDestroy {
             this.generatedImage.set(`data:image/png;base64,${result.images[0]}`);
           }
         },
-        error: (err) => {
+        error: (err: unknown) => {
           this.imageError.set(err instanceof Error ? err.message : 'Image generation failed');
         },
         complete: () => {
@@ -1432,7 +1432,7 @@ export class AiHubComponent implements OnInit, OnDestroy {
     this.api.getVoices().subscribe({
       next: (voices) => {
         this.availableVoices.set(voices);
-        const defaultVoice = voices.find((v) => v.is_default) || voices[0];
+        const defaultVoice = voices.find((v: Voice) => v.is_default) || voices[0];
         if (defaultVoice) {
           this.ttsVoice.set(defaultVoice.id);
         }
@@ -1472,7 +1472,7 @@ export class AiHubComponent implements OnInit, OnDestroy {
         output_format: 'mp3',
       })
       .subscribe({
-        next: (blob) => {
+        next: (blob: Blob) => {
           // Clean up previous audio URL
           if (this.audioUrl()) {
             URL.revokeObjectURL(this.audioUrl()!);
@@ -1491,7 +1491,7 @@ export class AiHubComponent implements OnInit, OnDestroy {
             }
           });
         },
-        error: (err) => {
+        error: (err: unknown) => {
           this.ttsError.set(err instanceof Error ? err.message : 'Synthesis failed');
         },
         complete: () => {

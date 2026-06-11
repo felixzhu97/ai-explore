@@ -11,6 +11,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import { AiService, SourceDocument } from '../services/ai.service';
 import { I18nService } from '../../../i18n';
 
@@ -87,7 +89,7 @@ interface Toast {
           </div>
         } @else if (availableDocs().length > 0) {
           <div class="documents-list">
-            @for (doc of availableDocs(); track doc.id) {
+            @for (doc of availableDocs(); track $index) {
               <div
                 class="document-card"
                 [class.selected]="selectedDocIds().has(doc.id)"
@@ -773,28 +775,88 @@ interface Toast {
     }
 
     .markdown-content h1, .markdown-content h2, .markdown-content h3 {
-      margin: 0.5em 0 0.25em;
+      margin: 0.6em 0 0.3em;
       font-weight: 600;
+      color: #1c1c1e;
     }
+
+    .markdown-content h1 { font-size: 1.4em; }
+    .markdown-content h2 { font-size: 1.2em; }
+    .markdown-content h3 { font-size: 1.1em; }
 
     .markdown-content p {
       margin: 0.5em 0;
+      line-height: 1.6;
+    }
+
+    .markdown-content ul, .markdown-content ol {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+    }
+
+    .markdown-content li {
+      margin: 0.25em 0;
+      line-height: 1.5;
+    }
+
+    .markdown-content blockquote {
+      margin: 0.5em 0;
+      padding: 0.5em 1em;
+      border-left: 3px solid #007aff;
+      background: rgba(0, 122, 255, 0.05);
+      color: #636366;
     }
 
     .markdown-content code {
-      font-family: 'SF Mono', Monaco, monospace;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
       font-size: 0.9em;
       padding: 0.15em 0.4em;
       border-radius: 4px;
-      background: #e5e5ea;
+      background: rgba(0, 0, 0, 0.06);
+      color: #d63384;
     }
 
     .markdown-content pre {
-      margin: 0.5em 0;
-      padding: 12px;
-      border-radius: 8px;
-      background: #e5e5ea;
+      margin: 0.75em 0;
+      padding: 14px;
+      border-radius: 10px;
+      background: #1e1e1e;
       overflow-x: auto;
+    }
+
+    .markdown-content pre code {
+      background: transparent;
+      color: #d4d4d4;
+      padding: 0;
+      font-size: 0.85em;
+      line-height: 1.5;
+    }
+
+    .markdown-content a {
+      color: #007aff;
+      text-decoration: none;
+    }
+
+    .markdown-content a:hover {
+      text-decoration: underline;
+    }
+
+    .markdown-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5em 0;
+      font-size: 0.9em;
+    }
+
+    .markdown-content th, .markdown-content td {
+      padding: 8px 12px;
+      border: 1px solid #e5e5ea;
+      text-align: left;
+    }
+
+    .markdown-content th {
+      background: rgba(0, 0, 0, 0.03);
+      font-weight: 600;
     }
 
     .message-meta {
@@ -996,6 +1058,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
   // Refs
   fileInput = viewChild<ElementRef>('fileInput');
   messagesEnd = viewChild<ElementRef>('messagesEnd');
+  chatContainer = viewChild<ElementRef>('chatContainer');
 
   ngOnInit() {
     this.fetchAvailableDocs();
@@ -1010,17 +1073,15 @@ export class RagChatComponent implements OnInit, OnDestroy {
   fetchAvailableDocs() {
     this.isLoadingDocs.set(true);
     this.api.getDocuments().subscribe({
-      next: (data: { documents: { doc_id: string; filename: string }[] }) => {
+      next: (data: { documents: { id: string; title: string }[] }) => {
         const docs = data.documents || [];
-        this.availableDocs.set(
-          docs.map((d: { doc_id: string; filename: string }) => ({
-            id: d.doc_id,
-            title: d.filename,
-          }))
-        );
-        this.selectedDocIds.set(new Set(docs.map((d: { doc_id: string }) => d.doc_id)));
+        this.availableDocs.set(docs);
+        // Select all docs by default
+        this.selectedDocIds.set(new Set(docs.map((d) => d.id)));
+        console.debug('[RAG] Loaded docs:', docs);
       },
-      error: () => {
+      error: (err) => {
+        console.error('[RAG] Failed to load docs:', err);
         this.availableDocs.set([]);
       },
       complete: () => {
@@ -1059,6 +1120,14 @@ export class RagChatComponent implements OnInit, OnDestroy {
   deleteDocument(docId: string, event: Event) {
     event.stopPropagation();
 
+    // Defensive check - ensure docId is valid
+    if (!docId || docId === 'undefined' || docId === 'null') {
+      console.error('[RAG] Invalid document ID:', docId);
+      this.addToast('Cannot delete: document ID is invalid', 'error');
+      return;
+    }
+
+    console.debug('[RAG] Deleting document:', docId);
     this.deletingDocIds.update((ids) => new Set(ids).add(docId));
 
     this.api.deleteDocument(docId).subscribe({
@@ -1220,14 +1289,53 @@ export class RagChatComponent implements OnInit, OnDestroy {
     }
 
     let fullContent = '';
+    let displayedContent = '';
+    let pendingContent = '';
+    let isTyping = false;
+
+    const typeNextChunk = () => {
+      if (!pendingContent) {
+        isTyping = false;
+        return;
+      }
+
+      isTyping = true;
+      const nextChar = pendingContent.charAt(0);
+      pendingContent = pendingContent.slice(1);
+      displayedContent += nextChar;
+
+      this.messages.update((msgs) =>
+        msgs.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, content: displayedContent }
+            : msg
+        )
+      );
+
+      const container = this.chatContainer();
+      if (container?.nativeElement) {
+        container.nativeElement.scrollTop = container.nativeElement.scrollHeight;
+      }
+
+      let delay = 20;
+      if (nextChar === ' ' || nextChar === '\n') {
+        delay = 8;
+      } else if ('.!?,'.includes(nextChar)) {
+        delay = 100;
+      }
+
+      setTimeout(typeNextChunk, delay);
+    };
 
     const streamResult = this.api.ragChat(
       requestBody,
       (chunk: string) => {
         fullContent += chunk;
-        this.messages.update((msgs) =>
-          msgs.map((msg) => (msg.id === assistantMessageId ? { ...msg, content: fullContent } : msg))
-        );
+        pendingContent += chunk;
+
+        if (!isTyping) {
+          typeNextChunk();
+        }
       },
       (sources: import('../services/ai.service').SourceDocument[]) => {
         this.messages.update((msgs) =>
@@ -1235,7 +1343,22 @@ export class RagChatComponent implements OnInit, OnDestroy {
         );
       },
       () => {
-        this.isLoading.set(false);
+        const finishTyping = () => {
+          if (pendingContent) {
+            setTimeout(finishTyping, 30);
+            return;
+          }
+          displayedContent = fullContent;
+          this.messages.update((msgs) =>
+            msgs.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: fullContent }
+                : msg
+            )
+          );
+          this.isLoading.set(false);
+        };
+        finishTyping();
       },
       (err: Error) => {
         this.messages.update((msgs) =>
@@ -1279,18 +1402,23 @@ export class RagChatComponent implements OnInit, OnDestroy {
   }
 
   renderMarkdown(content: string): string {
-    let html = content
-      .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
-      .replace(/^- (.*$)/gm, '<li>$1</li>')
-      .replace(/\n/g, '<br>');
+    if (!content) return '';
 
-    return html;
+    // Configure marked for better output
+    marked.setOptions({
+      gfm: true,
+      breaks: true,
+    });
+
+    // Convert markdown to HTML
+    const html = marked.parse(content) as string;
+
+    // Sanitize HTML to prevent XSS
+    const cleanHtml = DOMPurify.sanitize(html, {
+      ADD_TAGS: ['pre', 'code'],
+      ADD_ATTR: ['class'],
+    });
+
+    return cleanHtml;
   }
 }

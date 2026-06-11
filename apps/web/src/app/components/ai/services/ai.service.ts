@@ -269,8 +269,8 @@ export class AiService {
 
   // ==================== RAG ====================
 
-  getDocuments(): Observable<{ documents: { doc_id: string; filename: string }[] }> {
-    return this.http.get<{ documents: { doc_id: string; filename: string }[] }>(
+  getDocuments(): Observable<{ documents: { id: string; title: string }[] }> {
+    return this.http.get<{ documents: { id: string; title: string }[] }>(
       `${RAG_SERVICE_URL}/documents/`
     );
   }

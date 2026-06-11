@@ -34,6 +34,9 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
+    // PDF Processing
+    implementation("org.apache.pdfbox:pdfbox:3.0.3")
+
     // Database
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("org.postgresql:postgresql")

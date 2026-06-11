@@ -3,6 +3,7 @@ package com.ai.infrastructure.adapter.embedding;
 import com.ai.application.port.EmbeddingPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
@@ -14,8 +15,10 @@ import java.util.stream.Collectors;
 /**
  * DeepSeek embedding adapter implementing EmbeddingPort.
  * Uses Spring AI's OpenAI-compatible embedding model with DeepSeek API.
+ * Only activated when mock embeddings are disabled.
  */
 @Component
+@ConditionalOnProperty(name = "rag.mock.embeddings", havingValue = "false", matchIfMissing = true)
 public class DeepSeekEmbeddingAdapter implements EmbeddingPort {
 
     private static final Logger log = LoggerFactory.getLogger(DeepSeekEmbeddingAdapter.class);

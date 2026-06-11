@@ -3,6 +3,7 @@ package com.ai.interfaces.controller;
 import com.ai.application.service.RagApplicationService;
 import com.ai.domain.model.Document;
 import com.ai.domain.model.SourceDocument;
+import com.ai.infrastructure.adapter.document.PdfTextExtractor;
 import com.ai.interfaces.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,8 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,10 +38,14 @@ public class RagController {
 
     private final RagApplicationService ragApplicationService;
     private final ObjectMapper objectMapper;
+    private final PdfTextExtractor pdfTextExtractor;
 
-    public RagController(RagApplicationService ragApplicationService, ObjectMapper objectMapper) {
+    public RagController(RagApplicationService ragApplicationService, 
+                         ObjectMapper objectMapper,
+                         PdfTextExtractor pdfTextExtractor) {
         this.ragApplicationService = ragApplicationService;
         this.objectMapper = objectMapper;
+        this.pdfTextExtractor = pdfTextExtractor;
     }
 
     /**
@@ -62,14 +70,40 @@ public class RagController {
     @PostMapping("/documents/upload")
     @Operation(summary = "Upload a document", description = "Upload a new document for RAG processing")
     public ResponseEntity<UploadDocumentResponse> uploadDocument(
-            @Valid @RequestBody UploadDocumentRequest request) {
-        log.info("Uploading document: {}", request.title());
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "title", required = false) String title) {
+        String fileName = file.getOriginalFilename();
+        String docTitle = title != null ? title : fileName;
+        
+        String content;
+        try {
+            byte[] fileBytes = file.getBytes();
+            String extension = pdfTextExtractor.getExtension(fileName);
+            
+            if ("pdf".equalsIgnoreCase(extension)) {
+                // Extract text from PDF using PDFBox
+                var extractedText = pdfTextExtractor.extractText(fileBytes);
+                if (extractedText.isEmpty()) {
+                    throw new RuntimeException("Failed to extract text from PDF file: " + fileName);
+                }
+                content = extractedText.get();
+                log.info("Extracted {} characters from PDF: {}", content.length(), fileName);
+            } else {
+                // For other text files, read as UTF-8
+                content = new String(fileBytes, StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            log.error("Failed to read file content", e);
+            throw new RuntimeException("Failed to read file content: " + e.getMessage(), e);
+        }
+        
+        log.info("Uploading document: {}", docTitle);
         
         Document document = ragApplicationService.uploadDocument(
-            request.title(),
-            request.fileName(),
-            request.content() != null ? (long) request.content().length() : null,
-            request.content()
+            docTitle,
+            fileName,
+            file.getSize(),
+            content
         );
         
         UploadDocumentResponse response = new UploadDocumentResponse(
@@ -102,27 +136,35 @@ public class RagController {
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "RAG streaming chat", description = "Streaming RAG chat with source documents")
     public Flux<ServerSentEvent<String>> ragChatStream(@Valid @RequestBody RagChatRequest request) {
-        log.info("RAG chat request: {}", truncate(request.question()));
-        
+        log.info("RAG chat request: {} with docIds: {}", truncate(request.question()), request.docIds());
+
         return Flux.create(sink -> {
             try {
-                // Retrieve context from documents
+                // Convert string doc IDs to UUIDs
+                List<UUID> docUuids = null;
+                if (request.docIds() != null && !request.docIds().isEmpty()) {
+                    docUuids = request.docIds().stream()
+                        .map(UUID::fromString)
+                        .collect(Collectors.toList());
+                }
+
+                // Retrieve context from specified documents (or all if not specified)
                 var result = ragApplicationService.retrieveContext(
                     request.question(),
-                    null, // all documents
-                    5     // topK
+                    docUuids,  // use provided doc IDs
+                    request.topK() != null ? request.topK() : 5
                 );
-                
+
                 String context = result.context();
                 List<SourceDocument> sources = result.sources();
-                
+
                 // Build the prompt with context
                 String prompt = buildPrompt(request.question(), context);
-                
+
                 // Stream tokens - in a real implementation, this would call an AI service
                 // For now, simulate streaming response
                 streamResponse(sink, prompt, sources);
-                
+
             } catch (Exception e) {
                 log.error("Error in RAG chat", e);
                 sink.error(e);

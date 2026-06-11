@@ -7,7 +7,7 @@ import java.util.UUID;
  * Upload document response DTO.
  */
 public record UploadDocumentResponse(
-    UUID documentId,
+    UUID id,
     String title,
     String status,
     int chunkCount,

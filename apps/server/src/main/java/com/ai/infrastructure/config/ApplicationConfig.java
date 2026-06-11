@@ -67,15 +67,34 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public EmbeddingPort embeddingPort(DeepSeekEmbeddingAdapter deepSeekEmbeddingAdapter, 
-                                       MockEmbeddingAdapter mockEmbeddingAdapter,
-                                       org.springframework.core.env.Environment env) {
+    public EmbeddingPort embeddingPort(
+            org.springframework.beans.factory.ObjectProvider<DeepSeekEmbeddingAdapter> deepSeekProvider,
+            org.springframework.beans.factory.ObjectProvider<MockEmbeddingAdapter> mockProvider,
+            org.springframework.core.env.Environment env) {
+        
         boolean useMock = Boolean.parseBoolean(
             env.getProperty("rag.mock.embeddings", "false"));
+        
         if (useMock) {
-            return mockEmbeddingAdapter;
+            MockEmbeddingAdapter mock = mockProvider.getIfAvailable();
+            if (mock != null) {
+                return mock;
+            }
+            throw new IllegalStateException("Mock embedding adapter not available but rag.mock.embeddings=true");
         }
-        return deepSeekEmbeddingAdapter;
+        
+        DeepSeekEmbeddingAdapter deepSeek = deepSeekProvider.getIfAvailable();
+        if (deepSeek != null) {
+            return deepSeek;
+        }
+        
+        // Fallback to mock if DeepSeek not available
+        MockEmbeddingAdapter fallbackMock = mockProvider.getIfAvailable();
+        if (fallbackMock != null) {
+            return fallbackMock;
+        }
+        
+        throw new IllegalStateException("No embedding adapter available");
     }
 
     @Bean

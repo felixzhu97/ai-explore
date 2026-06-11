@@ -23,11 +23,7 @@ public class DocumentChunk {
         this.createdAt = Instant.now();
     }
 
-    public DocumentChunk withEmbedding(float[] embedding) {
-        return new DocumentChunk(this.id, this.documentId, this.content, this.chunkIndex, this.metadata, embedding, this.createdAt);
-    }
-
-    private DocumentChunk(UUID id, UUID documentId, String content, int chunkIndex, Map<String, Object> metadata, float[] embedding, Instant createdAt) {
+    DocumentChunk(UUID id, UUID documentId, String content, int chunkIndex, Map<String, Object> metadata, float[] embedding, Instant createdAt) {
         this.id = id;
         this.documentId = documentId;
         this.content = content;
@@ -35,6 +31,10 @@ public class DocumentChunk {
         this.metadata = metadata;
         this.embedding = embedding;
         this.createdAt = createdAt;
+    }
+
+    public DocumentChunk withEmbedding(float[] embedding) {
+        return new DocumentChunk(this.id, this.documentId, this.content, this.chunkIndex, this.metadata, embedding, this.createdAt);
     }
 
     // Getters

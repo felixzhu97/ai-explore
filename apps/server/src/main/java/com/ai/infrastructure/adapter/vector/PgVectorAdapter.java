@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -142,7 +145,7 @@ public class PgVectorAdapter implements VectorSearchPort {
             
             Map<String, Object> metadata = parseMetadata(rs.getString("metadata"));
             
-            Instant createdAt = Instant.parse(rs.getString("created_at"));
+            Instant createdAt = parseTimestamp(rs.getString("created_at"));
 
             return new DocumentChunk(id, documentId, content, chunkIndex, metadata)
                     .withEmbedding(embedding);
@@ -173,6 +176,27 @@ public class PgVectorAdapter implements VectorSearchPort {
                 log.error("Failed to parse metadata JSON", e);
             }
             return metadata;
+        }
+
+        private Instant parseTimestamp(String timestamp) {
+            if (timestamp == null || timestamp.isEmpty()) {
+                return Instant.now();
+            }
+            try {
+                return Instant.parse(timestamp);
+            } catch (DateTimeParseException e) {
+                try {
+                    return OffsetDateTime.parse(timestamp, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant();
+                } catch (DateTimeParseException e2) {
+                    try {
+                        return java.time.LocalDateTime.parse(timestamp.replace(" ", "T"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                .atZone(java.time.ZoneId.systemDefault()).toInstant();
+                    } catch (DateTimeParseException e3) {
+                        log.warn("Failed to parse timestamp '{}', using current time", timestamp);
+                        return Instant.now();
+                    }
+                }
+            }
         }
     }
 }

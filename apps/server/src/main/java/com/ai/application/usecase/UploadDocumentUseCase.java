@@ -12,19 +12,23 @@ import java.util.*;
 
 public class UploadDocumentUseCase {
     private static final Logger log = LoggerFactory.getLogger(UploadDocumentUseCase.class);
-    private static final int CHUNK_SIZE = 500;
-    private static final int CHUNK_OVERLAP = 50;
 
+    private final int chunkSize;
+    private final int chunkOverlap;
     private final DocumentRepositoryPort documentRepository;
     private final EmbeddingPort embeddingPort;
     private final VectorSearchPort vectorSearchPort;
 
-    public UploadDocumentUseCase(DocumentRepositoryPort documentRepository, 
-                                  EmbeddingPort embeddingPort,
-                                  VectorSearchPort vectorSearchPort) {
+    public UploadDocumentUseCase(DocumentRepositoryPort documentRepository,
+                                 EmbeddingPort embeddingPort,
+                                 VectorSearchPort vectorSearchPort,
+                                 int chunkSize,
+                                 int chunkOverlap) {
         this.documentRepository = documentRepository;
         this.embeddingPort = embeddingPort;
         this.vectorSearchPort = vectorSearchPort;
+        this.chunkSize = chunkSize;
+        this.chunkOverlap = chunkOverlap;
     }
 
     public Document execute(String title, String fileName, Long fileSize, String content) {
@@ -88,12 +92,12 @@ public class UploadDocumentUseCase {
 
         for (String sentence : sentences) {
             int sentenceLength = sentence.length();
-            if (currentLength + sentenceLength > CHUNK_SIZE && currentLength > 0) {
+            if (currentLength + sentenceLength > chunkSize && currentLength > 0) {
                 chunks.add(currentChunk.toString().trim());
                 String overlap = currentChunk.toString();
                 currentChunk = new StringBuilder(
-                    overlap.length() > CHUNK_OVERLAP 
-                        ? overlap.substring(overlap.length() - CHUNK_OVERLAP) 
+                    overlap.length() > chunkOverlap
+                        ? overlap.substring(overlap.length() - chunkOverlap)
                         : overlap
                 );
                 currentLength = currentChunk.length();

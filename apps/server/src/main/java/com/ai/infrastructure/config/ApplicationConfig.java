@@ -6,6 +6,7 @@ import com.ai.application.port.DocumentRepositoryPort;
 import com.ai.application.port.EmbeddingPort;
 import com.ai.application.port.VectorSearchPort;
 import com.ai.application.service.ChatApplicationService;
+import com.ai.application.service.LanguageDetectionService;
 import com.ai.application.service.RagApplicationService;
 import com.ai.application.usecase.DeleteDocumentUseCase;
 import com.ai.application.usecase.RagChatUseCase;
@@ -71,6 +72,11 @@ public class ApplicationConfig {
     // RAG Infrastructure Beans
 
     @Bean
+    public LanguageDetectionService languageDetectionService() {
+        return new LanguageDetectionService();
+    }
+
+    @Bean
     public JpaDocumentRepository jpaDocumentRepository(
             com.ai.infrastructure.adapter.persistence.SpringDataDocumentRepository documentRepository,
             com.ai.infrastructure.adapter.persistence.SpringDataChunkRepository chunkRepository,
@@ -126,8 +132,11 @@ public class ApplicationConfig {
     public UploadDocumentUseCase uploadDocumentUseCase(
             DocumentRepositoryPort documentRepositoryPort,
             EmbeddingPort embeddingPort,
-            VectorSearchPort vectorSearchPort) {
-        return new UploadDocumentUseCase(documentRepositoryPort, embeddingPort, vectorSearchPort);
+            VectorSearchPort vectorSearchPort,
+            org.springframework.core.env.Environment env) {
+        int chunkSize = Integer.parseInt(env.getProperty("rag.chunk.size", "500"));
+        int chunkOverlap = Integer.parseInt(env.getProperty("rag.chunk.overlap", "50"));
+        return new UploadDocumentUseCase(documentRepositoryPort, embeddingPort, vectorSearchPort, chunkSize, chunkOverlap);
     }
 
     @Bean

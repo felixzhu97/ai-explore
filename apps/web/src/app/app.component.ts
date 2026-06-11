@@ -6,7 +6,7 @@ import {
   HostListener,
   ElementRef,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { I18nService, languageNames, SUPPORTED_LANGUAGES, Language, Translations } from './i18n';
 
 interface Tab {
@@ -18,7 +18,7 @@ interface Tab {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink],
   template: `
     <div class="app-container">
       <nav class="navbar">

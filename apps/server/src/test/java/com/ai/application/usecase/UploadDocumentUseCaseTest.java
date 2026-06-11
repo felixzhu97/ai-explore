@@ -53,7 +53,7 @@ class UploadDocumentUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new UploadDocumentUseCase(documentRepository, embeddingPort, vectorSearchPort);
+        useCase = new UploadDocumentUseCase(documentRepository, embeddingPort, vectorSearchPort, 500, 50);
     }
 
     @Nested

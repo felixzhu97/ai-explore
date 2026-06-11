@@ -772,6 +772,8 @@ interface Toast {
 
     .markdown-content {
       line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .markdown-content h1, .markdown-content h2, .markdown-content h3 {
@@ -1060,6 +1062,11 @@ export class RagChatComponent implements OnInit, OnDestroy {
   messagesEnd = viewChild<ElementRef>('messagesEnd');
   chatContainer = viewChild<ElementRef>('chatContainer');
 
+  // Streaming state: track which assistant messages are still receiving chunks
+  readonly streamingMessageIds = signal<Set<string>>(new Set());
+  private charCountSinceLastRender = 0;
+  private readonly RENDER_THROTTLE = 15;
+
   ngOnInit() {
     this.fetchAvailableDocs();
   }
@@ -1270,6 +1277,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
         timestamp: Date.now(),
       },
     ]);
+    this.streamingMessageIds.update((ids) => new Set(ids).add(assistantMessageId));
 
     const requestBody: {
       query: string;
@@ -1288,53 +1296,30 @@ export class RagChatComponent implements OnInit, OnDestroy {
       requestBody.doc_ids = Array.from(this.selectedDocIds());
     }
 
-    let fullContent = '';
     let displayedContent = '';
-    let pendingContent = '';
-    let isTyping = false;
-
-    const typeNextChunk = () => {
-      if (!pendingContent) {
-        isTyping = false;
-        return;
-      }
-
-      isTyping = true;
-      const nextChar = pendingContent.charAt(0);
-      pendingContent = pendingContent.slice(1);
-      displayedContent += nextChar;
-
-      this.messages.update((msgs) =>
-        msgs.map((msg) =>
-          msg.id === assistantMessageId
-            ? { ...msg, content: displayedContent }
-            : msg
-        )
-      );
-
-      const container = this.chatContainer();
-      if (container?.nativeElement) {
-        container.nativeElement.scrollTop = container.nativeElement.scrollHeight;
-      }
-
-      let delay = 20;
-      if (nextChar === ' ' || nextChar === '\n') {
-        delay = 8;
-      } else if ('.!?,'.includes(nextChar)) {
-        delay = 100;
-      }
-
-      setTimeout(typeNextChunk, delay);
-    };
+    this.charCountSinceLastRender = 0;
 
     const streamResult = this.api.ragChat(
       requestBody,
       (chunk: string) => {
-        fullContent += chunk;
-        pendingContent += chunk;
+        displayedContent += chunk;
+        this.charCountSinceLastRender += chunk.length;
 
-        if (!isTyping) {
-          typeNextChunk();
+        this.messages.update((msgs) =>
+          msgs.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: displayedContent }
+              : msg
+          )
+        );
+
+        const container = this.chatContainer();
+        if (container?.nativeElement) {
+          container.nativeElement.scrollTop = container.nativeElement.scrollHeight;
+        }
+
+        if (this.charCountSinceLastRender >= this.RENDER_THROTTLE) {
+          this.charCountSinceLastRender = 0;
         }
       },
       (sources: import('../services/ai.service').SourceDocument[]) => {
@@ -1343,22 +1328,12 @@ export class RagChatComponent implements OnInit, OnDestroy {
         );
       },
       () => {
-        const finishTyping = () => {
-          if (pendingContent) {
-            setTimeout(finishTyping, 30);
-            return;
-          }
-          displayedContent = fullContent;
-          this.messages.update((msgs) =>
-            msgs.map((msg) =>
-              msg.id === assistantMessageId
-                ? { ...msg, content: fullContent }
-                : msg
-            )
-          );
-          this.isLoading.set(false);
-        };
-        finishTyping();
+        this.streamingMessageIds.update((ids) => {
+          const next = new Set(ids);
+          next.delete(assistantMessageId);
+          return next;
+        });
+        this.isLoading.set(false);
       },
       (err: Error) => {
         this.messages.update((msgs) =>
@@ -1368,6 +1343,11 @@ export class RagChatComponent implements OnInit, OnDestroy {
               : msg
           )
         );
+        this.streamingMessageIds.update((ids) => {
+          const next = new Set(ids);
+          next.delete(assistantMessageId);
+          return next;
+        });
         this.isLoading.set(false);
       }
     );

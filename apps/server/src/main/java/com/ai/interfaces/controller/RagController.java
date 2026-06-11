@@ -1,8 +1,10 @@
 package com.ai.interfaces.controller;
 
+import com.ai.application.service.LanguageDetectionService;
 import com.ai.application.service.RagApplicationService;
 import com.ai.domain.model.Document;
 import com.ai.domain.model.SourceDocument;
+import com.ai.domain.service.AiChatService;
 import com.ai.infrastructure.adapter.document.PdfTextExtractor;
 import com.ai.interfaces.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,13 +39,19 @@ import java.util.stream.Collectors;
 public class RagController {
 
     private final RagApplicationService ragApplicationService;
+    private final LanguageDetectionService languageDetectionService;
+    private final AiChatService aiChatService;
     private final ObjectMapper objectMapper;
     private final PdfTextExtractor pdfTextExtractor;
 
-    public RagController(RagApplicationService ragApplicationService, 
+    public RagController(RagApplicationService ragApplicationService,
+                         LanguageDetectionService languageDetectionService,
+                         AiChatService aiChatService,
                          ObjectMapper objectMapper,
                          PdfTextExtractor pdfTextExtractor) {
         this.ragApplicationService = ragApplicationService;
+        this.languageDetectionService = languageDetectionService;
+        this.aiChatService = aiChatService;
         this.objectMapper = objectMapper;
         this.pdfTextExtractor = pdfTextExtractor;
     }
@@ -161,9 +169,11 @@ public class RagController {
                 // Build the prompt with context
                 String prompt = buildPrompt(request.question(), context);
 
-                // Stream tokens - in a real implementation, this would call an AI service
-                // For now, simulate streaming response
-                streamResponse(sink, prompt, sources);
+                // Call AI service to get the actual response
+                String aiResponse = aiChatService.chat(prompt);
+
+                // Stream the AI response
+                streamResponse(sink, aiResponse, sources);
 
             } catch (Exception e) {
                 log.error("Error in RAG chat", e);
@@ -183,6 +193,14 @@ public class RagController {
             sink.next(ServerSentEvent.<String>builder()
                 .data(token)
                 .build());
+            
+            // Control streaming speed to avoid flooding the frontend
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
         
         // Send sources event at the end
@@ -205,19 +223,8 @@ public class RagController {
     }
 
     private String buildPrompt(String question, String context) {
-        if (context == null || context.isBlank()) {
-            return "I don't have relevant documents to answer your question. " +
-                   "Please upload some documents first.";
-        }
-        
-        return String.format(
-            "Based on the following context, answer the question.\n\n" +
-            "Context:\n%s\n\n" +
-            "Question: %s\n\n" +
-            "Answer:",
-            context,
-            question
-        );
+        String languageCode = languageDetectionService.detect(question);
+        return languageDetectionService.buildPrompt(question, context, languageCode);
     }
 
     private DocumentSummaryDto toDocumentSummaryDto(Document document) {

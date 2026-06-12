@@ -19,8 +19,6 @@ describe('AgentChatComponent', () => {
   const mockQuickPrompts = ['Hello', 'Help me', 'Tell me a story'];
 
   beforeEach(async () => {
-    vi.useFakeTimers();
-
     await TestBed.configureTestingModule({
       imports: [AgentChatComponent, ChatMessageComponent, HttpClientTestingModule],
     }).compileComponents();
@@ -34,7 +32,6 @@ describe('AgentChatComponent', () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 

@@ -134,7 +134,7 @@ public class PgVectorAdapter implements VectorSearchPort {
         }
     }
 
-    private class ChunkRowMapper implements RowMapper<DocumentChunk> {
+    class ChunkRowMapper implements RowMapper<DocumentChunk> {
         @Override
         public DocumentChunk mapRow(ResultSet rs, int rowNum) throws SQLException {
             UUID id = UUID.fromString(rs.getString("id"));

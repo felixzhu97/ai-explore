@@ -61,6 +61,15 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    classDirectories.setFrom(files(classDirectories.files.map { f ->
+        fileTree(f) {
+            exclude("com/ai/infrastructure/config/**")
+        }
+    }))
+}
+
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
 
@@ -76,12 +85,12 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = BigDecimal("0.15")
+                minimum = BigDecimal("0.85")
             }
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = BigDecimal("0.10")
+                minimum = BigDecimal("0.70")
             }
         }
     }

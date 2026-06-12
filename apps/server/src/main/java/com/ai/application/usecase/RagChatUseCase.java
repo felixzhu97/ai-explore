@@ -2,6 +2,7 @@ package com.ai.application.usecase;
 
 import com.ai.application.port.EmbeddingPort;
 import com.ai.application.port.VectorSearchPort;
+import com.ai.domain.model.ChatMessage;
 import com.ai.domain.model.DocumentChunk;
 import com.ai.domain.model.SourceDocument;
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 public class RagChatUseCase {
     private static final Logger log = LoggerFactory.getLogger(RagChatUseCase.class);
     private static final int DEFAULT_TOP_K = 5;
+    private static final int MAX_SOURCE_LENGTH = 500;
+    private static final int MAX_HISTORY_MESSAGES = 10;
 
     private final EmbeddingPort embeddingPort;
     private final VectorSearchPort vectorSearchPort;
@@ -22,13 +25,18 @@ public class RagChatUseCase {
         this.vectorSearchPort = vectorSearchPort;
     }
 
-    public record RetrievalResult(String context, List<SourceDocument> sources) {}
+    public record RetrievalResult(
+        String context,
+        List<SourceDocument> sources,
+        String enrichedQuery
+    ) {}
 
-    public RetrievalResult execute(String query, List<UUID> docIds, int topK) {
-        log.info("RAG retrieval for query: {}", query);
-        
-        float[] queryEmbedding = embeddingPort.embed(query);
-        
+    public RetrievalResult execute(String query, List<UUID> docIds, int topK, List<ChatMessage> history) {
+        String enrichedQuery = enrichWithHistory(query, history);
+        log.info("RAG retrieval for query: {}", enrichedQuery);
+
+        float[] queryEmbedding = embeddingPort.embed(enrichedQuery);
+
         List<DocumentChunk> chunks;
         if (docIds != null && !docIds.isEmpty()) {
             chunks = vectorSearchPort.search(queryEmbedding, topK > 0 ? topK : DEFAULT_TOP_K, docIds);
@@ -42,7 +50,7 @@ public class RagChatUseCase {
 
         List<SourceDocument> sources = chunks.stream()
             .map(chunk -> new SourceDocument(
-                chunk.getContent().substring(0, Math.min(500, chunk.getContent().length())),
+                chunk.getContent().substring(0, Math.min(MAX_SOURCE_LENGTH, chunk.getContent().length())),
                 calculateSimilarity(queryEmbedding, chunk.getEmbedding()),
                 chunk.getMetadata()
             ))
@@ -50,7 +58,28 @@ public class RagChatUseCase {
             .toList();
 
         log.info("Retrieved {} chunks", chunks.size());
-        return new RetrievalResult(context, sources);
+        return new RetrievalResult(context, sources, enrichedQuery);
+    }
+
+    public RetrievalResult execute(String query, List<UUID> docIds, int topK) {
+        return execute(query, docIds, topK, null);
+    }
+
+    private String enrichWithHistory(String query, List<ChatMessage> history) {
+        if (history == null || history.isEmpty()) {
+            return query;
+        }
+
+        int historyLimit = Math.min(history.size(), MAX_HISTORY_MESSAGES);
+        List<ChatMessage> recentHistory = history.subList(history.size() - historyLimit, history.size());
+
+        StringBuilder historyContext = new StringBuilder();
+        for (ChatMessage msg : recentHistory) {
+            historyContext.append(msg.getRole()).append(": ").append(msg.getText()).append("\n");
+        }
+
+        return "Previous conversation:\n" + historyContext +
+               "\nCurrent question: " + query;
     }
 
     private double calculateSimilarity(float[] a, float[] b) {

@@ -1,14 +1,11 @@
 package com.ai.application.service;
 
-import org.springframework.stereotype.Component;
-
 import java.util.regex.Pattern;
 
 /**
  * Lightweight language detection service using JDK standard library.
  * Detects primary language based on character distribution in input text.
  */
-@Component
 public class LanguageDetectionService {
 
     private static final Pattern CJK_UNIFIED_IDEOGRAPHS = Pattern.compile("[\\u4e00-\\u9fff]");
@@ -16,6 +13,10 @@ public class LanguageDetectionService {
     private static final Pattern KATAKANA = Pattern.compile("[\\u30a0-\\u30ff]");
     private static final Pattern KANJI = Pattern.compile("[\\u3400-\\u4dbf\\u4e00-\\u9fff]");
     private static final Pattern LATIN = Pattern.compile("[a-zA-Z]");
+
+    private static final double JAPANESE_KANA_THRESHOLD = 0.05;
+    private static final double CHINESE_CJK_THRESHOLD = 0.3;
+    private static final double ENGLISH_LATIN_THRESHOLD = 0.5;
 
     /**
      * Detects the primary language of the given text.
@@ -41,9 +42,9 @@ public class LanguageDetectionService {
 
         int japaneseKanaCount = hiraganaCount + katakanaCount;
         boolean hasJapaneseContent = japaneseKanaCount > 0 || kanjiCount > 0;
-        boolean isPredominantlyJapanese = hasJapaneseContent && japaneseKanaCount > totalChars * 0.05;
-        boolean isPredominantlyChinese = cjkCount > totalChars * 0.3 && !isPredominantlyJapanese;
-        boolean isPredominantlyEnglish = latinCount > totalChars * 0.5;
+        boolean isPredominantlyJapanese = hasJapaneseContent && japaneseKanaCount > totalChars * JAPANESE_KANA_THRESHOLD;
+        boolean isPredominantlyChinese = cjkCount > totalChars * CHINESE_CJK_THRESHOLD && !isPredominantlyJapanese;
+        boolean isPredominantlyEnglish = latinCount > totalChars * ENGLISH_LATIN_THRESHOLD;
 
         if (isPredominantlyJapanese) {
             return "ja";

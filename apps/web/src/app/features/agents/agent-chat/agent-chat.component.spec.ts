@@ -19,22 +19,19 @@ describe('AgentChatComponent', () => {
   const mockQuickPrompts = ['Hello', 'Help me', 'Tell me a story'];
 
   beforeEach(async () => {
-    vi.useFakeTimers();
-
     await TestBed.configureTestingModule({
       imports: [AgentChatComponent, ChatMessageComponent, HttpClientTestingModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AgentChatComponent);
     component = fixture.componentInstance;
-    
+
     (component as any).agentInfo = signal(mockAgentInfo);
     (component as any).apiEndpoint = signal(mockApiEndpoint);
     (component as any).quickPrompts = signal(mockQuickPrompts);
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -95,14 +92,20 @@ describe('AgentChatComponent', () => {
   describe('onKeyDown', () => {
     it('should call sendMessage on Enter key without shift', () => {
       vi.spyOn(component, 'sendMessage');
-      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: false });
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        shiftKey: false,
+      });
       component.onKeyDown(event);
       expect(component.sendMessage).toHaveBeenCalled();
     });
 
     it('should not call sendMessage on Enter with shift', () => {
       vi.spyOn(component, 'sendMessage');
-      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true });
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        shiftKey: true,
+      });
       component.onKeyDown(event);
       expect(component.sendMessage).not.toHaveBeenCalled();
     });
@@ -115,7 +118,10 @@ describe('AgentChatComponent', () => {
     });
 
     it('should prevent default on Enter without shift', () => {
-      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: false });
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        shiftKey: false,
+      });
       const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
       component.onKeyDown(event);
       expect(preventDefaultSpy).toHaveBeenCalled();
@@ -147,11 +153,11 @@ describe('AgentChatComponent', () => {
 
     it('should clear input after sending', async () => {
       component.inputValue = 'Hello';
-      
+
       const mockReader = {
         read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
       };
-      
+
       vi.spyOn(global, 'fetch').mockResolvedValue({
         ok: true,
         body: { getReader: () => mockReader },
@@ -163,11 +169,11 @@ describe('AgentChatComponent', () => {
 
     it('should add user message to messages array', async () => {
       component.inputValue = 'Test message';
-      
+
       const mockReader = {
         read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
       };
-      
+
       vi.spyOn(global, 'fetch').mockResolvedValue({
         ok: true,
         body: { getReader: () => mockReader },
@@ -185,11 +191,11 @@ describe('AgentChatComponent', () => {
 
     it('should add assistant placeholder message', async () => {
       component.inputValue = 'Test';
-      
+
       const mockReader = {
         read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
       };
-      
+
       vi.spyOn(global, 'fetch').mockResolvedValue({
         ok: true,
         body: { getReader: () => mockReader },
@@ -215,11 +221,11 @@ describe('AgentChatComponent', () => {
 
     it('should reset abortController after completion', async () => {
       component.inputValue = 'Test';
-      
+
       const mockReader = {
         read: vi.fn().mockResolvedValue({ done: true, value: new Uint8Array() }),
       };
-      
+
       vi.spyOn(global, 'fetch').mockResolvedValue({
         ok: true,
         body: { getReader: () => mockReader },
@@ -285,7 +291,14 @@ describe('AgentChatComponent', () => {
           role: 'assistant',
           content: 'Test',
           timestamp: Date.now(),
-          toolCalls: [{ id: 'tool1', name: 'testTool', input: {}, status: 'running' as const }],
+          toolCalls: [
+            {
+              id: 'tool1',
+              name: 'testTool',
+              input: {},
+              status: 'running' as const,
+            },
+          ],
         },
       ]);
 

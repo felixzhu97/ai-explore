@@ -1,10 +1,11 @@
 package com.ai.domain.model;
 
+import com.ai.domain.vo.DocumentId;
+
 import java.time.Instant;
-import java.util.UUID;
 
 public class Document {
-    private final UUID id;
+    private final DocumentId id;
     private String title;
     private String fileName;
     private Long fileSize;
@@ -12,11 +13,7 @@ public class Document {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public enum DocumentStatus {
-        UPLOADING, PROCESSING, READY, FAILED
-    }
-
-    public Document(UUID id, String title, String fileName, Long fileSize) {
+    public Document(DocumentId id, String title, String fileName, Long fileSize) {
         this.id = id;
         this.title = title;
         this.fileName = fileName;
@@ -27,7 +24,7 @@ public class Document {
     }
 
     // Full constructor for repository mapper to restore all fields
-    public Document(UUID id, String title, String fileName, Long fileSize,
+    public Document(DocumentId id, String title, String fileName, Long fileSize,
                    DocumentStatus status, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.title = title;
@@ -44,7 +41,7 @@ public class Document {
     public boolean isReady() { return this.status == DocumentStatus.READY; }
     
     // Getters only, no setters - use business methods
-    public UUID getId() { return id; }
+    public DocumentId getId() { return id; }
     public String getTitle() { return title; }
     public String getFileName() { return fileName; }
     public Long getFileSize() { return fileSize; }

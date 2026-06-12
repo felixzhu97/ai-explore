@@ -57,55 +57,56 @@ public class PgVectorAdapter implements VectorSearchPort {
         
         String sql;
         if (docIds != null && !docIds.isEmpty()) {
-            String placeholders = docIds.stream()
-                    .map(id -> "'" + id + "'")
-                    .collect(Collectors.joining(","));
-            sql = String.format(
-                    "SELECT id, document_id, content, chunk_index, embedding, metadata, created_at " +
-                    "FROM %s " +
-                    "WHERE document_id IN (%s) " +
-                    "ORDER BY embedding <=> '%s'::vector " +
-                    "LIMIT %d",
-                    TABLE_NAME, placeholders, embeddingString, topK);
-        } else {
-            sql = String.format(
-                    "SELECT id, document_id, content, chunk_index, embedding, metadata, created_at " +
-                    "FROM %s " +
-                    "ORDER BY embedding <=> '%s'::vector " +
-                    "LIMIT %d",
-                    TABLE_NAME, embeddingString, topK);
-        }
+            // Use parameterized query with = ANY(?) for SQL injection prevention
+            sql = "SELECT id, document_id, content, chunk_index, embedding, metadata, created_at " +
+                  "FROM " + TABLE_NAME + " " +
+                  "WHERE document_id = ANY(?) " +
+                  "ORDER BY embedding <=> ?::vector " +
+                  "LIMIT ?";
 
-        log.debug("Executing vector search SQL");
-        return jdbcTemplate.query(sql, new ChunkRowMapper());
+            log.debug("Executing vector search SQL with docIds filter");
+            return jdbcTemplate.query(sql,
+                    new Object[]{docIds.toArray(new UUID[0]), embeddingString, topK},
+                    new ChunkRowMapper());
+        } else {
+            sql = "SELECT id, document_id, content, chunk_index, embedding, metadata, created_at " +
+                  "FROM " + TABLE_NAME + " " +
+                  "ORDER BY embedding <=> ?::vector " +
+                  "LIMIT ?";
+
+            log.debug("Executing vector search SQL");
+            return jdbcTemplate.query(sql,
+                    new Object[]{embeddingString, topK},
+                    new ChunkRowMapper());
+        }
     }
 
     @Override
     @Transactional
     public void saveChunk(DocumentChunk chunk) {
-        log.debug("Saving chunk to vector store: id={}, documentId={}", 
+        log.debug("Saving chunk to vector store: id={}, documentId={}",
                   chunk.getId(), chunk.getDocumentId());
-        
+
         String embeddingString = arrayToPostgresString(chunk.getEmbedding());
         String metadataJson = metadataToJson(chunk.getMetadata());
 
-        String sql = String.format(
-                "INSERT INTO %s (id, document_id, content, chunk_index, embedding, metadata, created_at) " +
-                "VALUES ('%s', '%s', ?, %d, '%s'::vector, %s, '%s') " +
+        // Use parameterized query for content to prevent SQL injection
+        String sql = "INSERT INTO " + TABLE_NAME +
+                " (id, document_id, content, chunk_index, embedding, metadata, created_at) " +
+                "VALUES (?, ?, ?, ?, ?::vector, " + metadataJson + ", ?) " +
                 "ON CONFLICT (id) DO UPDATE SET " +
                 "content = EXCLUDED.content, " +
                 "embedding = EXCLUDED.embedding, " +
-                "metadata = EXCLUDED.metadata",
-                TABLE_NAME,
+                "metadata = EXCLUDED.metadata";
+
+        jdbcTemplate.update(sql,
                 chunk.getId(),
                 chunk.getDocumentId(),
+                chunk.getContent(),
                 chunk.getChunkIndex(),
                 embeddingString,
-                metadataJson,
                 chunk.getCreatedAt().toString());
 
-        jdbcTemplate.update(sql, chunk.getContent());
-        
         log.info("Chunk saved to vector store: id={}", chunk.getId());
     }
 

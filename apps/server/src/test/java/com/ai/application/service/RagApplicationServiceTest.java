@@ -5,6 +5,7 @@ import com.ai.application.usecase.DeleteDocumentUseCase;
 import com.ai.application.usecase.RagChatUseCase;
 import com.ai.application.usecase.UploadDocumentUseCase;
 import com.ai.domain.model.Document;
+import com.ai.domain.vo.DocumentId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,7 +53,7 @@ class RagApplicationServiceTest {
     private static final String TEST_FILE_NAME = "test.txt";
     private static final Long TEST_FILE_SIZE = 1024L;
     private static final String TEST_CONTENT = "Test content";
-    private static final UUID TEST_DOCUMENT_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    private static final DocumentId TEST_DOCUMENT_ID = DocumentId.of(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
 
     @BeforeEach
     void setUp() {
@@ -107,13 +108,13 @@ class RagApplicationServiceTest {
         @DisplayName("should delegate delete to use case")
         void shouldDelegateDeleteToUseCase() {
             // Arrange
-            doNothing().when(deleteUseCase).execute(TEST_DOCUMENT_ID);
+            doNothing().when(deleteUseCase).execute(TEST_DOCUMENT_ID.value());
 
             // Act
-            service.deleteDocument(TEST_DOCUMENT_ID);
+            service.deleteDocument(TEST_DOCUMENT_ID.value());
 
             // Assert
-            verify(deleteUseCase).execute(TEST_DOCUMENT_ID);
+            verify(deleteUseCase).execute(TEST_DOCUMENT_ID.value());
         }
 
         @Test
@@ -140,7 +141,7 @@ class RagApplicationServiceTest {
         void shouldDelegateRagChatToUseCase() {
             // Arrange
             String query = "What is AI?";
-            List<UUID> docIds = List.of(TEST_DOCUMENT_ID);
+            List<UUID> docIds = List.of(TEST_DOCUMENT_ID.value());
             int topK = 5;
             
             RagChatUseCase.RetrievalResult expectedResult = mock(RagChatUseCase.RetrievalResult.class);
@@ -257,12 +258,12 @@ class RagApplicationServiceTest {
 
             // Act
             Document doc = service.uploadDocument(TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE, TEST_CONTENT);
-            service.deleteDocument(doc.getId());
+            service.deleteDocument(doc.getId().value());
             List<Document> docs = service.listDocuments();
 
             // Assert
             verify(uploadUseCase).execute(TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE, TEST_CONTENT);
-            verify(deleteUseCase).execute(TEST_DOCUMENT_ID);
+            verify(deleteUseCase).execute(TEST_DOCUMENT_ID.value());
             verify(documentRepository).findAll();
         }
 
@@ -271,9 +272,9 @@ class RagApplicationServiceTest {
         void shouldHandleMultipleDocumentOperations() {
             // Arrange
             Document doc1 = mock(Document.class);
-            when(doc1.getId()).thenReturn(UUID.randomUUID());
+            when(doc1.getId()).thenReturn(DocumentId.generate());
             Document doc2 = mock(Document.class);
-            when(doc2.getId()).thenReturn(UUID.randomUUID());
+            when(doc2.getId()).thenReturn(DocumentId.generate());
             
             when(uploadUseCase.execute(eq("Doc 1"), anyString(), anyLong(), anyString())).thenReturn(doc1);
             when(uploadUseCase.execute(eq("Doc 2"), anyString(), anyLong(), anyString())).thenReturn(doc2);

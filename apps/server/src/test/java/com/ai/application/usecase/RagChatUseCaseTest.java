@@ -2,6 +2,7 @@ package com.ai.application.usecase;
 
 import com.ai.application.port.EmbeddingPort;
 import com.ai.application.port.VectorSearchPort;
+import com.ai.domain.model.ChatMessage;
 import com.ai.domain.model.DocumentChunk;
 import com.ai.domain.model.SourceDocument;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -314,6 +313,260 @@ class RagChatUseCaseTest {
             assertThat(result.context()).contains("First");
             assertThat(result.context()).contains("Second");
             assertThat(result.context()).contains("Third");
+        }
+    }
+
+    @Nested
+    @DisplayName("EnrichWithHistory")
+    class EnrichWithHistory {
+
+        @Test
+        @DisplayName("should return original query when history is null")
+        void shouldReturnOriginalQueryWhenHistoryIsNull() {
+            // Arrange
+            String query = "Current question";
+            when(embeddingPort.embed(query)).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, null);
+
+            // Assert
+            assertThat(result.enrichedQuery()).isEqualTo(query);
+        }
+
+        @Test
+        @DisplayName("should return original query when history is empty")
+        void shouldReturnOriginalQueryWhenHistoryIsEmpty() {
+            // Arrange
+            String query = "Current question";
+            when(embeddingPort.embed(query)).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, Collections.emptyList());
+
+            // Assert
+            assertThat(result.enrichedQuery()).isEqualTo(query);
+        }
+
+        @Test
+        @DisplayName("should truncate history at MAX_HISTORY_MESSAGES")
+        void shouldTruncateHistoryAtMaxHistoryMessages() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> manyMessages = new ArrayList<>();
+            for (int i = 0; i < 15; i++) {
+                manyMessages.add(ChatMessage.createUserMessage("Historical message " + i));
+            }
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, manyMessages);
+
+            // Assert
+            // MAX_HISTORY_MESSAGES is 10, so only last 10 messages should be included
+            assertThat(result.enrichedQuery()).doesNotContain("Historical message 0");
+            assertThat(result.enrichedQuery()).contains("Historical message 14");
+            assertThat(result.enrichedQuery()).contains("Historical message 5");
+        }
+
+        @Test
+        @DisplayName("should include exactly 10 messages when history has more")
+        void shouldIncludeExactlyTenMessagesWhenHistoryHasMore() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> messages = new ArrayList<>();
+            for (int i = 0; i < 20; i++) {
+                messages.add(ChatMessage.createUserMessage("Message " + i));
+            }
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, messages);
+
+            // Assert
+            String enriched = result.enrichedQuery();
+            long userCount = enriched.chars().filter(ch -> ch == 'u').count();
+            // Count occurrences of "user: Message" - should be exactly 10
+            long messageCount = enriched.split("user: Message").length - 1;
+            assertThat(messageCount).isEqualTo(10);
+        }
+
+        @Test
+        @DisplayName("should format enriched query with Previous conversation header")
+        void shouldFormatEnrichedQueryWithPreviousConversationHeader() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createUserMessage("First question"),
+                ChatMessage.createAssistantMessage("First answer")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            assertThat(result.enrichedQuery()).startsWith("Previous conversation:");
+        }
+
+        @Test
+        @DisplayName("should format enriched query with Current question header")
+        void shouldFormatEnrichedQueryWithCurrentQuestionHeader() {
+            // Arrange
+            String query = "What is the answer?";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createUserMessage("Previous question")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            assertThat(result.enrichedQuery()).contains("Current question: " + query);
+        }
+
+        @Test
+        @DisplayName("should format history messages with role and text")
+        void shouldFormatHistoryMessagesWithRoleAndText() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createUserMessage("User message content"),
+                ChatMessage.createAssistantMessage("Assistant message content")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            String enriched = result.enrichedQuery();
+            assertThat(enriched).contains("user: User message content");
+            assertThat(enriched).contains("assistant: Assistant message content");
+        }
+
+        @Test
+        @DisplayName("should embed enriched query instead of original query")
+        void shouldEmbedEnrichedQueryInsteadOfOriginal() {
+            // Arrange
+            String originalQuery = "Original query";
+            String enrichedQuery = "Previous conversation:\nuser: History\n\nCurrent question: Original query";
+            
+            when(embeddingPort.embed(enrichedQuery)).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            useCase.execute(originalQuery, null, DEFAULT_TOP_K, List.of(ChatMessage.createUserMessage("History")));
+
+            // Assert
+            verify(embeddingPort).embed(enrichedQuery);
+            verify(embeddingPort, never()).embed(originalQuery);
+        }
+
+        @Test
+        @DisplayName("should return enriched query in RetrievalResult")
+        void shouldReturnEnrichedQueryInResult() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createUserMessage("Previous message")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            assertThat(result.enrichedQuery())
+                .contains("Previous conversation:")
+                .contains("user: Previous message")
+                .contains("Current question: " + query);
+        }
+
+        @Test
+        @DisplayName("should handle history with only assistant messages")
+        void shouldHandleHistoryWithOnlyAssistantMessages() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createAssistantMessage("Previous answer")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            assertThat(result.enrichedQuery())
+                .contains("Previous conversation:")
+                .contains("assistant: Previous answer")
+                .contains("Current question: " + query);
+        }
+
+        @Test
+        @DisplayName("should handle single message history")
+        void shouldHandleSingleMessageHistory() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createUserMessage("Single message")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            assertThat(result.enrichedQuery())
+                .contains("Previous conversation:")
+                .contains("user: Single message")
+                .contains("Current question: " + query);
+        }
+
+        @Test
+        @DisplayName("should preserve message order from history")
+        void shouldPreserveMessageOrderFromHistory() {
+            // Arrange
+            String query = "Current question";
+            List<ChatMessage> history = List.of(
+                ChatMessage.createUserMessage("First"),
+                ChatMessage.createAssistantMessage("Second"),
+                ChatMessage.createUserMessage("Third")
+            );
+            
+            when(embeddingPort.embed(anyString())).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(query, null, DEFAULT_TOP_K, history);
+
+            // Assert
+            String enriched = result.enrichedQuery();
+            int firstIndex = enriched.indexOf("First");
+            int secondIndex = enriched.indexOf("Second");
+            int thirdIndex = enriched.indexOf("Third");
+            
+            assertThat(firstIndex).isLessThan(secondIndex);
+            assertThat(secondIndex).isLessThan(thirdIndex);
         }
     }
 

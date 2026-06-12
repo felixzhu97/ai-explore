@@ -1,5 +1,6 @@
 package com.ai.domain.model;
 
+import com.ai.domain.vo.DocumentId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("Document")
 class DocumentTest {
 
-    private static final UUID TEST_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    private static final DocumentId TEST_ID = DocumentId.of(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
     private static final String TEST_TITLE = "Test Document";
     private static final String TEST_FILE_NAME = "test.pdf";
     private static final Long TEST_FILE_SIZE = 1024L;
@@ -37,7 +38,7 @@ class DocumentTest {
             Document document = new Document(TEST_ID, TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE);
 
             // Assert
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.UPLOADING);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.UPLOADING);
         }
 
         @Test
@@ -110,13 +111,13 @@ class DocumentTest {
         void shouldTransitionFromUploadingToProcessingWhenMarkProcessing() {
             // Arrange
             Document document = new Document(TEST_ID, TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE);
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.UPLOADING);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.UPLOADING);
 
             // Act
             document.markProcessing();
 
             // Assert
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.PROCESSING);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.PROCESSING);
         }
 
         @Test
@@ -130,7 +131,7 @@ class DocumentTest {
             document.markReady();
 
             // Assert
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.READY);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.READY);
         }
 
         @Test
@@ -144,7 +145,7 @@ class DocumentTest {
             document.markFailed();
 
             // Assert
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.FAILED);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.FAILED);
         }
 
         @Test
@@ -154,13 +155,13 @@ class DocumentTest {
             Document document = new Document(TEST_ID, TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE);
             document.markProcessing();
             document.markReady();
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.READY);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.READY);
 
             // Act
             document.markProcessing();
 
             // Assert
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.PROCESSING);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.PROCESSING);
         }
 
         @Test
@@ -170,13 +171,13 @@ class DocumentTest {
             Document document = new Document(TEST_ID, TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE);
             document.markProcessing();
             document.markFailed();
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.FAILED);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.FAILED);
 
             // Act
             document.markProcessing();
 
             // Assert
-            assertThat(document.getStatus()).isEqualTo(Document.DocumentStatus.PROCESSING);
+            assertThat(document.getStatus()).isEqualTo(DocumentStatus.PROCESSING);
         }
 
         @Test
@@ -253,35 +254,35 @@ class DocumentTest {
         @DisplayName("should have four status values")
         void shouldHaveFourStatusValues() {
             // Assert
-            assertThat(Document.DocumentStatus.values()).hasSize(4);
+            assertThat(DocumentStatus.values()).hasSize(4);
         }
 
         @Test
         @DisplayName("should contain UPLOADING status")
         void shouldContainUploadingStatus() {
             // Assert
-            assertThat(Document.DocumentStatus.UPLOADING).isNotNull();
+            assertThat(DocumentStatus.UPLOADING).isNotNull();
         }
 
         @Test
         @DisplayName("should contain PROCESSING status")
         void shouldContainProcessingStatus() {
             // Assert
-            assertThat(Document.DocumentStatus.PROCESSING).isNotNull();
+            assertThat(DocumentStatus.PROCESSING).isNotNull();
         }
 
         @Test
         @DisplayName("should contain READY status")
         void shouldContainReadyStatus() {
             // Assert
-            assertThat(Document.DocumentStatus.READY).isNotNull();
+            assertThat(DocumentStatus.READY).isNotNull();
         }
 
         @Test
         @DisplayName("should contain FAILED status")
         void shouldContainFailedStatus() {
             // Assert
-            assertThat(Document.DocumentStatus.FAILED).isNotNull();
+            assertThat(DocumentStatus.FAILED).isNotNull();
         }
     }
 }

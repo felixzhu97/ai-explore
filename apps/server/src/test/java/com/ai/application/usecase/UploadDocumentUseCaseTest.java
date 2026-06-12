@@ -5,6 +5,7 @@ import com.ai.application.port.EmbeddingPort;
 import com.ai.application.port.VectorSearchPort;
 import com.ai.domain.model.Document;
 import com.ai.domain.model.DocumentChunk;
+import com.ai.domain.model.DocumentStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -119,7 +120,7 @@ class UploadDocumentUseCaseTest {
             Document result = useCase.execute(TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE, TEST_CONTENT);
 
             // Assert
-            assertThat(result.getStatus()).isEqualTo(Document.DocumentStatus.READY);
+            assertThat(result.getStatus()).isEqualTo(DocumentStatus.READY);
         }
 
         @Test
@@ -134,7 +135,7 @@ class UploadDocumentUseCaseTest {
 
             // Assert - even empty content results in one chunk due to how chunkText works
             assertThat(result).isNotNull();
-            assertThat(result.getStatus()).isEqualTo(Document.DocumentStatus.READY);
+            assertThat(result.getStatus()).isEqualTo(DocumentStatus.READY);
         }
 
         @Test
@@ -170,7 +171,7 @@ class UploadDocumentUseCaseTest {
             
             List<Document> savedDocuments = documentCaptor.getAllValues();
             Document lastSaved = savedDocuments.get(savedDocuments.size() - 1);
-            assertThat(lastSaved.getStatus()).isEqualTo(Document.DocumentStatus.FAILED);
+            assertThat(lastSaved.getStatus()).isEqualTo(DocumentStatus.FAILED);
         }
 
         @Test
@@ -185,7 +186,7 @@ class UploadDocumentUseCaseTest {
             Document result = useCase.execute(TEST_TITLE, TEST_FILE_NAME, TEST_FILE_SIZE, content);
 
             // Assert
-            assertThat(result.getStatus()).isEqualTo(Document.DocumentStatus.READY);
+            assertThat(result.getStatus()).isEqualTo(DocumentStatus.READY);
         }
 
         @Test

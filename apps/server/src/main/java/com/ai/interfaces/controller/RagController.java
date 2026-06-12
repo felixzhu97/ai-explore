@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -168,11 +167,8 @@ public class RagController {
             // Build the prompt with context
             String prompt = buildPrompt(request.question(), context);
 
-            // Call AI service to get the actual response
-            String aiResponse = aiChatService.chat(prompt);
-
-            // Stream the AI response using non-blocking reactive approach
-            return streamResponseReactive(aiResponse, sources);
+            // Stream the AI response using real ChatClient streaming
+            return streamResponseReactive(prompt, sources);
 
         } catch (Exception e) {
             log.error("Error in RAG chat", e);
@@ -182,13 +178,10 @@ public class RagController {
 
     private Flux<ServerSentEvent<String>> streamResponseReactive(String prompt,
                                                                  List<SourceDocument> sources) {
-        String[] words = prompt.split(" ");
-
-        // Use Flux.interval for non-blocking delay instead of Thread.sleep
-        return Flux.fromArray(words)
-                .delayElements(Duration.ofMillis(30))
+        // Use real ChatClient streaming
+        return aiChatService.chatStream(prompt)
                 .map(word -> ServerSentEvent.<String>builder()
-                        .data(word + " ")
+                        .data(word)
                         .build())
                 .concatWith(Flux.defer(() -> {
                     // Send sources event at the end
@@ -207,7 +200,8 @@ public class RagController {
                         log.error("Error serializing sources", e);
                         return Flux.empty();
                     }
-                }));
+                }))
+                .doOnError(e -> log.error("Error in streaming", e));
     }
 
     private String buildPrompt(String question, String context) {

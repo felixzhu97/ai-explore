@@ -5,8 +5,10 @@ import com.ai.application.port.EmbeddingPort;
 import com.ai.application.port.VectorSearchPort;
 import com.ai.domain.model.Document;
 import com.ai.domain.model.DocumentChunk;
+import com.ai.domain.vo.DocumentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -31,10 +33,11 @@ public class UploadDocumentUseCase {
         this.chunkOverlap = chunkOverlap;
     }
 
+    @Transactional
     public Document execute(String title, String fileName, Long fileSize, String content) {
         log.info("Uploading document: {}", title);
         
-        Document document = new Document(UUID.randomUUID(), title, fileName, fileSize);
+        Document document = new Document(DocumentId.generate(), title, fileName, fileSize);
         document.markProcessing();
         document = documentRepository.save(document);
 
@@ -53,7 +56,7 @@ public class UploadDocumentUseCase {
                 
                 DocumentChunk chunk = new DocumentChunk(
                     UUID.randomUUID(),
-                    document.getId(),
+                    document.getId().value(),
                     chunkText,
                     i,
                     metadata

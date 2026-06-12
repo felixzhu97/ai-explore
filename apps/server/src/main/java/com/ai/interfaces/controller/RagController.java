@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,7 +36,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/rag")
 @Tag(name = "RAG", description = "RAG document management and chat")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:3000"})
 public class RagController {
 
     private final RagApplicationService ragApplicationService;
@@ -115,7 +115,7 @@ public class RagController {
         );
         
         UploadDocumentResponse response = new UploadDocumentResponse(
-            document.getId(),
+            document.getId().value(),
             document.getTitle(),
             document.getStatus().name(),
             0, // chunkCount not available from Document model
@@ -146,80 +146,68 @@ public class RagController {
     public Flux<ServerSentEvent<String>> ragChatStream(@Valid @RequestBody RagChatRequest request) {
         log.info("RAG chat request: {} with docIds: {}", truncate(request.question()), request.docIds());
 
-        return Flux.create(sink -> {
-            try {
-                // Convert string doc IDs to UUIDs
-                List<UUID> docUuids = null;
-                if (request.docIds() != null && !request.docIds().isEmpty()) {
-                    docUuids = request.docIds().stream()
-                        .map(UUID::fromString)
-                        .collect(Collectors.toList());
-                }
-
-                // Retrieve context from specified documents (or all if not specified)
-                var result = ragApplicationService.retrieveContext(
-                    request.question(),
-                    docUuids,  // use provided doc IDs
-                    request.topK() != null ? request.topK() : 5
-                );
-
-                String context = result.context();
-                List<SourceDocument> sources = result.sources();
-
-                // Build the prompt with context
-                String prompt = buildPrompt(request.question(), context);
-
-                // Call AI service to get the actual response
-                String aiResponse = aiChatService.chat(prompt);
-
-                // Stream the AI response
-                streamResponse(sink, aiResponse, sources);
-
-            } catch (Exception e) {
-                log.error("Error in RAG chat", e);
-                sink.error(e);
+        try {
+            // Convert string doc IDs to UUIDs
+            List<UUID> docUuids = null;
+            if (request.docIds() != null && !request.docIds().isEmpty()) {
+                docUuids = request.docIds().stream()
+                    .map(UUID::fromString)
+                    .collect(Collectors.toList());
             }
-        });
+
+            // Retrieve context from specified documents (or all if not specified)
+            var result = ragApplicationService.retrieveContext(
+                request.question(),
+                docUuids,
+                request.topK() != null ? request.topK() : 5
+            );
+
+            String context = result.context();
+            List<SourceDocument> sources = result.sources();
+
+            // Build the prompt with context
+            String prompt = buildPrompt(request.question(), context);
+
+            // Call AI service to get the actual response
+            String aiResponse = aiChatService.chat(prompt);
+
+            // Stream the AI response using non-blocking reactive approach
+            return streamResponseReactive(aiResponse, sources);
+
+        } catch (Exception e) {
+            log.error("Error in RAG chat", e);
+            return Flux.error(e);
+        }
     }
 
-    private void streamResponse(reactor.core.publisher.FluxSink<ServerSentEvent<String>> sink, 
-                                 String prompt, 
-                                 List<SourceDocument> sources) {
-        // Split prompt into tokens for streaming simulation
+    private Flux<ServerSentEvent<String>> streamResponseReactive(String prompt,
+                                                                 List<SourceDocument> sources) {
         String[] words = prompt.split(" ");
-        
-        for (int i = 0; i < words.length; i++) {
-            String token = words[i] + (i < words.length - 1 ? " " : "");
-            sink.next(ServerSentEvent.<String>builder()
-                .data(token)
-                .build());
-            
-            // Control streaming speed to avoid flooding the frontend
-            try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        
-        // Send sources event at the end
-        try {
-            List<SourceDocumentDto> sourceDtos = sources.stream()
-                .map(this::toSourceDocumentDto)
-                .collect(Collectors.toList());
-            
-            String sourcesJson = objectMapper.writeValueAsString(sourceDtos);
-            
-            sink.next(ServerSentEvent.<String>builder()
-                .event("sources")
-                .data(sourcesJson)
-                .build());
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing sources", e);
-        }
-        
-        sink.complete();
+
+        // Use Flux.interval for non-blocking delay instead of Thread.sleep
+        return Flux.fromArray(words)
+                .delayElements(Duration.ofMillis(30))
+                .map(word -> ServerSentEvent.<String>builder()
+                        .data(word + " ")
+                        .build())
+                .concatWith(Flux.defer(() -> {
+                    // Send sources event at the end
+                    try {
+                        List<SourceDocumentDto> sourceDtos = sources.stream()
+                                .map(this::toSourceDocumentDto)
+                                .collect(Collectors.toList());
+
+                        String sourcesJson = objectMapper.writeValueAsString(sourceDtos);
+
+                        return Flux.just(ServerSentEvent.<String>builder()
+                                .event("sources")
+                                .data(sourcesJson)
+                                .build());
+                    } catch (JsonProcessingException e) {
+                        log.error("Error serializing sources", e);
+                        return Flux.empty();
+                    }
+                }));
     }
 
     private String buildPrompt(String question, String context) {
@@ -229,7 +217,7 @@ public class RagController {
 
     private DocumentSummaryDto toDocumentSummaryDto(Document document) {
         return new DocumentSummaryDto(
-            document.getId(),
+            document.getId().value(),
             document.getTitle(),
             document.getStatus().name(),
             document.getCreatedAt(),

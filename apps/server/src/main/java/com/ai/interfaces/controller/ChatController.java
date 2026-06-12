@@ -20,7 +20,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:3000"})
 public class ChatController {
 
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);

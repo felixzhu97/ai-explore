@@ -3,6 +3,8 @@ package com.ai.infrastructure.adapter.persistence;
 import com.ai.application.port.DocumentRepositoryPort;
 import com.ai.domain.model.Document;
 import com.ai.domain.model.DocumentChunk;
+import com.ai.domain.model.DocumentStatus;
+import com.ai.domain.vo.DocumentId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -114,7 +116,7 @@ public class JpaDocumentRepository implements DocumentRepositoryPort {
         }
 
         return new DocumentEntity(
-                document.getId(),
+                document.getId().value(),
                 document.getTitle(),
                 document.getFileName(),
                 document.getFileSize(),
@@ -125,17 +127,17 @@ public class JpaDocumentRepository implements DocumentRepositoryPort {
     }
 
     private Document toDomain(DocumentEntity entity) {
-        Document.DocumentStatus status;
+        DocumentStatus status;
         switch (entity.getStatus()) {
-            case UPLOADING -> status = Document.DocumentStatus.UPLOADING;
-            case PROCESSING -> status = Document.DocumentStatus.PROCESSING;
-            case READY -> status = Document.DocumentStatus.READY;
-            case FAILED -> status = Document.DocumentStatus.FAILED;
+            case UPLOADING -> status = DocumentStatus.UPLOADING;
+            case PROCESSING -> status = DocumentStatus.PROCESSING;
+            case READY -> status = DocumentStatus.READY;
+            case FAILED -> status = DocumentStatus.FAILED;
             default -> throw new IllegalArgumentException("Unknown status: " + entity.getStatus());
         }
 
         return new Document(
-                entity.getId(),
+                DocumentId.of(entity.getId()),
                 entity.getTitle(),
                 entity.getFileName(),
                 entity.getFileSize(),

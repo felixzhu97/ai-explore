@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class ChatSession {
 
@@ -114,20 +115,21 @@ public class ChatSession {
      * Returns the most recent user message.
      */
     public ChatMessage getLastUserMessage() {
-        List<ChatMessage> userMessages = messages.stream()
-            .filter(ChatMessage::isFromUser)
-            .toList();
-        return userMessages.isEmpty() ? null : userMessages.get(userMessages.size() - 1);
+        return getLastMessageByRole(ChatMessage::isFromUser);
     }
 
     /**
      * Returns the most recent assistant message.
      */
     public ChatMessage getLastAssistantMessage() {
-        List<ChatMessage> assistantMessages = messages.stream()
-            .filter(ChatMessage::isFromAssistant)
-            .toList();
-        return assistantMessages.isEmpty() ? null : assistantMessages.get(assistantMessages.size() - 1);
+        return getLastMessageByRole(ChatMessage::isFromAssistant);
+    }
+
+    private ChatMessage getLastMessageByRole(Predicate<ChatMessage> filter) {
+        return messages.stream()
+            .filter(filter)
+            .reduce((first, second) -> second)
+            .orElse(null);
     }
 
     /**

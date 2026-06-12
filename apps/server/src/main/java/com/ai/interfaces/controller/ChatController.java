@@ -35,12 +35,12 @@ public class ChatController {
      */
     @PostMapping("/chat")
     public ResponseEntity<ChatResponse> chat(@Valid @RequestBody ChatRequest request) {
-        log.info("Received chat request: {}", truncate(request.message()));
-
         if (request.message() == null || request.message().isBlank()) {
             return ResponseEntity.badRequest()
                 .body(ChatResponse.of("Please provide a message."));
         }
+
+        log.info("Received chat request: {}", truncate(request.message()));
 
         String response;
         if (request.sessionId() != null && !request.sessionId().isBlank()) {

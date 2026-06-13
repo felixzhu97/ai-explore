@@ -862,7 +862,6 @@ interface Toast {
       .markdown-content ul,
       .markdown-content ol {
         margin: 0.5em 0;
-        padding-left: 1.5em;
       }
 
       .markdown-content li {

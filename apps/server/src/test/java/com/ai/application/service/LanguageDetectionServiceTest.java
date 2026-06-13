@@ -552,5 +552,46 @@ class LanguageDetectionServiceTest {
             String result = service.buildPrompt("Q", "C", "en");
             assertThat(result).matches("(?s).*(blank line|paragraph).*");
         }
+
+        // ==================== Citation Instructions Tests ====================
+
+        @Test
+        @DisplayName("should include citation instructions in Chinese template")
+        void shouldIncludeCitationInstructionsInChineseTemplate() {
+            // Act
+            String result = service.buildPrompt(TEST_QUESTION, TEST_CONTEXT, "zh");
+
+            // Assert
+            assertThat(result).contains("[Source 1]");
+            assertThat(result).contains("[1]");
+            assertThat(result).contains("引用规范");
+            assertThat(result).contains("参考来源");
+        }
+
+        @Test
+        @DisplayName("should include citation instructions in Japanese template")
+        void shouldIncludeCitationInstructionsInJapaneseTemplate() {
+            // Act
+            String result = service.buildPrompt(TEST_QUESTION, TEST_CONTEXT, "ja");
+
+            // Assert
+            assertThat(result).contains("[Source 1]");
+            assertThat(result).contains("[1]");
+            assertThat(result).contains("引用");
+            assertThat(result).contains("参考");
+        }
+
+        @Test
+        @DisplayName("should include citation instructions in English template")
+        void shouldIncludeCitationInstructionsInEnglishTemplate() {
+            // Act
+            String result = service.buildPrompt(TEST_QUESTION, TEST_CONTEXT, "en");
+
+            // Assert
+            assertThat(result).contains("[Source 1]");
+            assertThat(result).contains("[1]");
+            assertThat(result).contains("Citation");
+            assertThat(result).contains("References");
+        }
     }
 }

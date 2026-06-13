@@ -221,18 +221,19 @@ interface Toast {
                       <div class="sources-title">📖 {{ i18n.t().ragChat.sources }}</div>
                       @for (source of msg.sources.slice(0, 3); track $index) {
                         <div class="source-item">
+                          <div class="source-header">
+                            <span class="source-index">[{{ source.index || ($index + 1) }}]</span>
+                            <span class="source-title" [title]="source.documentTitle || ''">
+                              {{ source.documentTitle || 'Unknown Document' }}
+                            </span>
+                            <span class="source-similarity">{{ (source.score * 100).toFixed(1) }}%</span>
+                          </div>
                           <div class="source-text">
                             {{
-                              (source.text || source.content || '').length > 200 
-                                ? (source.text || source.content || '').slice(0, 200) + '...' 
+                              (source.text || source.content || '').length > 200
+                                ? (source.text || source.content || '').slice(0, 200) + '...'
                                 : (source.text || source.content || '')
                             }}
-                          </div>
-                          <div class="source-meta">
-                            <span
-                              >{{ i18n.t().ragChat.similarity }}:
-                              {{ (source.score * 100).toFixed(1) }}%</span
-                            >
                           </div>
                         </div>
                       }
@@ -997,6 +998,27 @@ interface Toast {
         margin-bottom: 0;
       }
 
+      .source-index {
+        font-weight: 600;
+        color: #007aff;
+        margin-right: 4px;
+        font-size: 13px;
+      }
+
+      .source-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+      }
+
+      .source-similarity {
+        font-size: 12px;
+        color: #86868b;
+        margin-left: auto;
+      }
+
       .source-text {
         color: #1d1d1f;
         line-height: 1.6;
@@ -1008,6 +1030,13 @@ interface Toast {
         justify-content: space-between;
         font-size: 12px;
         color: #86868b;
+      }
+
+      .source-title {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .input-area {

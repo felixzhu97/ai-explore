@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RagChatUseCase {
     private static final Logger log = LoggerFactory.getLogger(RagChatUseCase.class);
@@ -44,18 +43,38 @@ public class RagChatUseCase {
             chunks = vectorSearchPort.search(queryEmbedding, topK > 0 ? topK : DEFAULT_TOP_K);
         }
 
-        String context = chunks.stream()
-            .map(DocumentChunk::getContent)
-            .collect(Collectors.joining("\n\n"));
+        List<SourceDocument> sources = new ArrayList<>();
+        StringBuilder contextBuilder = new StringBuilder();
 
-        List<SourceDocument> sources = chunks.stream()
-            .map(chunk -> new SourceDocument(
-                chunk.getContent().substring(0, Math.min(MAX_SOURCE_LENGTH, chunk.getContent().length())),
-                calculateSimilarity(queryEmbedding, chunk.getEmbedding()),
-                chunk.getMetadata()
-            ))
-            .sorted(Comparator.comparingDouble(SourceDocument::score).reversed())
-            .toList();
+        for (int i = 0; i < chunks.size(); i++) {
+            DocumentChunk chunk = chunks.get(i);
+            int sourceIndex = i + 1;
+            String documentTitle = extractDocumentTitle(chunk.getMetadata());
+            double similarity = calculateSimilarity(queryEmbedding, chunk.getEmbedding());
+            String snippet = chunk.getContent().substring(0, Math.min(MAX_SOURCE_LENGTH, chunk.getContent().length()));
+
+            // Build formatted context with source marker
+            contextBuilder.append("[Source ")
+                    .append(sourceIndex)
+                    .append("] (document: ")
+                    .append(documentTitle)
+                    .append(", similarity: ")
+                    .append(String.format("%.1f", similarity * 100))
+                    .append("%)\n")
+                    .append(chunk.getContent())
+                    .append("\n\n");
+
+            // Build source document for SSE response
+            sources.add(new SourceDocument(
+                    sourceIndex,
+                    snippet,
+                    similarity,
+                    documentTitle,
+                    chunk.getMetadata()
+            ));
+        }
+
+        String context = contextBuilder.toString();
 
         log.info("Retrieved {} chunks", chunks.size());
         return new RetrievalResult(context, sources, enrichedQuery);
@@ -91,5 +110,14 @@ public class RagChatUseCase {
             normB += b[i] * b[i];
         }
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-10);
+    }
+
+    private String extractDocumentTitle(Map<String, Object> metadata) {
+        if (metadata == null) return "unknown";
+        Object title = metadata.get("documentTitle");
+        if (title != null) return title.toString();
+        Object filename = metadata.get("filename");
+        if (filename != null) return filename.toString();
+        return "unknown";
     }
 }

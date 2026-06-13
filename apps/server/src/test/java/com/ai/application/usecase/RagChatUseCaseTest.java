@@ -230,7 +230,7 @@ class RagChatUseCaseTest {
             // Arrange
             UUID docId = UUID.randomUUID();
             when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
-            
+
             List<DocumentChunk> chunks = List.of(
                 createChunkWithEmbedding(UUID.randomUUID(), docId, "Content with relevant info", 2)
             );
@@ -252,7 +252,7 @@ class RagChatUseCaseTest {
             UUID docId = UUID.randomUUID();
             String longContent = "A".repeat(600);
             when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
-            
+
             List<DocumentChunk> chunks = List.of(
                 createChunkWithEmbedding(UUID.randomUUID(), docId, longContent, 2)
             );
@@ -273,9 +273,9 @@ class RagChatUseCaseTest {
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("source", "test.pdf");
             metadata.put("page", 1);
-            
+
             DocumentChunk chunk = createChunkWithMetadata(UUID.randomUUID(), docId, "Test content", metadata, 2);
-            
+
             when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
             when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(List.of(chunk));
 
@@ -285,6 +285,166 @@ class RagChatUseCaseTest {
             // Assert
             assertThat(result.sources().get(0).metadata()).containsEntry("source", "test.pdf");
             assertThat(result.sources().get(0).metadata()).containsEntry("page", 1);
+        }
+
+        @Test
+        @DisplayName("should assign sequential indices to sources starting at 1")
+        void shouldAssignSequentialIndicesToSourcesStartingAtOne() {
+            // Arrange
+            UUID docId = UUID.randomUUID();
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
+
+            List<DocumentChunk> chunks = List.of(
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "First source", 2),
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "Second source", 2),
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "Third source", 2)
+            );
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(chunks);
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            assertThat(result.sources()).hasSize(3);
+            assertThat(result.sources().get(0).index()).isEqualTo(1);
+            assertThat(result.sources().get(1).index()).isEqualTo(2);
+            assertThat(result.sources().get(2).index()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("should extract documentTitle from chunk metadata")
+        void shouldExtractDocumentTitleFromChunkMetadata() {
+            // Arrange
+            UUID docId = UUID.randomUUID();
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("documentTitle", "Test Document.pdf");
+
+            DocumentChunk chunk = createChunkWithMetadata(UUID.randomUUID(), docId, "Test content", metadata, 2);
+
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(List.of(chunk));
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            assertThat(result.sources()).hasSize(1);
+            assertThat(result.sources().get(0).documentTitle()).isEqualTo("Test Document.pdf");
+        }
+
+        @Test
+        @DisplayName("should use filename as fallback when documentTitle is absent")
+        void shouldUseFilenameAsFallbackWhenDocumentTitleIsAbsent() {
+            // Arrange
+            UUID docId = UUID.randomUUID();
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("filename", "fallback.txt");
+
+            DocumentChunk chunk = createChunkWithMetadata(UUID.randomUUID(), docId, "Test content", metadata, 2);
+
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(List.of(chunk));
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            assertThat(result.sources()).hasSize(1);
+            assertThat(result.sources().get(0).documentTitle()).isEqualTo("fallback.txt");
+        }
+    }
+
+    @Nested
+    @DisplayName("Context Formatting with Source Markers")
+    class ContextFormattingWithSourceMarkers {
+
+        @Test
+        @DisplayName("should format context with source markers")
+        void shouldFormatContextWithSourceMarkers() {
+            // Arrange
+            UUID docId = UUID.randomUUID();
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
+
+            List<DocumentChunk> chunks = List.of(
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "First chunk", 2),
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "Second chunk", 2)
+            );
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(chunks);
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            assertThat(result.context()).contains("[Source 1]");
+            assertThat(result.context()).contains("[Source 2]");
+            assertThat(result.context()).contains("First chunk");
+            assertThat(result.context()).contains("Second chunk");
+        }
+
+        @Test
+        @DisplayName("should include document title and similarity in source marker")
+        void shouldIncludeDocumentTitleAndSimilarityInSourceMarker() {
+            // Arrange
+            UUID docId = UUID.randomUUID();
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("documentTitle", "ai-guide.pdf");
+
+            DocumentChunk chunk = createChunkWithMetadata(UUID.randomUUID(), docId, "AI content", metadata, 2);
+
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(List.of(chunk));
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            assertThat(result.context()).contains("document: ai-guide.pdf");
+            assertThat(result.context()).contains("similarity:");
+            assertThat(result.context()).contains("%");
+        }
+
+        @Test
+        @DisplayName("should align source indices between context and source list")
+        void shouldAlignSourceIndicesBetweenContextAndSourceList() {
+            // Arrange
+            UUID docId = UUID.randomUUID();
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(new float[]{0.5f, 0.5f});
+
+            List<DocumentChunk> chunks = List.of(
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "Chunk A", 2),
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "Chunk B", 2),
+                createChunkWithEmbedding(UUID.randomUUID(), docId, "Chunk C", 2)
+            );
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(chunks);
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            // Context should have [Source 1], [Source 2], [Source 3]
+            assertThat(result.context()).contains("[Source 1]");
+            assertThat(result.context()).contains("[Source 2]");
+            assertThat(result.context()).contains("[Source 3]");
+            // Source list should have matching indices
+            assertThat(result.sources()).hasSize(3);
+            assertThat(result.sources().get(0).index()).isEqualTo(1);
+            assertThat(result.sources().get(1).index()).isEqualTo(2);
+            assertThat(result.sources().get(2).index()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("should return empty context and sources when no chunks found")
+        void shouldReturnEmptyContextAndSourcesWhenNoChunksFound() {
+            // Arrange
+            when(embeddingPort.embed(TEST_QUERY)).thenReturn(TEST_EMBEDDING);
+            when(vectorSearchPort.search(any(float[].class), anyInt())).thenReturn(Collections.emptyList());
+
+            // Act
+            RagChatUseCase.RetrievalResult result = useCase.execute(TEST_QUERY, null, DEFAULT_TOP_K);
+
+            // Assert
+            assertThat(result.context()).isEmpty();
+            assertThat(result.sources()).isEmpty();
         }
     }
 

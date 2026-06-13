@@ -84,7 +84,7 @@ class RagControllerStreamingTest {
             // Arrange
             RagChatUseCase.RetrievalResult result = new RagChatUseCase.RetrievalResult(
                     "Context from documents",
-                    List.of(new SourceDocument("Document 1", 0.9, null)),
+                    List.of(new SourceDocument(1, "Document 1", 0.9, "doc1", null)),
                     "Enriched query"
             );
             when(ragApplicationService.retrieveContext(anyString(), any(), anyInt())).thenReturn(result);

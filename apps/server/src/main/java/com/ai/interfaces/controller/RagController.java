@@ -182,7 +182,7 @@ public class RagController {
 
     private Flux<ServerSentEvent<String>> sendSources(List<SourceDocument> sources) {
         List<SourceDocumentDto> sourceDtos = sources.stream()
-                .map(s -> new SourceDocumentDto(null, s.text(), (float) s.score(), s.metadata()))
+                .map(s -> new SourceDocumentDto(null, s.text(), (float) s.score(), s.metadata(), s.index(), s.documentTitle()))
                 .toList();
         return Flux.just(sourceDtos)
                 .map(dto -> ServerSentEvent.<String>builder()

@@ -86,7 +86,7 @@ public class LanguageDetectionService {
     private String getNoContextMessage(String languageCode) {
         return switch (languageCode) {
             case "zh" -> "没有找到相关的文档来回答您的问题。请先上传一些文档。";
-            case "ja" -> "您的質問にお答えできる関連ドキュメントがありません。まずドキュメントをアップロードしてください。";
+            case "ja" -> "関連ドキュメントがありません。まずドキュメントをアップロードしてください。";
             default -> "I don't have relevant documents to answer your question. Please upload some documents first.";
         };
     }
@@ -102,29 +102,50 @@ public class LanguageDetectionService {
                 # 用户问题
                 %s
 
+                ## 引用规范
+
+                - 文档上下文中的 `[Source 1]`、`[Source 2]` 等标记表示信息来源
+                - 在回答中引用时使用 `[1]`、`[2]` 格式，例如：`根据 [1]，人工智能是...`
+                - 如果引用多个来源，使用 `[1][2]` 格式
+
                 ## 格式要求（必须严格遵守）
 
                 - 标题符号后必须加空格：`# 标题` 而不是 `#标题`
                 - 粗体符号前后必须加空格：`** 关键词 **` 而不是 `**关键词**`
                 - 列表符号后必须加空格：`- 要点` 而不是 `-要点`
                 - **段落之间必须用两个换行符分隔（空一行）**：每个标题、每个列表项之间都要有空行
-                - **每个段落（标题或正文）的尾部必须加 `\n\n`**
+                - **每个段落（标题或正文）的尾部必须加换行符分隔**
                 - 使用标准 Markdown 语法
+
+                ## 参考来源
+
+                在回答末尾添加参考来源列表，格式如下：
+
+                ## 参考来源
+
+
+
+                [1] 文档标题 (相似度: XX%%)
+
+
 
                 ## 正确示例（严格模仿此格式，每个段落尾部都有空行）
 
-                # 概述\n\n
+                # 概述
 
-                **人工智能**（AI）是计算机科学的重要分支。\n\n
 
-                # 主要特点\n\n
 
-                - **机器学习**：让计算机从数据中学习\n
-                - **自然语言处理**：理解和生成人类语言\n\n
+                **人工智能**（AI）是计算机科学的重要分支 [1]。
 
-                # 应用领域\n\n
 
-                AI 广泛应用于医疗、金融、教育等行业。\n\n
+
+                ## 参考来源
+
+
+
+                [1] 文档标题 (相似度: 85%%)
+
+
 
                 # 回答
 
@@ -138,31 +159,50 @@ public class LanguageDetectionService {
                 # ユーザーの質問
                 %s
 
+                ## 引用ルール
+
+                - ドキュメントコンテキスト内の `[Source 1]`、`[Source 2]` などのマークは情報源を示します
+                - 回答で引用する場合は `[1]`、`[2]` 形式を使用し，例如：`[1] によると、AIは...`
+                - 複数のソースを引用する場合は `[1][2]` 形式を使用
+
                 ## フォーマット要件（厳守必須）
 
                 - 見出し記号の後にスペースが必要：`# 見出し` 而不是 `#見出し`
                 - 太字記号の前後にスペースが必要：`** キーワード **` 而不是 `**キーワード**`
                 - リスト記号の後にスペースが必要：`- 要点` 而不是 `-要点`
                 - **段落の間に必ず空行を挿入（2つの改行で区切る）**：各見出し、リスト項目同士は必ず空行で分隔
-                - **各段落（見出しまたは本文）の末尾に `\n\n` を追加すること**
+                - **各段落（見出しまたは本文）の末尾に改行を追加すること**
                 - 標準的な Markdown 構文を使用
+
+                ## 参考ソース
+
+                回答の最後に以下の形式で参考ソースリストを追加してください：
+
+                ## 参考ソース
+
+
+
+                [1] ドキュメントタイトル (類似度: XX%%)
+
+
 
                 ## 正しい例（この形式を厳密に真似ること、各段落の末尾に空行がある）
 
-                # 概要\n\n
-
-                **人工知能**（AI）はコンピュータ科学の重要な分支です。\n\n
-
-                # 主な特徴\n\n
-
-                - **機械学習**：コンピュータにデータから学習させる\n
-                - **自然言語処理**：人間の言語を理解し生成する\n\n
+                # 概要
 
 
 
-                # 応用分野\n\n
+                **人工知能**（AI）はコンピュータ科学の重要な分支です [1]。
 
-                AI は医療、金融、教育などの分野で広く応用されています。\n\n
+
+
+                ## 参考ソース
+
+
+
+                [1] ドキュメントタイトル (類似度: 85%%)
+
+
 
                 # 回答
 
@@ -176,33 +216,50 @@ public class LanguageDetectionService {
                 # Question
                 %s
 
+                ## Citation Guidelines
+
+                - `[Source 1]`, `[Source 2]` markers in the context indicate source documents
+                - When citing in your answer, use `[1]`, `[2]` format, e.g.: `According to [1], AI is...`
+                - For multiple sources, use `[1][2]` format
+
                 ## Format Requirements (MUST STRICTLY FOLLOW)
 
                 - Space after heading symbols: `# Heading` NOT `#Heading`
                 - Space around bold symbols: `** keyword **` NOT `**keyword**`
                 - Space after list symbols: `- Bullet point` NOT `-Bullet point`
                 - **Blank line between paragraphs (use two line breaks to separate)**: Always add empty line between headings and lists
-                - **Add `\n\n` at the end of every paragraph (heading or body text)**
+                - **Add blank line at the end of every paragraph (heading or body text)**
                 - Use standard Markdown syntax
+
+                ## References
+
+                Add a references list at the end of your answer using this format:
+
+                ## References
+
+
+
+                [1] Document Title (similarity: XX%%)
+
+
 
                 ## Correct Example (STRICTLY follow this format, each paragraph ends with blank line)
 
-                # Overview\n\n
-
-                **Artificial Intelligence** (AI) is an important branch of computer science.\n\n
+                # Overview
 
 
 
-                # Key Features\n\n
-
-                - **Machine Learning**: Enabling computers to learn from data\n
-                - **Natural Language Processing**: Understanding and generating human language\n\n
+                **Artificial Intelligence** (AI) is an important branch of computer science [1].
 
 
 
-                # Application Areas\n\n
+                ## References
 
-                AI is widely applied in healthcare, finance, education, and other industries.\n\n
+
+
+                [1] Document Title (similarity: 85%%)
+
+
 
                 # Answer
 

@@ -99,6 +99,8 @@ export interface SourceDocument {
   content?: string;
   score: number;
   metadata: Record<string, unknown>;
+  index?: number;
+  documentTitle?: string;
 }
 
 export interface RAGSource {

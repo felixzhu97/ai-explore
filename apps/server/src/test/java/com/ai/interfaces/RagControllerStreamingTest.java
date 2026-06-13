@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.UUID;
@@ -78,6 +79,7 @@ class RagControllerStreamingTest {
             when(ragApplicationService.retrieveContext(anyString(), any(), anyInt())).thenReturn(result);
             when(languageDetectionService.detect(anyString())).thenReturn("en");
             when(languageDetectionService.buildPrompt(anyString(), anyString(), anyString())).thenReturn("Built prompt");
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Response"));
 
             String requestBody = "{\"query\": \"What is AI?\"}";
 
@@ -90,6 +92,7 @@ class RagControllerStreamingTest {
             // Verify mock was called
             verify(ragApplicationService).retrieveContext(anyString(), any(), anyInt());
             verify(languageDetectionService).detect(anyString());
+            verify(aiChatService).chatStream(anyString());
         }
 
         @Test
@@ -104,7 +107,7 @@ class RagControllerStreamingTest {
                     "Context from specific docs", List.of(), "Query"
             );
             when(ragApplicationService.retrieveContext(anyString(), any(), anyInt())).thenReturn(result);
-            when(aiChatService.chat(anyString())).thenReturn("Response");
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Response"));
 
             String requestBody = String.format("{\"query\": \"Question\", \"doc_ids\": [\"%s\", \"%s\"]}",
                     docIds.get(0), docIds.get(1));
@@ -127,7 +130,7 @@ class RagControllerStreamingTest {
                     "Context", List.of(), "Query"
             );
             when(ragApplicationService.retrieveContext(anyString(), any(), eq(10))).thenReturn(result);
-            when(aiChatService.chat(anyString())).thenReturn("Response");
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Response"));
 
             String requestBody = "{\"query\": \"Question\", \"top_k\": 10}";
 
@@ -149,7 +152,7 @@ class RagControllerStreamingTest {
                     "Context", List.of(), "Query"
             );
             when(ragApplicationService.retrieveContext(anyString(), any(), eq(5))).thenReturn(result);
-            when(aiChatService.chat(anyString())).thenReturn("Response");
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Response"));
 
             String requestBody = "{\"query\": \"Question\"}";
 
@@ -171,7 +174,7 @@ class RagControllerStreamingTest {
                     "Context", List.of(), "Query"
             );
             when(ragApplicationService.retrieveContext(anyString(), isNull(), anyInt())).thenReturn(result);
-            when(aiChatService.chat(anyString())).thenReturn("Response");
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Response"));
 
             String requestBody = "{\"query\": \"Question\", \"doc_ids\": null}";
 

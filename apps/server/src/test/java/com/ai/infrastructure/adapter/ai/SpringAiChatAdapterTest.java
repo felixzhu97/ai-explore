@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -153,21 +154,41 @@ class SpringAiChatAdapterTest {
             verify(aiChatService).chatWithHistory(emptyHistory);
             assertThat(result).isEqualTo(expectedResponse);
         }
+    }
+
+    @Nested
+    @DisplayName("shouldDelegateChatStreamToAiChatService")
+    class ShouldDelegateChatStreamToAiChatService {
 
         @Test
-        @DisplayName("should handle single message history")
-        void shouldHandleSingleMessageHistory() {
+        @DisplayName("should call aiChatService.chatStream with user message")
+        void shouldCallAiChatServiceChatStreamWithUserMessage() {
             // Arrange
-            List<ChatMessage> singleMessage = List.of(
-                    ChatMessage.createUserMessage("Single message")
-            );
-            when(aiChatService.chatWithHistory(any())).thenReturn("Response");
+            String userMessage = "Hello, AI!";
+            Flux<String> expectedFlux = Flux.just("Hello", " world");
+            when(aiChatService.chatStream(userMessage)).thenReturn(expectedFlux);
 
             // Act
-            adapter.chatWithHistory(singleMessage);
+            Flux<String> result = adapter.chatStream(userMessage);
 
             // Assert
-            verify(aiChatService).chatWithHistory(singleMessage);
+            verify(aiChatService).chatStream(userMessage);
+            assertThat(result).isNotNull();
+        }
+
+        @Test
+        @DisplayName("should return flux from streaming service")
+        void shouldReturnFluxFromStreamingService() {
+            // Arrange
+            String userMessage = "Stream test";
+            Flux<String> expectedFlux = Flux.just("Chunk1", " Chunk2", " Chunk3");
+            when(aiChatService.chatStream(userMessage)).thenReturn(expectedFlux);
+
+            // Act
+            Flux<String> result = adapter.chatStream(userMessage);
+
+            // Assert
+            assertThat(result).isNotNull();
         }
     }
 
@@ -206,6 +227,21 @@ class SpringAiChatAdapterTest {
         }
 
         @Test
+        @DisplayName("should wrap exception from chatStream")
+        void shouldWrapExceptionFromChatStream() {
+            // Arrange
+            String userMessage = "Hello";
+            RuntimeException originalException = new RuntimeException("Stream failed");
+            when(aiChatService.chatStream(userMessage)).thenThrow(originalException);
+
+            // Act & Assert
+            assertThatThrownBy(() -> adapter.chatStream(userMessage))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("AI service error")
+                    .hasCause(originalException);
+        }
+
+        @Test
         @DisplayName("should preserve original exception message")
         void shouldPreserveOriginalExceptionMessage() {
             // Arrange
@@ -229,7 +265,7 @@ class SpringAiChatAdapterTest {
             RuntimeException originalException = new RuntimeException("Service error", nestedCause);
             when(aiChatService.chat(anyString())).thenThrow(originalException);
 
-            // Act & Assert - The exception chain: thrown -> originalException (cause) -> nestedCause
+            // Act & Assert
             assertThatThrownBy(() -> adapter.chat(userMessage))
                     .isInstanceOf(RuntimeException.class)
                     .hasCause(originalException);
@@ -333,21 +369,38 @@ class SpringAiChatAdapterTest {
         }
 
         @Test
+        @DisplayName("should call aiChatService exactly once per chatStream call")
+        void shouldCallAiChatServiceExactlyOncePerChatStreamCall() {
+            // Arrange
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Response"));
+
+            // Act
+            adapter.chatStream("Test");
+
+            // Assert
+            verify(aiChatService, times(1)).chatStream(anyString());
+        }
+
+        @Test
         @DisplayName("should delegate to correct service method")
         void shouldDelegateToCorrectServiceMethod() {
             // Arrange
             when(aiChatService.chat(anyString())).thenReturn("Simple response");
             when(aiChatService.chatWithHistory(any())).thenReturn("History response");
+            when(aiChatService.chatStream(anyString())).thenReturn(Flux.just("Stream response"));
 
             // Act
             String simpleResult = adapter.chat("Simple message");
             String historyResult = adapter.chatWithHistory(List.of(ChatMessage.createUserMessage("History")));
+            Flux<String> streamResult = adapter.chatStream("Stream message");
 
             // Assert
             verify(aiChatService).chat("Simple message");
             verify(aiChatService).chatWithHistory(any());
+            verify(aiChatService).chatStream("Stream message");
             assertThat(simpleResult).isEqualTo("Simple response");
             assertThat(historyResult).isEqualTo("History response");
+            assertThat(streamResult).isNotNull();
         }
     }
 }

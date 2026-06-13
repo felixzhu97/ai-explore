@@ -13,6 +13,7 @@ import com.ai.application.usecase.RagChatUseCase;
 import com.ai.application.usecase.SendChatMessageUseCase;
 import com.ai.application.usecase.UploadDocumentUseCase;
 import com.ai.domain.service.AiChatService;
+import com.ai.infrastructure.adapter.ai.DocumentSearchTool;
 import com.ai.infrastructure.adapter.ai.SpringAiChatAdapter;
 import com.ai.infrastructure.adapter.ai.SpringAiChatService;
 import com.ai.infrastructure.adapter.embedding.MockEmbeddingAdapter;
@@ -21,9 +22,16 @@ import com.ai.infrastructure.adapter.persistence.InMemoryChatSessionRepository;
 import com.ai.infrastructure.adapter.persistence.JpaDocumentRepository;
 import com.ai.infrastructure.adapter.vector.PgVectorAdapter;
 import jakarta.servlet.MultipartConfigElement;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.util.unit.DataSize;
 
@@ -46,6 +54,49 @@ public class ApplicationConfig {
         factory.setMaxRequestSize(DataSize.ofMegabytes(50));
         factory.setLocation("/tmp/uploads");
         return factory.createMultipartConfig();
+    }
+
+    /**
+     * Configure ChatMemory for conversation history management.
+     * Uses MessageWindowChatMemory which keeps the last N messages (default 20).
+     */
+    @Bean
+    public ChatMemory chatMemory() {
+        return MessageWindowChatMemory.builder().build();
+    }
+
+    /**
+     * Primary ChatModel bean to resolve ambiguity when both Ollama and OpenAI
+     * ChatModel beans are auto-configured by Spring AI.
+     * Spring AI's ChatClientAutoConfiguration requires a single ChatModel.
+     */
+    @Bean
+    @Primary
+    public ChatModel primaryChatModel(@Qualifier("openAiChatModel") ChatModel openAiChatModel) {
+        return openAiChatModel;
+    }
+
+    /**
+     * Configure MessageChatMemoryAdvisor for automatic conversation history injection.
+     */
+    @Bean
+    public MessageChatMemoryAdvisor messageChatMemoryAdvisor(ChatMemory chatMemory) {
+        return MessageChatMemoryAdvisor.builder(chatMemory).build();
+    }
+
+    /**
+     * Configure ChatClient with memory and tool support.
+     * Uses the ChatModel directly (injected via @Qualifier) to build the ChatClient.
+     */
+    @Bean
+    public ChatClient chatClient(
+                                 @Qualifier("openAiChatModel") org.springframework.ai.chat.model.ChatModel chatModel,
+                                 MessageChatMemoryAdvisor memoryAdvisor,
+                                 DocumentSearchTool documentSearchTool) {
+        return ChatClient.builder(chatModel)
+            .defaultAdvisors(memoryAdvisor)
+            .defaultTools(documentSearchTool)
+            .build();
     }
 
     @Bean

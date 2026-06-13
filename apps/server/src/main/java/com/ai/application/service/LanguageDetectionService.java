@@ -102,12 +102,6 @@ public class LanguageDetectionService {
                 # 用户问题
                 %s
 
-                ## 引用规范
-
-                - 文档上下文中的 `[Source 1]`、`[Source 2]` 等标记表示信息来源
-                - 在回答中引用时使用 `[1]`、`[2]` 格式，例如：`根据 [1]，人工智能是...`
-                - 如果引用多个来源，使用 `[1][2]` 格式
-
                 ## 格式要求（必须严格遵守）
 
                 - 标题符号后必须加空格：`# 标题` 而不是 `#标题`
@@ -115,37 +109,24 @@ public class LanguageDetectionService {
                 - 列表符号后必须加空格：`- 要点` 而不是 `-要点`
                 - **段落之间必须用两个换行符分隔（空一行）**：每个标题、每个列表项之间都要有空行
                 - **每个段落（标题或正文）的尾部必须加换行符分隔**
+                - 回答必须遵循「总-分-总」结构：开头先用 1-2 句话给出总体结论或概述（总）；中间用分点列表或子标题展开详细要点（分）；结尾再用 1-2 句话做总结或给出行动建议（总）。
                 - 使用标准 Markdown 语法
-
-                ## 参考来源
-
-                在回答末尾添加参考来源列表，格式如下：
-
-                ## 参考来源
-
-
-
-                [1] 文档标题 (相似度: XX%%)
-
-
 
                 ## 正确示例（严格模仿此格式，每个段落尾部都有空行）
 
                 # 概述
 
+                **人工智能**（AI）是计算机科学的重要分支，正在深刻改变各行各业。
 
+                # 核心要点
 
-                **人工智能**（AI）是计算机科学的重要分支 [1]。
+                - **机器学习**是 AI 的核心技术，通过数据训练模型
+                - **深度学习**基于神经网络，在图像和语音领域表现突出
+                - **自然语言处理**让机器理解和生成人类语言
 
+                # 总结
 
-
-                ## 参考来源
-
-
-
-                [1] 文档标题 (相似度: 85%%)
-
-
+                AI 将持续推动技术创新，建议持续关注其最新发展动态。
 
                 # 回答
 
@@ -159,12 +140,6 @@ public class LanguageDetectionService {
                 # ユーザーの質問
                 %s
 
-                ## 引用ルール
-
-                - ドキュメントコンテキスト内の `[Source 1]`、`[Source 2]` などのマークは情報源を示します
-                - 回答で引用する場合は `[1]`、`[2]` 形式を使用し，例如：`[1] によると、AIは...`
-                - 複数のソースを引用する場合は `[1][2]` 形式を使用
-
                 ## フォーマット要件（厳守必須）
 
                 - 見出し記号の後にスペースが必要：`# 見出し` 而不是 `#見出し`
@@ -172,37 +147,24 @@ public class LanguageDetectionService {
                 - リスト記号の後にスペースが必要：`- 要点` 而不是 `-要点`
                 - **段落の間に必ず空行を挿入（2つの改行で区切る）**：各見出し、リスト項目同士は必ず空行で分隔
                 - **各段落（見出しまたは本文）の末尾に改行を追加すること**
+                - 回答は「総-分-総」構造に従うこと：冒頭で 1〜2 文の全体結論（総）、中段はリストまたはサブ見出しで詳細を展開（分）、末尾で 1〜2 文のまとめまたは次のアクション提案（総）。
                 - 標準的な Markdown 構文を使用
-
-                ## 参考ソース
-
-                回答の最後に以下の形式で参考ソースリストを追加してください：
-
-                ## 参考ソース
-
-
-
-                [1] ドキュメントタイトル (類似度: XX%%)
-
-
 
                 ## 正しい例（この形式を厳密に真似ること、各段落の末尾に空行がある）
 
                 # 概要
 
+                **人工知能**（AI）はコンピュータ科学の重要な分支であり、各業界に深い変化をもたらしています。
 
+                # コアポイント
 
-                **人工知能**（AI）はコンピュータ科学の重要な分支です [1]。
+                - **機械学習**は AI の中核技術であり、データを通じてモデルを訓練する
+                - **深層学習**はニューラルネットワークに基づき、画像と音声の分野で顕著な成果を上げる
+                - **自然言語処理**により、機械が人間の言語を理解し生成することが可能になる
 
+                # まとめ
 
-
-                ## 参考ソース
-
-
-
-                [1] ドキュメントタイトル (類似度: 85%%)
-
-
+                AI は技術革新を継続的に推進するため、最新の動向に注目することをお勧めします。
 
                 # 回答
 
@@ -216,12 +178,6 @@ public class LanguageDetectionService {
                 # Question
                 %s
 
-                ## Citation Guidelines
-
-                - `[Source 1]`, `[Source 2]` markers in the context indicate source documents
-                - When citing in your answer, use `[1]`, `[2]` format, e.g.: `According to [1], AI is...`
-                - For multiple sources, use `[1][2]` format
-
                 ## Format Requirements (MUST STRICTLY FOLLOW)
 
                 - Space after heading symbols: `# Heading` NOT `#Heading`
@@ -229,37 +185,24 @@ public class LanguageDetectionService {
                 - Space after list symbols: `- Bullet point` NOT `-Bullet point`
                 - **Blank line between paragraphs (use two line breaks to separate)**: Always add empty line between headings and lists
                 - **Add blank line at the end of every paragraph (heading or body text)**
+                - Follow a `General-Specific-General` structure: open with a 1-2 sentence overall conclusion (General), expand with bullet points or sub-headings for details (Specific), close with a 1-2 sentence summary or next-step suggestion (General).
                 - Use standard Markdown syntax
-
-                ## References
-
-                Add a references list at the end of your answer using this format:
-
-                ## References
-
-
-
-                [1] Document Title (similarity: XX%%)
-
-
 
                 ## Correct Example (STRICTLY follow this format, each paragraph ends with blank line)
 
                 # Overview
 
+                **Artificial Intelligence** (AI) is an important branch of computer science, transforming every industry.
 
+                # Core Points
 
-                **Artificial Intelligence** (AI) is an important branch of computer science [1].
+                - **Machine learning** is the core technology of AI, training models through data
+                - **Deep learning** is based on neural networks and excels in image and speech domains
+                - **Natural language processing** enables machines to understand and generate human language
 
+                # Summary
 
-
-                ## References
-
-
-
-                [1] Document Title (similarity: 85%%)
-
-
+                AI will continue to drive technological innovation; staying current with its latest developments is recommended.
 
                 # Answer
 

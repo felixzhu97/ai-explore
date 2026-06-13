@@ -505,24 +505,33 @@ class LanguageDetectionServiceTest {
         @DisplayName("should include code block guidelines for Chinese")
         void shouldIncludeCodeBlockGuidelinesForChinese() {
             String result = service.buildPrompt("Q", "C", "zh");
-            // Verify markdown formatting examples are present
-            assertThat(result).contains("正确示例");
+            // Verify example section title exists and example body follows 总-分-总 structure
+            assertThat(result).contains("## 正确示例");
+            assertThat(result).contains("# 概述");
+            assertThat(result).contains("# 核心要点");
+            assertThat(result).contains("# 总结");
         }
 
         @Test
         @DisplayName("should include code block guidelines for Japanese")
         void shouldIncludeCodeBlockGuidelinesForJapanese() {
             String result = service.buildPrompt("Q", "C", "ja");
-            // Verify markdown formatting examples are present
-            assertThat(result).contains("正しい例");
+            // Verify example section title exists and example body follows 総-分-総 structure
+            assertThat(result).contains("## 正しい例");
+            assertThat(result).contains("# 概要");
+            assertThat(result).contains("# コアポイント");
+            assertThat(result).contains("# まとめ");
         }
 
         @Test
         @DisplayName("should include code block guidelines for English")
         void shouldIncludeCodeBlockGuidelinesForEnglish() {
             String result = service.buildPrompt("Q", "C", "en");
-            // Verify markdown formatting examples are present
-            assertThat(result).contains("Correct Example");
+            // Verify example section title exists and example body follows General-Specific-General structure
+            assertThat(result).contains("## Correct Example");
+            assertThat(result).contains("# Overview");
+            assertThat(result).contains("# Core Points");
+            assertThat(result).contains("# Summary");
         }
 
         @Test
@@ -553,45 +562,5 @@ class LanguageDetectionServiceTest {
             assertThat(result).matches("(?s).*(blank line|paragraph).*");
         }
 
-        // ==================== Citation Instructions Tests ====================
-
-        @Test
-        @DisplayName("should include citation instructions in Chinese template")
-        void shouldIncludeCitationInstructionsInChineseTemplate() {
-            // Act
-            String result = service.buildPrompt(TEST_QUESTION, TEST_CONTEXT, "zh");
-
-            // Assert
-            assertThat(result).contains("[Source 1]");
-            assertThat(result).contains("[1]");
-            assertThat(result).contains("引用规范");
-            assertThat(result).contains("参考来源");
-        }
-
-        @Test
-        @DisplayName("should include citation instructions in Japanese template")
-        void shouldIncludeCitationInstructionsInJapaneseTemplate() {
-            // Act
-            String result = service.buildPrompt(TEST_QUESTION, TEST_CONTEXT, "ja");
-
-            // Assert
-            assertThat(result).contains("[Source 1]");
-            assertThat(result).contains("[1]");
-            assertThat(result).contains("引用");
-            assertThat(result).contains("参考");
-        }
-
-        @Test
-        @DisplayName("should include citation instructions in English template")
-        void shouldIncludeCitationInstructionsInEnglishTemplate() {
-            // Act
-            String result = service.buildPrompt(TEST_QUESTION, TEST_CONTEXT, "en");
-
-            // Assert
-            assertThat(result).contains("[Source 1]");
-            assertThat(result).contains("[1]");
-            assertThat(result).contains("Citation");
-            assertThat(result).contains("References");
-        }
     }
 }

@@ -34,7 +34,6 @@ describe('RagChatComponent', () => {
         keyInfo: 'Key Information',
         basedOn: 'Based on {count} sources',
         sources: 'Sources',
-        similarity: 'Similarity',
         thinking: 'Thinking...',
         inputPlaceholder: 'Type your question...',
         documentDeleted: 'Document deleted',
@@ -510,29 +509,6 @@ describe('RagChatComponent', () => {
 
       expect(component.toasts().length).toBe(0);
       vi.useRealTimers();
-    });
-  });
-
-  describe('source expansion', () => {
-    it('should toggle sources for a message', () => {
-      createFixture();
-      component.toggleSources('msg1');
-      expect(component.expandedSources().has('msg1')).toBe(true);
-
-      component.toggleSources('msg1');
-      expect(component.expandedSources().has('msg1')).toBe(false);
-    });
-
-    it('should toggle sources for multiple messages', () => {
-      createFixture();
-      component.toggleSources('msg1');
-      component.toggleSources('msg2');
-
-      expect(component.expandedSources().size).toBe(2);
-
-      component.toggleSources('msg1');
-      expect(component.expandedSources().size).toBe(1);
-      expect(component.expandedSources().has('msg2')).toBe(true);
     });
   });
 

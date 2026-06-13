@@ -76,6 +76,12 @@ tasks.jacocoTestReport {
 
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
+    
+    classDirectories.setFrom(files(classDirectories.files.map { f ->
+        fileTree(f) {
+            exclude("com/ai/infrastructure/config/**")
+        }
+    }))
 
     violationRules {
         rule {

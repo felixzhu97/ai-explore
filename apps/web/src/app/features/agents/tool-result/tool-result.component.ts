@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
 
 export type ToolCallStatus = 'pending' | 'running' | 'success' | 'error';
 

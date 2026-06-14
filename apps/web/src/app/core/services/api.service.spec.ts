@@ -232,8 +232,6 @@ describe('ApiService', () => {
     });
 
     it('should handle abort on the returned controller', async () => {
-      const encoder = new TextEncoder();
-      let abortFn: any;
       const mockReader = {
         read: vi.fn().mockImplementation(() => {
           return new Promise((resolve) => {

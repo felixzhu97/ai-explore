@@ -53,7 +53,7 @@ describe('VisionPanelComponent', () => {
         // Trigger onload asynchronously to simulate real behavior
         setTimeout(() => {
           if (this.onload) {
-            this.onload({ target: { result: this.result } } as ProgressEvent);
+            this.onload({ target: { result: this.result } } as unknown as ProgressEvent<EventTarget>);
           }
         }, 0);
       }

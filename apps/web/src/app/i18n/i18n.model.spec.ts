@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   Language,
   SUPPORTED_LANGUAGES,
-  Translations,
   translations,
   languageNames,
 } from './i18n.model';

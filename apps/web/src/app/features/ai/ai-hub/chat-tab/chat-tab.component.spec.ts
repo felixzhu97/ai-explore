@@ -4,7 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ChatTabComponent } from './chat-tab.component';
 import { ApiService } from '@core/services/api.service';
 import { I18nService } from '@i18n';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 describe('ChatTabComponent', () => {
   let fixture: ComponentFixture<ChatTabComponent>;
@@ -428,8 +428,8 @@ describe('ChatTabComponent', () => {
       );
 
       component.send();
-      capturedChunk?.('Hello ');
-      capturedChunk?.('world!');
+      capturedChunk!('Hello ');
+      capturedChunk!('world!');
 
       const messages = component.messages();
       const assistantMsg = messages.find((m) => m.role === 'assistant');

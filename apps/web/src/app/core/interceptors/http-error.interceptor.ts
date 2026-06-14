@@ -2,7 +2,6 @@ import { inject } from '@angular/core';
 import {
   HttpInterceptorFn,
   HttpRequest,
-  HttpHandlerFn,
   HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';

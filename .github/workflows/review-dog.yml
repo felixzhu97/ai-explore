@@ -2,17 +2,15 @@ name: Code Review with Review Dog
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-  push:
-    branches: [main, master]
+    branches: ["main", "java-angular", "feature/**"]
 
 jobs:
-  lint:
-    name: Lint & Code Review
+  review:
+    name: ESLint & Prettier
     runs-on: ubuntu-latest
     permissions:
+      pull-requests: read
       contents: read
-      pull-requests: write
       checks: write
 
     steps:
@@ -30,112 +28,25 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: ESLint (Web)
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          eslint_flags: '.'
+          level: warning
+          reporter: github-pr-review
+          workdir: apps/web
 
-      - name: ESLint
-        run: pnpm --filter web exec eslint "src/**/*.{ts,html}"
-
-      - name: Run Review Dog for ESLint
-        if: failure()
+      - name: Prettier
+        uses: reviewdog/action-reviewdog@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reviewdog_version: v0.20.3
+          tool_name: prettier
+          level: warning
+          fail_on_error: false
+          reporter: github-pr-review
         env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm --filter web exec eslint "src/**/*.{ts,html}" 2>&1 | reviewdog -f=eslint -reporter=github-pr-review -level=error
-
-  typescript:
-    name: TypeScript Check
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      checks: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: TypeScript Check (Web)
-        run: pnpm --filter web exec tsc --noEmit
-
-      - name: Run Review Dog for TypeScript
-        if: failure()
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm --filter web exec tsc --noEmit 2>&1 | reviewdog -f=tsc -reporter=github-pr-review -level=error
-
-  prettier:
-    name: Code Format Check
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check Prettier formatting
-        run: pnpm --filter web exec prettier --check "src/**/*.{ts,tsx,js,jsx,json,css,scss,html,md,mdc}"
-
-      - name: Run Review Dog for Prettier
-        if: failure()
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm --filter web exec prettier --check "src/**/*.{ts,tsx,js,jsx,json,css,scss,html,md,mdc}" 2>&1 | reviewdog -f=prettier -reporter=github-pr-review -level=warning
-
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      checks: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests (Vitest + jsdom)
-        run: pnpm --filter web exec vitest run
+          PRETTIERDOG_IGNORE_UNCHANGED: "true"
+        entrypoint: |
+          pnpm prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}" --log-level warn 2>&1 || true

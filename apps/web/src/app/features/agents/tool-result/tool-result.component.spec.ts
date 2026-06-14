@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolResultComponent, ToolCall } from './tool-result.component';
 
@@ -377,7 +377,7 @@ describe('ToolResultComponent', () => {
       fixture.detectChanges();
 
       const outputSection = fixture.nativeElement.querySelectorAll('.section-label');
-      const outputLabel = Array.from(outputSection).find(
+      const outputLabel = (Array.from(outputSection) as HTMLElement[]).find(
         (el) => el.textContent?.includes('Output')
       );
       expect(outputLabel).toBeTruthy();

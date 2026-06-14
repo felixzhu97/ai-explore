@@ -1,10 +1,5 @@
-import {
-  HttpInterceptorFn,
-  HttpRequest,
-  HttpHandlerFn,
-  HttpErrorResponse,
-} from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';

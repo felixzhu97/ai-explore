@@ -333,8 +333,8 @@ describe('RagChatComponent', () => {
       );
 
       component.sendMessage();
-      capturedChunk?.('Hello ');
-      capturedChunk?.('world!');
+      capturedChunk!('Hello ');
+      capturedChunk!('world!');
 
       const messages = component.messages();
       const assistantMsg = messages.find((m) => m.role === 'assistant');
@@ -357,7 +357,7 @@ describe('RagChatComponent', () => {
       );
 
       component.sendMessage();
-      capturedSources?.([{ text: 'source text', score: 0.95 }]);
+      capturedSources!([{ text: 'source text', score: 0.95 }]);
 
       const messages = component.messages();
       const assistantMsg = messages.find((m) => m.role === 'assistant');
@@ -379,7 +379,7 @@ describe('RagChatComponent', () => {
       );
 
       component.sendMessage();
-      capturedDone?.();
+      capturedDone!();
 
       expect(component.isLoading()).toBe(false);
     });
@@ -399,7 +399,7 @@ describe('RagChatComponent', () => {
       );
 
       component.sendMessage();
-      capturedError?.(new Error('Processing failed'));
+      capturedError!(new Error('Processing failed'));
 
       const messages = component.messages();
       const assistantMsg = messages.find((m) => m.role === 'assistant');

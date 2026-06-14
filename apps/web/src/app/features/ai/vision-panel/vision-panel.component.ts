@@ -4,11 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { I18nService } from '../../../i18n';
-import {
-  SegmentedControlComponent,
-  SegmentedControlOption,
-} from '../../../shared/components/ui/segmented-control/segmented-control.component';
-import { Detection, VisionResult } from '../../../shared/models';
+import { SegmentedControlComponent } from '../../../shared/components/ui/segmented-control/segmented-control.component';
+import { VisionResult } from '../../../shared/models';
 
 type TaskType = 'caption' | 'detect' | 'ocr';
 

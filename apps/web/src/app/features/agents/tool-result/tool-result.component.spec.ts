@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolResultComponent, ToolCall } from './tool-result.component';
 
@@ -377,8 +377,8 @@ describe('ToolResultComponent', () => {
       fixture.detectChanges();
 
       const outputSection = fixture.nativeElement.querySelectorAll('.section-label');
-      const outputLabel = Array.from(outputSection).find(
-        (el) => el.textContent?.includes('Output')
+      const outputLabel = (Array.from(outputSection) as HTMLElement[]).find((el) =>
+        el.textContent?.includes('Output')
       );
       expect(outputLabel).toBeTruthy();
     });
@@ -432,7 +432,9 @@ describe('ToolResultComponent', () => {
     });
 
     it('should handle long tool names', () => {
-      createFixture(createToolCall({ name: 'a_very_long_tool_name_that_should_be_handled_gracefully' }));
+      createFixture(
+        createToolCall({ name: 'a_very_long_tool_name_that_should_be_handled_gracefully' })
+      );
       const toolName = fixture.nativeElement.querySelector('.tool-name');
       expect(toolName).toBeTruthy();
     });

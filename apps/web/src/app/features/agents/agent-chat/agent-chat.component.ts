@@ -297,7 +297,7 @@ export class AgentChatComponent {
   constructor() {
     // Scroll to bottom when messages change
     effect(() => {
-      const msgs = this.messages();
+      this.messages();
       const endEl = this.messagesEnd();
       if (endEl) {
         endEl.nativeElement.scrollIntoView({ behavior: 'smooth' });

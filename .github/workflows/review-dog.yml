@@ -137,5 +137,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests
-        run: pnpm --filter web test -- --watch=false --browsers=ChromeHeadless
+      - name: Run tests (Vitest + jsdom)
+        run: pnpm --filter web exec vitest run

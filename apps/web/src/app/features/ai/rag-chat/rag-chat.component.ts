@@ -1,7 +1,6 @@
 import {
   Component,
   signal,
-  computed,
   inject,
   OnInit,
   OnDestroy,
@@ -1378,7 +1377,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
     let displayedContent = '';
     this.charCountSinceLastRender = 0;
 
-    const streamResult = this.api.ragChat(
+    this.api.ragChat(
       requestBody,
       (chunk: string) => {
         displayedContent += chunk;
@@ -1412,7 +1411,7 @@ export class RagChatComponent implements OnInit, OnDestroy {
         });
         this.isLoading.set(false);
       },
-      (err: Error) => {
+      (_err: Error) => {
         this.messages.update((msgs) =>
           msgs.map((msg) =>
             msg.id === assistantMessageId

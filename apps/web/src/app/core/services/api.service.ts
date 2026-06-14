@@ -11,7 +11,6 @@ import {
   ModelInfo,
   Voice,
   Detection,
-  VisionResult,
   DocumentListResponse,
 } from '@shared/models';
 

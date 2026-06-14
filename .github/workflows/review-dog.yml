@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: ESLint
-        run: npx eslint "apps/web/src/**/*.ts" --ext .ts
+        run: pnpm -C apps/web exec eslint "src/**/*.ts" --ext .ts
 
       - name: Install reviewdog
         if: failure()
@@ -43,7 +43,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx eslint "apps/web/src/**/*.ts" --ext .ts 2>&1 |
+          pnpm -C apps/web exec eslint "src/**/*.ts" --ext .ts 2>&1 |
             reviewdog -f=eslint -reporter=github-pr-review -level=error
 
   typescript:
@@ -72,8 +72,8 @@ jobs:
 
       - name: TypeScript Check (Web)
         run: |
-          npx tsc --noEmit -p apps/web/tsconfig.app.json &&
-            npx tsc --noEmit -p apps/web/tsconfig.spec.json
+          pnpm -C apps/web exec tsc --noEmit -p tsconfig.app.json &&
+            pnpm -C apps/web exec tsc --noEmit -p tsconfig.spec.json
 
       - name: Install reviewdog
         if: failure()
@@ -86,8 +86,8 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx tsc --noEmit -p apps/web/tsconfig.app.json &&
-            npx tsc --noEmit -p apps/web/tsconfig.spec.json 2>&1 |
+          pnpm -C apps/web exec tsc --noEmit -p tsconfig.app.json &&
+            pnpm -C apps/web exec tsc --noEmit -p tsconfig.spec.json 2>&1 |
             reviewdog -f=tsc -reporter=github-pr-review -level=error
 
   prettier:
@@ -114,7 +114,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check Prettier formatting
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"
+        run: pnpm prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"
 
   test:
     name: Unit Tests

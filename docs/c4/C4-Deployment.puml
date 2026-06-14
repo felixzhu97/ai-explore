@@ -15,10 +15,9 @@ Person_Ext(user, "User", "Uses the Angular web application from a browser")
 ' ============================================================
 Deployment_Node(developer_machine, "Developer Workstation", "localhost") {
 
-    ' Docker Engine runs PostgreSQL + pgvector and Qdrant
+    ' Docker Engine runs PostgreSQL + pgvector
     Deployment_Node(docker_engine, "Docker Engine", "Docker") {
         ContainerDb(postgresql, "PostgreSQL", "pgvector/pgvector:pg17", "Documents, vectors, metadata", "5432")
-        Container(qdrant, "Qdrant v1.7.4", "qdrant/qdrant:v1.7.4", "Vector index", "6333")
     }
 
     ' Java / Gradle — Spring Boot backend

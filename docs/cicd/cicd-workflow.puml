@@ -9,7 +9,7 @@ skinparam noteBackgroundColor #FFFDE7
 skinparam noteBorderColor #F9A825
 skinparam packageStyle rectangle
 
-title CI/CD Workflow - GitHub Actions
+title CI/CD Workflow Overview - GitHub Actions
 
 |#palegreen|**Workflow: backend-ci.yml**|
 start
@@ -17,34 +17,8 @@ note right
 **Trigger:** push | pull_request
 **Branches:** main, java-angular, feature/**
 end note
-
-:Checkout code;
-note right: `actions/checkout@v4` (fetch-depth: 0)
-
-:Setup Java 25 (Temurin);
-note right: `actions/setup-java@v4` (cache: gradle)
-
-:Make gradlew executable;
-note right: `chmod +x apps/server/gradlew`
-
-:Build (skip tests);
-note right: `./gradlew build -x test --no-daemon`
-
-:Run tests with coverage;
-note right: `./gradlew test jacocoTestReport --no-daemon`
-
-:Upload JaCoCo coverage report;
-note right
-`actions/upload-artifact@v4`
-(name: jacoco-report)
-end note
-
-:Upload Java build outputs for CodeQL;
-note right
-`actions/upload-artifact@v4`
-(name: java-build-outputs)
-end note
-
+:**backend-ci**
+(trigger: push | pull_request);
 stop
 
 |#orange|**Workflow: codeql.yml**|
@@ -52,67 +26,11 @@ start
 note right
 **Trigger:** push | pull_request + cron (weekly)
 **Branches:** main, java-angular, feature/**
-**Schedule:** `cron: '20 5 * * 3'` (every Wed 05:20 UTC)
+**Schedule:** cron: '20 5 * * 3' (Wed 05:20 UTC)
 end note
-
-fork
-  :**Java / Kotlin Lane**
-  (matrix.language == java-kotlin);
-  note right: ## Java-Kotlin Lane
-
-  :Checkout repository;
-  note right: `actions/checkout@v4`
-
-  :Setup Java;
-  note right
-  `actions/setup-java@v4`
-  (Temurin 25, cache: gradle)
-  end note
-
-  :Initialize CodeQL;
-  note right
-  `github/codeql-action/init@v4`
-  (build-mode: none)
-  end note
-
-  :Download prebuilt Java/Kotlin outputs;
-  note right
-  `actions/download-artifact@v4`
-  (name: java-build-outputs)
-  (continue-on-error: true)
-  end note
-
-  if (artifact missing?) then (yes)
-    :Build Java/Kotlin (fallback);
-    note right
-    `./gradlew build -x test --no-daemon`
-    (triggered when
-    `hashFiles('apps/server/build/classes/java/main') == ''`)
-    end note
-  else (no)
-  endif
-
-  :Perform CodeQL Analysis;
-  note right: `github/codeql-action/analyze@v4`
-
-fork again
-  :**JavaScript / TypeScript Lane**
-  (matrix.language == javascript-typescript);
-  note right: ## JavaScript-TypeScript Lane
-
-  :Checkout repository;
-  note right: `actions/checkout@v4`
-
-  :Initialize CodeQL;
-  note right
-  `github/codeql-action/init@v4`
-  (build-mode: none)
-  end note
-
-  :Perform CodeQL Analysis;
-  note right: `github/codeql-action/analyze@v4`
-end fork
-
+:**codeql**
+(trigger: push | pull_request + cron
+ + matrix: java-kotlin + javascript-typescript);
 stop
 
 |#lightskyblue|**Workflow: review-dog.yml**|
@@ -121,84 +39,9 @@ note right
 **Trigger:** pull_request only
 **Branches:** main, java-angular, feature/**
 end note
-
-fork
-  :**Job: ESLint**;
-
-  :Checkout code;
-  note right: `actions/checkout@v4` (fetch-depth: 1)
-
-  :Setup web env;
-  note right: `.github/actions/setup-web-env`
-
-  :Install reviewdog;
-  note right
-  `reviewdog/action-setup@v1`
-  (v0.20.3)
-  end note
-
-  :Run ESLint with reviewdog;
-  note right
-  `pnpm -C apps/web exec eslint "src/**/*.ts" --ext .ts`
-  +
-  `reviewdog -f=eslint -reporter=github-pr-review -level=error`
-  end note
-
-fork again
-  :**Job: TypeScript Check**;
-
-  :Checkout code;
-  note right: `actions/checkout@v4` (fetch-depth: 1)
-
-  :Setup web env;
-  note right: `.github/actions/setup-web-env`
-
-  :Install reviewdog;
-  note right
-  `reviewdog/action-setup@v1`
-  (v0.20.3)
-  end note
-
-  :Run TypeScript check with reviewdog;
-  note right
-  `pnpm -C apps/web exec tsc --noEmit -p tsconfig.app.json`
-  +
-  `pnpm -C apps/web exec tsc --noEmit -p tsconfig.spec.json`
-  +
-  `reviewdog -f=tsc -reporter=github-pr-review -level=error`
-  end note
-
-fork again
-  :**Job: Prettier Format Check**;
-
-  :Checkout code;
-  note right: `actions/checkout@v4` (fetch-depth: 1)
-
-  :Setup web env;
-  note right: `.github/actions/setup-web-env`
-
-  :Check Prettier formatting;
-  note right
-  `pnpm prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"`
-  (no reviewdog - CI gate only)
-  end note
-
-fork again
-  :**Job: Unit Tests (Vitest)**;
-
-  :Checkout code;
-  note right: `actions/checkout@v4` (fetch-depth: 1)
-
-  :Setup web env;
-  note right: `.github/actions/setup-web-env`
-
-  :Run tests (Vitest + jsdom);
-  note right
-  `pnpm --filter web exec vitest run`
-  (no reviewdog - CI gate only)
-  end note
-end fork
-
+:**review-dog**
+(trigger: pull_request
+ + 4 parallel jobs: eslint | tsc | prettier | vitest);
 stop
 
 legend right
@@ -207,5 +50,4 @@ legend right
 | codeql | push / pull_request / cron | #orange |
 | review-dog | pull_request | #lightskyblue |
 endlegend
-
 @enduml

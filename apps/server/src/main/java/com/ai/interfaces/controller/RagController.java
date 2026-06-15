@@ -6,6 +6,7 @@ import com.ai.domain.model.Document;
 import com.ai.domain.model.SourceDocument;
 import com.ai.domain.service.AiChatService;
 import com.ai.infrastructure.adapter.document.PdfTextExtractor;
+import com.ai.infrastructure.event.SourcesEvent;
 import com.ai.interfaces.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -166,6 +167,9 @@ public class RagController {
             // Stream chunks, then send sources at the end
             return streamChunks(prompt)
                     .concatWith(Flux.defer(() -> sendSources(sources)));
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid argument in RAG chat", e);
+            return Flux.error(e);
         } catch (Exception e) {
             log.error("Error in RAG chat", e);
             return Flux.error(e);
@@ -173,10 +177,19 @@ public class RagController {
     }
 
     private Flux<ServerSentEvent<String>> streamChunks(String prompt) {
+        record ChunkEvent(String type, String text) {}
         return aiChatService.chatStream(prompt)
-                .map(text -> ServerSentEvent.<String>builder()
-                        .data("{\"type\":\"chunk\",\"text\":\"" + escapeJson(text) + "\"}")
-                        .build())
+                .map(text -> {
+                    try {
+                        String json = objectMapper.writeValueAsString(new ChunkEvent("chunk", text));
+                        return ServerSentEvent.<String>builder().data(json).build();
+                    } catch (JsonProcessingException e) {
+                        log.error("Failed to serialize chunk event", e);
+                        return ServerSentEvent.<String>builder()
+                                .data("{\"type\":\"chunk\",\"text\":\"\"}")
+                                .build();
+                    }
+                })
                 .doOnError(e -> log.error("Stream error", e));
     }
 
@@ -203,14 +216,6 @@ public class RagController {
         }
     }
 
-    private String escapeJson(String text) {
-        return text.replace("\\", "\\\\")
-                   .replace("\"", "\\\"")
-                   .replace("\n", "\\n")
-                   .replace("\r", "\\r")
-                   .replace("\t", "\\t");
-    }
-
     private String buildPrompt(String question, String context) {
         String languageCode = languageDetectionService.detect(question);
         return languageDetectionService.buildPrompt(question, context, languageCode);
@@ -227,6 +232,8 @@ public class RagController {
     }
 
     private String truncate(String text) {
-        return text == null ? "null" : text.length() <= 50 ? text : text.substring(0, 50) + "...";
+        if (text == null) return "null";
+        if (text.length() <= 50) return text;
+        return text.substring(0, 50) + "...";
     }
 }

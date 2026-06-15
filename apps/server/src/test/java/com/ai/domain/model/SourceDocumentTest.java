@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * SourceDocument Record Tests
@@ -78,13 +79,13 @@ class SourceDocumentTest {
         }
 
         @Test
-        @DisplayName("should create with negative score")
-        void shouldCreateWithNegativeScore() {
+        @DisplayName("should create with boundary score of 1.0")
+        void shouldCreateWithBoundaryScoreOfOne() {
             // Act
-            SourceDocument sourceDocument = new SourceDocument(1, "text", -0.5, "title", new HashMap<>());
+            SourceDocument sourceDocument = new SourceDocument(1, "text", 1.0, "title", new HashMap<>());
 
             // Assert
-            assertThat(sourceDocument.score()).isNegative();
+            assertThat(sourceDocument.score()).isEqualTo(1.0);
         }
 
         @Test
@@ -263,6 +264,62 @@ class SourceDocumentTest {
             assertThat(doc.score()).isNotNull();
             assertThat(doc.documentTitle()).isEqualTo("Test Document");
             assertThat(doc.metadata()).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Validation")
+    class Validation {
+
+        @Test
+        @DisplayName("should throw when index is zero")
+        void shouldThrowWhenIndexIsZero() {
+            assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(0, "text", 0.5, "title", new HashMap<>()));
+        }
+
+        @Test
+        @DisplayName("should throw when index is negative")
+        void shouldThrowWhenIndexIsNegative() {
+            assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(-1, "text", 0.5, "title", new HashMap<>()));
+        }
+
+        @Test
+        @DisplayName("should throw when text is null")
+        void shouldThrowWhenTextIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(1, null, 0.5, "title", new HashMap<>()));
+        }
+
+        @Test
+        @DisplayName("should throw when documentTitle is null")
+        void shouldThrowWhenDocumentTitleIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(1, "text", 0.5, null, new HashMap<>()));
+        }
+
+        @Test
+        @DisplayName("should throw when score is negative")
+        void shouldThrowWhenScoreIsNegative() {
+            assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(1, "text", -0.1, "title", new HashMap<>()));
+        }
+
+        @Test
+        @DisplayName("should throw when score exceeds 1.0")
+        void shouldThrowWhenScoreExceedsOne() {
+            assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(1, "text", 1.5, "title", new HashMap<>()));
+        }
+
+        @Test
+        @DisplayName("should include score value in exception message")
+        void shouldIncludeScoreInExceptionMessage() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> new SourceDocument(1, "text", 2.5, "title", new HashMap<>()));
+
+            assertThat(exception.getMessage()).contains("2.5");
         }
     }
 }

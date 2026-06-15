@@ -5,6 +5,7 @@ import com.ai.application.port.VectorSearchPort;
 import com.ai.domain.model.ChatMessage;
 import com.ai.domain.model.DocumentChunk;
 import com.ai.domain.model.SourceDocument;
+import com.ai.domain.service.RagContextFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,6 @@ import java.util.*;
 public class RagChatUseCase {
     private static final Logger log = LoggerFactory.getLogger(RagChatUseCase.class);
     private static final int DEFAULT_TOP_K = 5;
-    private static final int MAX_SOURCE_LENGTH = 500;
     private static final int MAX_HISTORY_MESSAGES = 10;
 
     private final EmbeddingPort embeddingPort;
@@ -44,37 +44,16 @@ public class RagChatUseCase {
         }
 
         List<SourceDocument> sources = new ArrayList<>();
-        StringBuilder contextBuilder = new StringBuilder();
 
         for (int i = 0; i < chunks.size(); i++) {
             DocumentChunk chunk = chunks.get(i);
             int sourceIndex = i + 1;
-            String documentTitle = extractDocumentTitle(chunk.getMetadata());
-            double similarity = calculateSimilarity(queryEmbedding, chunk.getEmbedding());
-            String snippet = chunk.getContent().substring(0, Math.min(MAX_SOURCE_LENGTH, chunk.getContent().length()));
 
-            // Build formatted context with source marker
-            contextBuilder.append("[Source ")
-                    .append(sourceIndex)
-                    .append("] (document: ")
-                    .append(documentTitle)
-                    .append(", similarity: ")
-                    .append(String.format("%.1f", similarity * 100))
-                    .append("%)\n")
-                    .append(chunk.getContent())
-                    .append("\n\n");
-
-            // Build source document for SSE response
-            sources.add(new SourceDocument(
-                    sourceIndex,
-                    snippet,
-                    similarity,
-                    documentTitle,
-                    chunk.getMetadata()
-            ));
+            SourceDocument source = RagContextFormatter.formatSource(chunk, sourceIndex, queryEmbedding);
+            sources.add(source);
         }
 
-        String context = contextBuilder.toString();
+        String context = RagContextFormatter.buildContextWithSources(chunks, queryEmbedding);
 
         log.info("Retrieved {} chunks", chunks.size());
         return new RetrievalResult(context, sources, enrichedQuery);
@@ -99,25 +78,5 @@ public class RagChatUseCase {
 
         return "Previous conversation:\n" + historyContext +
                "\nCurrent question: " + query;
-    }
-
-    private double calculateSimilarity(float[] a, float[] b) {
-        if (a == null || b == null) return 0.0;
-        double dotProduct = 0.0, normA = 0.0, normB = 0.0;
-        for (int i = 0; i < a.length; i++) {
-            dotProduct += a[i] * b[i];
-            normA += a[i] * a[i];
-            normB += b[i] * b[i];
-        }
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-10);
-    }
-
-    private String extractDocumentTitle(Map<String, Object> metadata) {
-        if (metadata == null) return "unknown";
-        Object title = metadata.get("documentTitle");
-        if (title != null) return title.toString();
-        Object filename = metadata.get("filename");
-        if (filename != null) return filename.toString();
-        return "unknown";
     }
 }

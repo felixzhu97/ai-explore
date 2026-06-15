@@ -173,19 +173,19 @@ export class ApiService {
               return true;
             }
 
-              // Default: treat as token - decode preserved paragraph breaks
-              let token: string | null = null;
-              try {
-                const parsed = JSON.parse(data);
-                token = parsed.token ?? (typeof parsed === 'string' ? parsed : null);
-              } catch {
-                token = data;
-              }
-              if (token && token.length > 0) {
-                // Decode \u0001\u0001 back to \n\n (paragraph break)
-                token = token.replace(/\u0001\u0001/g, '\n\n');
-                onChunk(token);
-              }
+            // Default: treat as token - decode preserved paragraph breaks
+            let token: string | null = null;
+            try {
+              const parsed = JSON.parse(data);
+              token = parsed.token ?? (typeof parsed === 'string' ? parsed : null);
+            } catch {
+              token = data;
+            }
+            if (token && token.length > 0) {
+              // Decode \u0001\u0001 back to \n\n (paragraph break)
+              token = token.replace(/\u0001\u0001/g, '\n\n');
+              onChunk(token);
+            }
           }
         }
         return false;

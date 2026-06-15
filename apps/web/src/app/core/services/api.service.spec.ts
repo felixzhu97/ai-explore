@@ -802,7 +802,9 @@ describe('ApiService', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
       readResolve({
         done: false,
-        value: encoder.encode('data: {"sources":[{"text":"source 1","score":0.9,"metadata":{}}]}\n'),
+        value: encoder.encode(
+          'data: {"sources":[{"text":"source 1","score":0.9,"metadata":{}}]}\n'
+        ),
       });
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -962,7 +964,9 @@ describe('ApiService', () => {
       // Send multiple JSON events
       readResolve({
         done: false,
-        value: encoder.encode('data: {"sources":[]}\ndata: {"type":"chunk","text":"chunk after sources"}\n'),
+        value: encoder.encode(
+          'data: {"sources":[]}\ndata: {"type":"chunk","text":"chunk after sources"}\n'
+        ),
       });
       await new Promise((resolve) => setTimeout(resolve, 10));
 

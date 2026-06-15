@@ -790,16 +790,22 @@ interface Toast {
 
         p {
           margin: 0.6em 0;
-          &:empty { display: none; }
+          &:empty {
+            display: none;
+          }
         }
 
-        > p:first-child { margin-top: 0; }
-        > p:last-child { margin-bottom: 0; }
+        > p:first-child {
+          margin-top: 0;
+        }
+        > p:last-child {
+          margin-bottom: 0;
+        }
 
         br {
           display: block;
           margin: 0.2em 0;
-          content: "";
+          content: '';
           line-height: 0.8;
         }
       }

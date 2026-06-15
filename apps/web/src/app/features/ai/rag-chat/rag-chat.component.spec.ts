@@ -446,7 +446,7 @@ describe('RagChatComponent', () => {
 
     it('should render unclosed code block gracefully during streaming', () => {
       createFixture();
-      const incomplete = '```python\nprint("hello")';  // unclosed code block
+      const incomplete = '```python\nprint("hello")'; // unclosed code block
       const html = renderMarkdown(incomplete);
       expect(html).toContain('<pre');
     });

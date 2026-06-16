@@ -153,7 +153,7 @@ describe('theme', () => {
     });
 
     it('should have numeric z-index values', () => {
-      Object.entries(zIndex).forEach(([key, value]) => {
+      Object.entries(zIndex).forEach(([_key, value]) => {
         expect(typeof value).toBe('number');
       });
     });

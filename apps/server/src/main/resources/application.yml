@@ -38,6 +38,11 @@ spring:
         format_sql: true
     open-in-view: false
 
+  # Flyway configuration
+  flyway:
+    variables:
+      embedding_dimensions: ${rag.ollama.embedding.dimensions:768}
+
 # RAG configuration
 rag:
   mock:

@@ -202,12 +202,12 @@ class DocumentChunkTest {
 
             // Act
             DocumentChunk withSmallEmbedding = original.withEmbedding(new float[]{0.1f, 0.2f});
-            float[] largeEmbedding = new float[1536]; // Common embedding dimension
+            float[] largeEmbedding = new float[768]; // Common embedding dimension (nomic-embed-text)
             DocumentChunk withLargeEmbedding = original.withEmbedding(largeEmbedding);
 
             // Assert
             assertThat(withSmallEmbedding.getEmbedding()).hasSize(2);
-            assertThat(withLargeEmbedding.getEmbedding()).hasSize(1536);
+            assertThat(withLargeEmbedding.getEmbedding()).hasSize(768);
         }
 
         @Test

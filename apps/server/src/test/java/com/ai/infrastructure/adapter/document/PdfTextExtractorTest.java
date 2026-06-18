@@ -1,4 +1,4 @@
-package com.ai.infrastructure.adapter.document;
+package com.ai.adapter.out.document;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

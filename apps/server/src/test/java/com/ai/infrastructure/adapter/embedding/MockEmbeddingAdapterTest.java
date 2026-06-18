@@ -1,4 +1,4 @@
-package com.ai.infrastructure.adapter.embedding;
+package com.ai.adapter.out.embedding;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,0 +1,259 @@
+---
+description: Hexagonal Architecture (端口-适配器) + DDD 充血模型。Java 24+ / Spring Boot 3.4+ 架构标准。包含 Domain 层（无外部依赖）、Adapter.in（主端口）、Adapter.out（从端口）、Config。
+globs: **/*.java **/*.kt
+alwaysApply: true
+---
+
+# Hexagonal Architecture Standards
+
+> **核心原则**: 端口-适配器模式 + 领域驱动设计 (DDD 充血模型)
+
+---
+
+## Hexagonal Architecture 分层
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      adapter/in                                │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │           Controllers / DTOs (Driving)                │    │
+│  └─────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                        domain                                 │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │    Entities / Value Objects / Aggregates / Ports       │    │
+│  └─────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                      adapter/out                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │        Persistence / External Services (Driven)        │    │
+│  └─────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                        config                                 │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Spring / Infrastructure Config            │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+
+依赖规则: Domain 层无任何外部依赖
+```
+
+---
+
+## 项目结构
+
+```
+src/main/java/com/ai/
+├── domain/                          # 领域层 (核心，无依赖)
+│   ├── model/                       # 聚合根、实体
+│   │   ├── Order.java
+│   │   ├── OrderId.java
+│   │   └── OrderLine.java
+│   ├── vo/                         # 值对象 (Value Objects)
+│   │   ├── Money.java
+│   │   ├── Email.java
+│   │   └── Address.java
+│   ├── service/                     # 领域服务 (跨实体业务逻辑)
+│   │   └── PricingService.java
+│   ├── repository/                  # 仓储端口接口 (Domain 定义)
+│   │   ├── OrderRepository.java
+│   │   └── CustomerRepository.java
+│   └── exception/                  # 领域异常
+│       └── DomainException.java
+│
+├── adapter/
+│   ├── in/                         # 主适配器 (Driving) - 接收输入
+│   │   ├── controller/             # REST 控制器
+│   │   │   └── OrderController.java
+│   │   └── dto/                    # 请求/响应 DTO
+│   │       ├── request/
+│   │       │   └── CreateOrderRequest.java
+│   │       └── response/
+│   │           └── OrderResponse.java
+│   │
+│   └── out/                        # 从适配器 (Driven) - 连接外部
+│       ├── persistence/            # 持久化
+│       │   ├── jpa/
+│       │   │   ├── OrderJpaRepository.java
+│       │   │   └── OrderEntity.java
+│       │   └── repository/
+│       │       └── JpaOrderRepository.java
+│       ├── embedding/              # Embedding 服务
+│       ├── vector/                 # 向量数据库
+│       └── external/               # 外部服务
+│           └── PaymentGatewayAdapter.java
+│
+└── config/                         # 配置层
+    ├── AiApplication.java
+    └── InfrastructureConfig.java
+```
+
+---
+
+## Domain 层规范
+
+### 实体 (Entity) - 充血模型
+
+```java
+// ✅ 正确: 充血模型，业务逻辑在实体内部
+package com.ai.domain.model;
+
+import com.ai.domain.exception.OrderException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class Order extends AggregateRoot {
+
+    private final UUID id;
+    private OrderStatus status;
+    private final List<OrderLine> lines;
+
+    // 私有构造函数，通过工厂方法创建
+    private Order(UUID id) {
+        this.id = Objects.requireNonNull(id);
+        this.status = OrderStatus.DRAFT;
+        this.lines = new ArrayList<>();
+    }
+
+    public static Order create() {
+        return new Order(UUID.randomUUID());
+    }
+
+    // 业务方法: 下单
+    public void place() {
+        validateCanPlace();
+        this.status = OrderStatus.PLACED;
+    }
+
+    // 业务方法: 添加商品行
+    public void addLine(Product product, int quantity) {
+        validateCanModify();
+        if (quantity <= 0) {
+            throw OrderException.invalidQuantity(quantity);
+        }
+        lines.add(new OrderLine(product.getId(), product.getPrice(), quantity));
+    }
+
+    // 状态枚举
+    public enum OrderStatus { DRAFT, PLACED, PAID, SHIPPED, CANCELLED }
+}
+```
+
+### 值对象 (Value Object)
+
+```java
+// ✅ 正确: 不可变值对象，使用 Java Record
+package com.ai.domain.vo;
+
+public record Money(
+    BigDecimal amount,
+    Currency currency
+) {
+    public Money {
+        Objects.requireNonNull(amount);
+        Objects.requireNonNull(currency);
+    }
+
+    public Money add(Money other) {
+        return new Money(this.amount.add(other.amount), this.currency);
+    }
+}
+```
+
+### 端口接口 (Port) - Domain 层定义
+
+```java
+// ✅ 正确: 仓储端口定义在 Domain 层
+package com.ai.domain.repository;
+
+public interface OrderRepository {
+    Optional<Order> findById(UUID id);
+    void save(Order order);
+}
+```
+
+---
+
+## Adapter 层规范
+
+### adapter/in (Driving) - 主端口实现
+
+```java
+// ✅ 控制器只做请求路由
+package com.ai.adapter.in.controller;
+
+@RestController
+@RequestMapping("/api/orders")
+@RequiredArgsConstructor
+public class OrderController {
+
+    private final PlaceOrderUseCase placeOrderUseCase;
+
+    @PostMapping
+    public ResponseEntity<OrderResponse> create(@RequestBody CreateOrderRequest request) {
+        var result = placeOrderUseCase.execute(request.toCommand());
+        return ResponseEntity.ok(OrderResponse.from(result));
+    }
+}
+```
+
+### adapter/out (Driven) - 从端口实现
+
+```java
+// ✅ 适配器实现 Domain 定义的端口
+package com.ai.adapter.out.persistence.repository;
+
+@Repository
+public class JpaOrderRepository implements OrderRepository {
+
+    private final SpringDataOrderRepository springRepository;
+
+    @Override
+    public Optional<Order> findById(UUID id) {
+        return springRepository.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public void save(Order order) {
+        springRepository.save(toEntity(order));
+    }
+}
+```
+
+---
+
+## Config 层规范
+
+```java
+// ✅ 配置层负责基础设施组装
+package com.ai.config;
+
+@SpringBootApplication
+@ComponentScan(basePackages = "com.ai")
+public class AiApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(AiApplication.class, args);
+    }
+}
+```
+
+---
+
+## 架构检查
+
+### Domain 层无框架依赖
+
+```bash
+grep -r "org.springframework" src/domain/ || echo "✅ OK"
+grep -r "jakarta.persistence" src/domain/ || echo "✅ OK"
+grep -r "@Entity" src/domain/ || echo "✅ OK"
+```
+
+### 依赖方向正确
+
+```
+adapter/in → domain (依赖接口)
+domain ← adapter/out (实现接口)
+config → domain, adapter/in, adapter/out
+```

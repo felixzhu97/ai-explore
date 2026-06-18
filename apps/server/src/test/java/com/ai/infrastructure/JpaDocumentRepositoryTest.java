@@ -1,11 +1,11 @@
-package com.ai.infrastructure;
+package com.ai.adapter.out;
 
-import com.ai.infrastructure.adapter.persistence.JpaDocumentRepository;
+import com.ai.adapter.out.persistence.JpaDocumentRepository;
 import com.ai.domain.model.Document;
 import com.ai.domain.model.DocumentChunk;
 import com.ai.domain.model.DocumentStatus;
 import com.ai.domain.vo.DocumentId;
-import com.ai.infrastructure.adapter.persistence.*;
+import com.ai.adapter.out.persistence.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

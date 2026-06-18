@@ -23,11 +23,11 @@ class MockEmbeddingAdapterTest {
 
     private MockEmbeddingAdapter adapter;
 
-    private static final int EXPECTED_DIMENSIONS = 1536;
+    private static final int EXPECTED_DIMENSIONS = 768;
 
     @BeforeEach
     void setUp() {
-        adapter = new MockEmbeddingAdapter();
+        adapter = new MockEmbeddingAdapter(EXPECTED_DIMENSIONS);
     }
 
     @Nested
@@ -35,8 +35,8 @@ class MockEmbeddingAdapterTest {
     class ShouldReturnEmbeddingWithCorrectDimensions {
 
         @Test
-        @DisplayName("should return embedding with 1536 dimensions")
-        void shouldReturnEmbeddingWith1536Dimensions() {
+        @DisplayName("should return embedding with 768 dimensions")
+        void shouldReturnEmbeddingWith768Dimensions() {
             // Arrange
             String testText = "Hello, world!";
 

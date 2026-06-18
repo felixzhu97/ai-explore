@@ -1,8 +1,8 @@
-package com.ai.infrastructure;
+package com.ai.adapter.out;
 
 import com.ai.domain.model.ChatSession;
 import com.ai.domain.vo.ChatSessionId;
-import com.ai.infrastructure.adapter.persistence.InMemoryChatSessionRepository;
+import com.ai.adapter.out.persistence.InMemoryChatSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

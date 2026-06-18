@@ -1,13 +1,13 @@
-package com.ai.service;
+package com.ai.domain.service;
 
 import com.ai.domain.model.Document;
 import com.ai.domain.model.DocumentChunk;
 import com.ai.domain.model.DocumentStatus;
 import com.ai.domain.model.SourceDocument;
 import com.ai.domain.vo.DocumentId;
-import com.ai.infrastructure.adapter.embedding.EmbeddingAdapter;
-import com.ai.infrastructure.adapter.persistence.JpaDocumentRepository;
-import com.ai.infrastructure.adapter.vector.PgVectorAdapter;
+import com.ai.adapter.out.embedding.EmbeddingAdapter;
+import com.ai.adapter.out.persistence.JpaDocumentRepository;
+import com.ai.adapter.out.vector.PgVectorAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

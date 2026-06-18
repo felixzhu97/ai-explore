@@ -1,4 +1,4 @@
-package com.ai.infrastructure.adapter.persistence;
+package com.ai.adapter.out.persistence;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

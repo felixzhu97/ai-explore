@@ -1,6 +1,6 @@
-package com.ai.infrastructure.adapter.embedding;
+package com.ai.adapter.out.embedding;
 
-import com.ai.infrastructure.adapter.embedding.EmbeddingAdapter;
+import com.ai.adapter.out.embedding.EmbeddingAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

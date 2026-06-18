@@ -1,6 +1,6 @@
-package com.ai.infrastructure.adapter.vector;
+package com.ai.adapter.out.vector;
 
-import com.ai.infrastructure.adapter.vector.PgVectorAdapter;
+import com.ai.adapter.out.vector.PgVectorAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,7 +1,7 @@
 ---
 description: Angular 20+ coding standards and best practices following Apple design principles and Angular official style guide
 globs: **/*.ts **/*.html **/*.scss
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Angular Coding Standards

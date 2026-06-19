@@ -30,6 +30,9 @@ class AiChatServiceTest {
     private ChatClient chatClient;
 
     @Mock
+    private ChatClient.Builder chatClientBuilder;
+
+    @Mock
     private ChatSessionRepository repository;
 
     @Mock

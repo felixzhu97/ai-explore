@@ -1,6 +1,6 @@
 ---
 name: software-architecture
-description: Software Architecture Design Methodology Guide. Covers Clean Architecture, DDD, Hexagonal, Event-Driven, Microservices patterns, C4 Model, and ADRs — with detailed references for each topic.
+description: Software Architecture Design Methodology Guide. Covers Hexagonal Architecture, DDD, Clean Architecture, Event-Driven, Microservices patterns, C4 Model, and ADRs — with detailed references for each topic.
 version: "1.0"
 lastUpdated: "2026-06-20"
 ---
@@ -9,7 +9,9 @@ lastUpdated: "2026-06-20"
 
 ## When to Use
 
-Use this skill when designing system architecture, making technology choices, reviewing designs, or structuring a project. It covers Clean Architecture, Domain-Driven Design, Hexagonal Architecture, Event-Driven patterns, Microservices patterns, C4 documentation, Architecture Decision Records, and anti-patterns to avoid.
+Use this skill when designing system architecture, making technology choices, reviewing designs, or structuring a project. It covers Hexagonal Architecture, Domain-Driven Design, Event-Driven patterns, Microservices patterns, C4 documentation, Architecture Decision Records, and anti-patterns to avoid.
+
+> **Note**: Hexagonal Architecture and Clean Architecture are synonymous. This project uses "Hexagonal Architecture" terminology.
 
 ## Quick Reference
 
@@ -17,7 +19,7 @@ Use this skill when designing system architecture, making technology choices, re
 |-------|------|
 | **Architecture Principles** | |
 | SOLID Principles | `./references/solid-principles.md` |
-| Clean Architecture Deep Dive | `./references/clean-architecture-deep-dive.md` |
+| Hexagonal Architecture Deep Dive | `./references/hexagonal-architecture-deep-dive.md` |
 | DDD Strategic Design | `./references/ddd-strategic-design.md` |
 | **Architecture Styles** | |
 | Hexagonal Architecture | `./references/hexagonal-architecture.md` |
@@ -49,8 +51,9 @@ Use this skill when designing system architecture, making technology choices, re
 
 ## How to Use This Skill
 
-Browse the Quick Reference table above to find the topic you need. Each reference file contains detailed explanations, diagrams, Bad/Good code examples, real implementation references, and links to related topics. Start with the principles (SOLID, Clean Architecture) for foundational understanding, then drill into specific patterns or styles as needed.
+Browse the Quick Reference table above to find the topic you need. Each reference file contains detailed explanations, diagrams, Bad/Good code examples, real implementation references, and links to related topics. Start with the principles (SOLID, Hexagonal Architecture) for foundational understanding, then drill into specific patterns or styles as needed.
 
 ## Related Skills
 
-- [Software Development](../software-development/SKILL.md) - day-to-day craft: Clean Code (naming, functions, comments, errors, formatting, tests) and Clean Architecture (Domain / Application / Infrastructure / Interface layers) with Bad/Good examples and references to the real `apps/server/` Java module.
+- [Software Development](../software-development/SKILL.md) - day-to-day craft: Clean Code (naming, functions, comments, errors, formatting, tests) and Hexagonal Architecture (Domain / Application / adapter/out / adapter/in layers) with Bad/Good examples and references to the real `apps/server/` Java module.
+- [Hexagonal Architecture](../hexagonal-architecture/SKILL.md) - Refactoring guide for Ports-and-Adapters pattern

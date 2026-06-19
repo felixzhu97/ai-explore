@@ -1,101 +1,101 @@
 ---
-description: Hexagonal Architecture (端口-适配器) + DDD 充血模型。Java 24+ / Spring Boot 3.4+ 架构标准。包含 Domain 层（无外部依赖）、Adapter.in（主端口）、Adapter.out（从端口）、Config。
+description: Hexagonal Architecture (Ports-and-Adapters) + DDD Rich Domain Model. Java 24+ / Spring Boot 3.4+ architecture standards. Contains Domain layer (no external dependencies), Adapter.in (primary ports), Adapter.out (secondary ports), Config.
 globs: **/*.java **/*.kt
 alwaysApply: true
 ---
 
 # Hexagonal Architecture Standards
 
-> **核心原则**: 端口-适配器模式 + 领域驱动设计 (DDD 充血模型)
+> **Core Principle**: Ports-and-Adapters pattern + Domain-Driven Design (DDD Rich Domain Model)
 
 ---
 
-## Hexagonal Architecture 分层
+## Hexagonal Architecture Layers
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      adapter/in                                │
+│                      adapter/in                              │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │           Controllers / DTOs (Driving)                │    │
+│  │           Controllers / DTOs (Driving)               │    │
 │  └─────────────────────────────────────────────────────┘    │
 ├─────────────────────────────────────────────────────────────┤
-│                        domain                                 │
+│                        domain                                │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │    Entities / Value Objects / Aggregates / Ports       │    │
+│  │    Entities / Value Objects / Aggregates / Ports     │    │
 │  └─────────────────────────────────────────────────────┘    │
 ├─────────────────────────────────────────────────────────────┤
-│                      adapter/out                              │
+│                      adapter/out                            │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │        Persistence / External Services (Driven)        │    │
+│  │        Persistence / External Services (Driven)      │    │
 │  └─────────────────────────────────────────────────────┘    │
 ├─────────────────────────────────────────────────────────────┤
-│                        config                                 │
+│                        config                               │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │              Spring / Infrastructure Config            │    │
+│  │              Spring / Infrastructure Config           │    │
 │  └─────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
 
-依赖规则: Domain 层无任何外部依赖
+Dependency Rule: Domain layer has no external dependencies
 ```
 
 ---
 
-## 项目结构
+## Project Structure
 
 ```
 src/main/java/com/ai/
-├── domain/                          # 领域层 (核心，无依赖)
-│   ├── model/                       # 聚合根、实体
+├── domain/                          # Domain layer (core, no dependencies)
+│   ├── model/                       # Aggregate roots, entities
 │   │   ├── Order.java
 │   │   ├── OrderId.java
 │   │   └── OrderLine.java
-│   ├── vo/                         # 值对象 (Value Objects)
+│   ├── vo/                         # Value Objects
 │   │   ├── Money.java
 │   │   ├── Email.java
 │   │   └── Address.java
-│   ├── service/                     # 领域服务 (跨实体业务逻辑)
+│   ├── service/                     # Domain services (cross-entity business logic)
 │   │   └── PricingService.java
-│   ├── repository/                  # 仓储端口接口 (Domain 定义)
+│   ├── repository/                  # Repository port interfaces (defined by Domain)
 │   │   ├── OrderRepository.java
 │   │   └── CustomerRepository.java
-│   └── exception/                  # 领域异常
+│   └── exception/                  # Domain exceptions
 │       └── DomainException.java
 │
 ├── adapter/
-│   ├── in/                         # 主适配器 (Driving) - 接收输入
-│   │   ├── controller/             # REST 控制器
+│   ├── in/                         # Primary adapter (Driving) - receives input
+│   │   ├── controller/             # REST controllers
 │   │   │   └── OrderController.java
-│   │   └── dto/                    # 请求/响应 DTO
+│   │   └── dto/                    # Request/Response DTOs
 │   │       ├── request/
 │   │       │   └── CreateOrderRequest.java
 │   │       └── response/
 │   │           └── OrderResponse.java
 │   │
-│   └── out/                        # 从适配器 (Driven) - 连接外部
-│       ├── persistence/            # 持久化
+│   └── out/                        # Secondary adapter (Driven) - connects external
+│       ├── persistence/            # Persistence
 │       │   ├── jpa/
 │       │   │   ├── OrderJpaRepository.java
 │       │   │   └── OrderEntity.java
 │       │   └── repository/
 │       │       └── JpaOrderRepository.java
-│       ├── embedding/              # Embedding 服务
-│       ├── vector/                 # 向量数据库
-│       └── external/               # 外部服务
+│       ├── embedding/              # Embedding services
+│       ├── vector/                 # Vector databases
+│       └── external/               # External services
 │           └── PaymentGatewayAdapter.java
 │
-└── config/                         # 配置层
+└── config/                         # Configuration layer
     ├── AiApplication.java
     └── InfrastructureConfig.java
 ```
 
 ---
 
-## Domain 层规范
+## Domain Layer Standards
 
-### 实体 (Entity) - 充血模型
+### Entity (Entity) - Rich Domain Model
 
 ```java
-// ✅ 正确: 充血模型，业务逻辑在实体内部
+// ✅ Correct: Rich domain model with business logic inside entity
 package com.ai.domain.model;
 
 import com.ai.domain.exception.OrderException;
@@ -109,7 +109,7 @@ public class Order extends AggregateRoot {
     private OrderStatus status;
     private final List<OrderLine> lines;
 
-    // 私有构造函数，通过工厂方法创建
+    // Private constructor, use factory method
     private Order(UUID id) {
         this.id = Objects.requireNonNull(id);
         this.status = OrderStatus.DRAFT;
@@ -120,13 +120,13 @@ public class Order extends AggregateRoot {
         return new Order(UUID.randomUUID());
     }
 
-    // 业务方法: 下单
+    // Business method: place order
     public void place() {
         validateCanPlace();
         this.status = OrderStatus.PLACED;
     }
 
-    // 业务方法: 添加商品行
+    // Business method: add order line
     public void addLine(Product product, int quantity) {
         validateCanModify();
         if (quantity <= 0) {
@@ -135,15 +135,15 @@ public class Order extends AggregateRoot {
         lines.add(new OrderLine(product.getId(), product.getPrice(), quantity));
     }
 
-    // 状态枚举
+    // Status enum
     public enum OrderStatus { DRAFT, PLACED, PAID, SHIPPED, CANCELLED }
 }
 ```
 
-### 值对象 (Value Object)
+### Value Object
 
 ```java
-// ✅ 正确: 不可变值对象，使用 Java Record
+// ✅ Correct: Immutable value object using Java Record
 package com.ai.domain.vo;
 
 public record Money(
@@ -161,10 +161,10 @@ public record Money(
 }
 ```
 
-### 端口接口 (Port) - Domain 层定义
+### Port Interface (Port) - Defined in Domain Layer
 
 ```java
-// ✅ 正确: 仓储端口定义在 Domain 层
+// ✅ Correct: Repository port defined in Domain layer
 package com.ai.domain.repository;
 
 public interface OrderRepository {
@@ -175,12 +175,12 @@ public interface OrderRepository {
 
 ---
 
-## Adapter 层规范
+## Adapter Layer Standards
 
-### adapter/in (Driving) - 主端口实现
+### adapter/in (Driving) - Primary Port Implementation
 
 ```java
-// ✅ 控制器只做请求路由
+// ✅ Controller only handles request routing
 package com.ai.adapter.in.controller;
 
 @RestController
@@ -198,10 +198,10 @@ public class OrderController {
 }
 ```
 
-### adapter/out (Driven) - 从端口实现
+### adapter/out (Driven) - Secondary Port Implementation
 
 ```java
-// ✅ 适配器实现 Domain 定义的端口
+// ✅ Adapter implements Domain-defined port
 package com.ai.adapter.out.persistence.repository;
 
 @Repository
@@ -223,10 +223,10 @@ public class JpaOrderRepository implements OrderRepository {
 
 ---
 
-## Config 层规范
+## Config Layer Standards
 
 ```java
-// ✅ 配置层负责基础设施组装
+// ✅ Config layer handles infrastructure assembly
 package com.ai.config;
 
 @SpringBootApplication
@@ -240,9 +240,9 @@ public class AiApplication {
 
 ---
 
-## 架构检查
+## Architecture Checks
 
-### Domain 层无框架依赖
+### Domain Layer Has No Framework Dependencies
 
 ```bash
 grep -r "org.springframework" src/domain/ || echo "✅ OK"
@@ -250,10 +250,10 @@ grep -r "jakarta.persistence" src/domain/ || echo "✅ OK"
 grep -r "@Entity" src/domain/ || echo "✅ OK"
 ```
 
-### 依赖方向正确
+### Dependency Direction Is Correct
 
 ```
-adapter/in → domain (依赖接口)
-domain ← adapter/out (实现接口)
+adapter/in → domain (depends on interface)
+domain ← adapter/out (implements interface)
 config → domain, adapter/in, adapter/out
 ```

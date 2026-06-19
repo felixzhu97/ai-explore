@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,14 +34,21 @@ class AiChatServiceTest {
     @Mock
     private ChatSessionRepository repository;
 
+    @Mock
+    private RetryTemplate retryTemplate;
+
     private AiChatService service;
 
     private static final String TEST_SESSION_ID = "test-session-id";
 
     @BeforeEach
     void setUp() {
-        when(chatClientBuilder.build()).thenReturn(chatClient);
-        service = new AiChatService(chatClientBuilder, repository);
+        lenient().when(chatClientBuilder.build()).thenReturn(chatClient);
+        lenient().when(retryTemplate.execute(any())).thenAnswer(inv -> {
+            org.springframework.retry.RetryCallback<String, org.springframework.retry.RetryException> callback = inv.getArgument(0);
+            return callback.doWithRetry(null);
+        });
+        service = new AiChatService(chatClientBuilder, repository, retryTemplate);
     }
 
     @Nested
@@ -169,5 +177,4 @@ class AiChatServiceTest {
             );
         }
     }
-
 }

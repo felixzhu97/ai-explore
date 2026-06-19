@@ -33,6 +33,7 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-model-openai")
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
     implementation("org.springframework.ai:spring-ai-client-chat")
+    implementation("org.springframework.retry:spring-retry:2.0.10")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compileOnly("org.projectlombok:lombok")

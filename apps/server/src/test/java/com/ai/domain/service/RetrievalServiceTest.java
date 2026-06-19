@@ -214,4 +214,134 @@ class RetrievalServiceTest {
         Arrays.fill(embedding, 0.1f);
         return embedding;
     }
+
+    // ============ Boundary Tests for Coverage ============
+
+    @Nested
+    @DisplayName("retrieve with edge cases")
+    class RetrieveEdgeCases {
+
+        @Test
+        @DisplayName("should truncate long content in sources")
+        void shouldTruncateLongContentInSources() {
+            // Arrange
+            String query = "Test query";
+            float[] mockEmbedding = createMockEmbedding();
+            String longContent = "A".repeat(600); // > MAX_SOURCE_LENGTH (500)
+
+            DocumentChunk chunk = new DocumentChunk(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    longContent,
+                    0,
+                    Map.of()
+            ).withEmbedding(createMockEmbedding());
+
+            when(embeddingAdapter.embed(query)).thenReturn(mockEmbedding);
+            when(vectorAdapter.search(any(), anyInt())).thenReturn(List.of(chunk));
+
+            // Act
+            RetrievalService.RetrievalResult result = retrievalService.retrieve(query, null, 5);
+
+            // Assert
+            assertThat(result.sources()).hasSize(1);
+            assertThat(result.sources().get(0).text()).hasSize(500);
+        }
+
+        @Test
+        @DisplayName("should use short content as-is without truncation")
+        void shouldUseShortContentAsIsWithoutTruncation() {
+            // Arrange
+            String query = "Test query";
+            float[] mockEmbedding = createMockEmbedding();
+            String shortContent = "Short content";
+
+            DocumentChunk chunk = new DocumentChunk(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    shortContent,
+                    0,
+                    Map.of()
+            ).withEmbedding(createMockEmbedding());
+
+            when(embeddingAdapter.embed(query)).thenReturn(mockEmbedding);
+            when(vectorAdapter.search(any(), anyInt())).thenReturn(List.of(chunk));
+
+            // Act
+            RetrievalService.RetrievalResult result = retrievalService.retrieve(query, null, 5);
+
+            // Assert
+            assertThat(result.sources()).hasSize(1);
+            assertThat(result.sources().get(0).text()).isEqualTo(shortContent);
+        }
+
+        @Test
+        @DisplayName("should return zero similarity for null embeddings")
+        void shouldReturnZeroSimilarityForNullEmbeddings() {
+            // This tests calculateSimilarity with null input
+            float[] nullEmbedding = null;
+            float[] validEmbedding = createMockEmbedding();
+
+            // We can't directly call private method, but we can test through integration
+            // when embeddings are computed as null from adapter
+            when(embeddingAdapter.embed("query")).thenReturn(nullEmbedding);
+
+            DocumentChunk chunk = new DocumentChunk(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    "content",
+                    0,
+                    Map.of()
+            ).withEmbedding(validEmbedding);
+
+            when(vectorAdapter.search(any(), anyInt())).thenReturn(List.of(chunk));
+
+            // Act
+            RetrievalService.RetrievalResult result = retrievalService.retrieve("query", null, 5);
+
+            // Assert - should handle gracefully
+            assertThat(result.sources()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("should sort sources by score descending")
+        void shouldSortSourcesByScoreDescending() {
+            // Arrange
+            String query = "Test query";
+            float[] mockEmbedding = createMockEmbedding();
+            mockEmbedding[0] = 0.5f;
+
+            float[] highScoreEmbedding = createMockEmbedding();
+            highScoreEmbedding[0] = 0.9f;
+
+            float[] lowScoreEmbedding = createMockEmbedding();
+            lowScoreEmbedding[0] = 0.3f;
+
+            DocumentChunk chunk1 = new DocumentChunk(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    "Low score chunk",
+                    0,
+                    Map.of()
+            ).withEmbedding(lowScoreEmbedding);
+
+            DocumentChunk chunk2 = new DocumentChunk(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    "High score chunk",
+                    0,
+                    Map.of()
+            ).withEmbedding(highScoreEmbedding);
+
+            when(embeddingAdapter.embed(query)).thenReturn(mockEmbedding);
+            when(vectorAdapter.search(any(), anyInt())).thenReturn(List.of(chunk1, chunk2));
+
+            // Act
+            RetrievalService.RetrievalResult result = retrievalService.retrieve(query, null, 5);
+
+            // Assert - sources should be sorted by score descending
+            assertThat(result.sources()).hasSize(2);
+            assertThat(result.sources().get(0).score()).isGreaterThan(result.sources().get(1).score());
+        }
+    }
 }

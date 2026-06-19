@@ -1,8 +1,7 @@
 package com.ai.application.usecase;
 
 import com.ai.adapter.out.document.PdfTextExtractor;
-import com.ai.domain.model.Document;
-import com.ai.domain.service.RagService;
+import com.ai.application.service.RagApplicationService;
 import com.ai.domain.vo.DocumentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,18 +14,18 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Application layer use case for document upload orchestration.
- * Coordinates between adapters (PdfTextExtractor) and domain services (RagService).
+ * Coordinates between adapters (PdfTextExtractor) and application services.
  */
 @Service
 public class DocumentUploadUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentUploadUseCase.class);
 
-    private final RagService ragService;
+    private final RagApplicationService ragApplicationService;
     private final PdfTextExtractor pdfTextExtractor;
 
-    public DocumentUploadUseCase(RagService ragService, PdfTextExtractor pdfTextExtractor) {
-        this.ragService = ragService;
+    public DocumentUploadUseCase(RagApplicationService ragApplicationService, PdfTextExtractor pdfTextExtractor) {
+        this.ragApplicationService = ragApplicationService;
         this.pdfTextExtractor = pdfTextExtractor;
     }
 
@@ -54,43 +53,36 @@ public class DocumentUploadUseCase {
 
         log.info("Processing document upload: {}", docTitle);
 
-        String content = extractContent(file, fileName);
-        Document document = ragService.uploadDocument(docTitle, fileName, file.getSize(), content);
-
-        return new UploadResult(
-                document.getId(),
-                document.getTitle(),
-                document.getStatus().name(),
-                0
-        );
-    }
-
-    private String extractContent(MultipartFile file, String fileName) {
         try {
             byte[] fileBytes = file.getBytes();
-            String extension = pdfTextExtractor.getExtension(fileName);
+            String content = extractContent(fileBytes, fileName);
+            var result = ragApplicationService.uploadDocument(docTitle, fileName, file.getSize(), content);
 
-            if ("pdf".equalsIgnoreCase(extension)) {
-                return extractPdfContent(fileBytes, fileName);
-            }
-
-            return new String(fileBytes, StandardCharsets.UTF_8);
-
+            return new UploadResult(
+                    result.documentId(),
+                    result.title(),
+                    result.status(),
+                    result.chunkCount()
+            );
         } catch (IOException e) {
             log.error("Failed to read file content: {}", e.getMessage());
             throw new DocumentUploadException("Failed to read file content: " + e.getMessage(), e);
         }
     }
 
-    private String extractPdfContent(byte[] fileBytes, String fileName) {
-        return pdfTextExtractor.extractText(fileBytes)
-                .orElseThrow(() -> {
-                    log.error("Failed to extract text from PDF: {}", fileName);
-                    return new DocumentUploadException(
-                            "Failed to extract text from PDF file: " + fileName,
-                            new IllegalStateException("PDF text extraction returned empty result")
-                    );
-                });
+    private String extractContent(byte[] fileBytes, String fileName) {
+        String extension = pdfTextExtractor.getExtension(fileName);
+        if ("pdf".equalsIgnoreCase(extension)) {
+            return pdfTextExtractor.extractText(fileBytes)
+                    .orElseThrow(() -> {
+                        log.error("Failed to extract text from PDF: {}", fileName);
+                        return new DocumentUploadException(
+                                "Failed to extract text from PDF file: " + fileName,
+                                new IllegalStateException("PDF text extraction returned empty result")
+                        );
+                    });
+        }
+        return new String(fileBytes, StandardCharsets.UTF_8);
     }
 
     /**

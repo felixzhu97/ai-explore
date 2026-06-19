@@ -6,7 +6,7 @@ import com.ai.domain.model.SourceDocument;
 import com.ai.domain.service.AiChatService;
 import com.ai.domain.service.LanguageDetectionService;
 import com.ai.domain.service.PromptTemplates;
-import com.ai.domain.service.RagService;
+import com.ai.application.service.RagApplicationService;
 import com.ai.application.usecase.DocumentUploadUseCase;
 import com.ai.adapter.in.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Tag(name = "RAG", description = "RAG document management and chat")
 public class RagController {
 
-    private final RagService ragService;
+    private final RagApplicationService ragApplicationService;
     private final AiChatService aiChatService;
     private final LanguageDetectionService languageDetectionService;
     private final PromptTemplates promptTemplates;
@@ -43,13 +43,13 @@ public class RagController {
     private final StreamingService streamingService;
 
     public RagController(
-            RagService ragService,
+            RagApplicationService ragApplicationService,
             AiChatService aiChatService,
             LanguageDetectionService languageDetectionService,
             PromptTemplates promptTemplates,
             DocumentUploadUseCase documentUploadUseCase,
             StreamingService streamingService) {
-        this.ragService = ragService;
+        this.ragApplicationService = ragApplicationService;
         this.aiChatService = aiChatService;
         this.languageDetectionService = languageDetectionService;
         this.promptTemplates = promptTemplates;
@@ -61,7 +61,7 @@ public class RagController {
     @Operation(summary = "List all documents")
     public ResponseEntity<DocumentListResponse> listDocuments() {
         log.info("Listing all documents");
-        List<Document> documents = ragService.listDocuments();
+        List<Document> documents = ragApplicationService.listDocuments();
         List<DocumentSummaryDto> summaries = documents.stream()
             .map(this::toDocumentSummaryDto)
             .collect(Collectors.toList());
@@ -92,7 +92,7 @@ public class RagController {
     @Operation(summary = "Delete a document")
     public ResponseEntity<Void> deleteDocument(@PathVariable UUID id) {
         log.info("Deleting document: {}", id);
-        ragService.deleteDocument(id);
+        ragApplicationService.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -109,7 +109,7 @@ public class RagController {
                     .collect(Collectors.toList());
             }
 
-            var result = ragService.retrieveContext(
+            var result = ragApplicationService.retrieveContext(
                 request.question(),
                 docUuids,
                 request.topK() != null ? request.topK() : 5

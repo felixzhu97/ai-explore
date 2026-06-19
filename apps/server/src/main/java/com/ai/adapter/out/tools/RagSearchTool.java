@@ -1,6 +1,6 @@
 package com.ai.adapter.out.tools;
 
-import com.ai.domain.service.RagService;
+import com.ai.application.service.RagApplicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
@@ -22,10 +22,10 @@ public class RagSearchTool {
     private static final int DEFAULT_TOP_K = 5;
     private static final int MAX_CONTENT_LENGTH = 500;
 
-    private final RagService ragService;
+    private final RagApplicationService ragApplicationService;
 
-    public RagSearchTool(RagService ragService) {
-        this.ragService = ragService;
+    public RagSearchTool(RagApplicationService ragApplicationService) {
+        this.ragApplicationService = ragApplicationService;
     }
 
     @Tool(description = "搜索知识库中的文档内容。根据用户问题搜索相关文档片段并返回匹配的内容和来源信息")
@@ -47,7 +47,7 @@ public class RagSearchTool {
                         .collect(Collectors.toList());
             }
 
-            RagService.RetrievalResult result = ragService.retrieveContext(query, docUuids, DEFAULT_TOP_K);
+            var result = ragApplicationService.retrieveContext(query, docUuids, DEFAULT_TOP_K);
 
             if (result.sources().isEmpty()) {
                 return "没有找到与您查询相关的文档内容。请尝试不同的搜索关键词。";
@@ -90,7 +90,7 @@ public class RagSearchTool {
         log.info("Listing all documents");
 
         try {
-            var documents = ragService.listDocuments();
+            var documents = ragApplicationService.listDocuments();
 
             if (documents.isEmpty()) {
                 return "知识库中暂无文档，请先上传文档。";

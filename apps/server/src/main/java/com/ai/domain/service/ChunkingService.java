@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Service for chunking text into smaller segments for RAG processing.
- * Uses Recursive Character Text Splitting strategy with configurable chunk size and overlap.
+ * Domain service for text chunking operations.
+ * Uses Recursive Character Text Splitting strategy.
  */
 @Service
 public class ChunkingService {

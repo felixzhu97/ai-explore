@@ -10,11 +10,14 @@ import com.ai.adapter.out.vector.PgVectorAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Domain service for RAG retrieval operations.
+ * Contains core retrieval logic without framework dependencies.
+ */
 @Service
 public class RagService {
 
@@ -44,7 +47,10 @@ public class RagService {
         String enrichedQuery
     ) {}
 
-    @Transactional
+    /**
+     * Uploads a document and returns the processed Document entity.
+     * Transaction management should be handled by the caller (Application layer).
+     */
     public Document uploadDocument(String title, String fileName, Long fileSize, String content) {
         log.info("Uploading document: {}", title);
 
@@ -102,7 +108,10 @@ public class RagService {
         return documentRepository.findAll();
     }
 
-    @Transactional
+    /**
+     * Deletes a document by ID.
+     * Transaction management should be handled by the caller (Application layer).
+     */
     public void deleteDocument(UUID documentId) {
         log.info("Deleting document: {}", documentId);
 

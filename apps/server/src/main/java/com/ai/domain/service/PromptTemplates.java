@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Centralized prompt templates for AI interactions.
+ * Domain service for centralized prompt templates.
  * Provides consistent prompt patterns across different use cases.
  */
 @Component

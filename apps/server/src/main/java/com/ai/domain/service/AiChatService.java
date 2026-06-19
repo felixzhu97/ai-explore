@@ -8,14 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.stereotype.Service;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * AI Chat Service using Spring AI 2.0 ChatClient API with retry and Chat Memory support.
+ * Domain service for AI chat operations using Spring AI ChatClient API.
+ * Contains chat logic with retry and memory support.
  */
 @Service
 public class AiChatService {

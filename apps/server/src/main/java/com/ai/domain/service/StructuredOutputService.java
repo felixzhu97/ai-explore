@@ -8,8 +8,7 @@ import org.springframework.ai.chat.client.AdvisorParams;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for structured output using Spring AI 2.0 .entity() method.
- * Demonstrates native structured output capability.
+ * Domain service for structured output using Spring AI 2.0 .entity() method.
  */
 @Service
 public class StructuredOutputService {

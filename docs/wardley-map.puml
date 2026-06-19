@@ -3,177 +3,220 @@
 
 LAYOUT_WITH_LEGEND()
 skinparam backgroundColor #FFFFFF
-skinparam defaultFontSize 9
+skinparam defaultFontSize 10
 skinparam dpi 150
 
-title AI-Test Platform 技术演进地图 (C4 Container)
+title AI-Test Platform 战略演进地图
 
 ' ============================================================
-' ANCHOR - 用户 (最高可见度)
+' ANCHOR - 用户需求 (最高可见度)
 ' ============================================================
-Person(user, "用户", "ML 工程师 / 运维工程师 / 数据科学家")
+Person(user, "用户", "ML工程师/运维/数据科学家")
+Person_Ext(external_user, "外部用户", "API 消费者")
 
 ' ============================================================
-' GENESIS 阶段 - 创新/定制能力 (左下角，演化早期)
+' 用户可见能力 (Y轴顶部)
 ' ============================================================
-Container_Boundary(genesis, "Genesis (创新阶段)") {
-    Container(multi_agent, "Multi-Agent Orchestration", "Java", "多 Agent 编排与任务路由")
-    Container(rag, "RAG + Vector Search", "Java/Spring AI", "文档检索与向量搜索")
-    Container(vision_ai, "Vision AI Pipeline", "Java", "图像分析处理流水线")
-    Container(tts, "TTS 语音合成", "Java/Spring AI", "文本转语音服务")
-    Container(image_gen, "Image Gen 图像生成", "Java/Spring AI", "AI 图像生成")
-    Container(aiops, "AIOps 智能分析", "Java", "运维智能分析与告警")
-    Container(mcp, "MCP Server/Client", "Java/Spring AI", "Model Context Protocol")
+Container_Boundary(user_facing, "用户可感知能力") {
+    Container(agent_chat, "Agent 对话", "对话式 AI 交互", "多轮对话、上下文理解")
+    Container(rag_chat, "RAG 对话", "知识库问答", "文档检索、精准回答")
+    Container(vision_analysis, "视觉分析", "图像内容理解", "目标检测、OCR识别")
+    Container(image_generation, "图像生成", "AI 图像创建", "文本转图像")
+    Container(speech_synthesis, "语音合成", "文本转语音", "多语言、多种音色")
+    Container(aiops_dashboard, "AIOps 面板", "智能运维监控", "异常检测、告警")
 }
 
 ' ============================================================
-' CUSTOM BUILT 阶段 - 定制开发 (中部，差异化能力)
+' 业务能力层 (Y轴中部)
 ' ============================================================
-Container_Boundary(frontend, "Frontend (Angular 22)") {
-    Container(fe_app, "AppComponent", "Angular 22", "根组件")
-    Container(fe_infra, "AIInfraPanel", "Angular 22", "AI 基础设施面板")
-    Container(fe_rag_chat, "RagChatComponent", "Angular 22", "RAG 对话组件")
-    Container(fe_vision, "VisionPanel", "Angular 22", "视觉分析面板")
-    Container(fe_agent, "AgentChatComponent", "Angular 22", "Agent 对话 (SSE)")
-    Container(fe_ai_service, "AiService", "Angular 22", "AI 能力服务")
-    Container(fe_api, "ApiService", "Angular 22", "API 通信服务")
-}
-
-Container_Boundary(chat_backend, "Chat Backend (Java 25)") {
-    Container(chat_ctrl, "ChatController", "REST API", "HTTP 接口")
-    Container(chat_app, "ChatApplicationService", "Java", "应用服务")
-    Container(chat_session, "ChatSession", "DDD Aggregate", "会话聚合根")
-    Container(chat_adapter, "SpringAiChatAdapter", "Spring AI 2.0", "AI 适配器")
-}
-
-Container_Boundary(rag_backend, "RAG Backend (Java 25)") {
-    Container(rag_ctrl, "RagController", "REST/SSE API", "HTTP 接口")
-    Container(rag_app, "RagApplicationService", "Java", "应用服务")
-    Container(rag_emb, "DeepSeekEmbeddingAdapter", "Spring AI", "嵌入模型适配器")
-    Container(rag_vec, "PgVectorAdapter", "pgvector", "向量数据库适配器")
-    Container(rag_doc_repo, "JpaDocumentRepository", "Spring Data JPA", "文档仓储")
-}
-
-Container_Boundary(mcp_backend, "MCP Backend (Java 25)") {
-    Container(mcp_ctrl, "McpController", "REST API", "MCP 服务控制")
-    Container(mcp_client, "AiMcpClientService", "Java", "MCP 客户端服务")
-}
-
-Container_Boundary(domain, "Domain Layer (DDD)") {
-    Container(vo, "Value Objects", "Java Record", "SessionId/MessageId/Email")
-    Container(domain_evt, "Domain Events", "Java", "领域事件")
-    Container(domain_exc, "Domain Exceptions", "Java", "业务异常")
+Container_Boundary(business_capabilities, "业务能力") {
+    Container(multi_agent, "Multi-Agent 编排", "多 Agent 协同", "任务分解、路由调度")
+    Container(mcp_protocol, "MCP 协议", "Model Context Protocol", "工具扩展、标准接口")
+    Container(session_management, "会话管理", "上下文保持", "状态追踪、历史记录")
+    Container(document_processor, "文档处理", "上传解析分块", "PDF/Word/OCR")
+    Container(vector_search, "向量检索", "语义搜索", "相似度匹配、Rerank")
+    Container(embedding_service, "Embedding 生成", "文本向量化", "语义表示、高维向量")
 }
 
 ' ============================================================
-' PRODUCT 阶段 - 商业/开源组件 (右侧，采购能力)
+' 基础设施能力 (Y轴底部)
 ' ============================================================
-Container_Boundary(products, "Product (商业/开源)") {
-    Container(angular, "Angular 22", "Framework", "前端框架")
-    Container(spring_boot, "Spring Boot 3.5", "Framework", "后端框架")
-    Container(spring_ai, "Spring AI 2.0", "Library", "AI 集成框架")
-    Container(deepseek, "DeepSeek API", "LLM Service", "大语言模型 + Embedding")
-    Container(yolo, "YOLO11n", "ML Model", "目标检测模型")
-    Container(paddleocr, "PaddleOCR", "ML Model", "OCR 文字识别")
-    Container(blip, "BLIP", "ML Model", "图像描述生成")
-    Container(dalle, "DALL-E", "API", "图像生成服务")
-    Container(edge_tts, "Edge TTS", "API", "微软语音合成")
+Container_Boundary(infrastructure, "基础设施能力") {
+    Container(llm_inference, "LLM 推理", "大语言模型调用", "DeepSeek API")
+    Container(image_gen_service, "图像生成服务", "DALL-E/SD", "图像生成 API")
+    Container(tts_service, "TTS 服务", "语音合成 API", "Edge TTS/DeepSeek TTS")
+    Container(vision_model, "视觉模型", "YOLO/BLIP/PaddleOCR", "目标检测/图像描述/OCR")
+    Container(vector_db, "向量数据库", "pgvector", "向量存储与检索")
+    Container(doc_storage, "文档存储", "PostgreSQL", "结构化数据存储")
+    Container(cache, "缓存服务", "Redis", "会话缓存、热点数据")
 }
 
 ' ============================================================
-' COMMODITY 阶段 - 标准化基础设施 (右下角，演化后期)
+' 支撑技术层 (Commodity - X轴最右)
 ' ============================================================
-Container_Boundary(commodity, "Commodity (标准化基础设施)") {
-    Container(nodejs, "Node.js", "Runtime", "前端运行时")
-    Container(java, "Java 25", "Runtime", "后端运行时")
-    Container(postgres, "PostgreSQL 17 + pgvector", "Database", "关系型 + 向量数据库")
-    Container(redis, "Redis", "Cache", "缓存服务")
-    Container(k8s, "Kubernetes", "Orchestration", "容器编排")
-    Container(docker, "Docker", "Container", "容器化")
-    Container(http, "HTTP/WebSocket/SSE", "Protocol", "通信协议")
-    Container(prom, "Prometheus/Grafana", "Monitoring", "监控告警")
-    Container(otel, "OpenTelemetry", "Observability", "可观测性")
-    Container(gradle, "Gradle", "Build Tool", "构建工具")
-    Container(gha, "GitHub Actions", "CI/CD", "持续集成部署")
+Container_Boundary(commodity, "标准化技术 (Commodity)") {
+    Container_Boundary(runtime, "运行时") {
+        Container(node_runtime, "Node.js", "前端运行时")
+        Container(java_runtime, "Java 25", "后端运行时")
+    }
+    Container_Boundary(platform, "平台") {
+        Container(k8s, "Kubernetes", "容器编排")
+        Container(docker, "Docker", "容器化")
+    }
+    Container_Boundary(data, "数据") {
+        Container(postgres, "PostgreSQL 17", "关系数据库")
+        Container(redis_cache, "Redis", "缓存")
+    }
+    Container_Boundary(protocols, "协议") {
+        Container(http_proto, "HTTP/WebSocket", "通信协议")
+        Container(sse, "SSE", "服务端推送")
+    }
+    Container_Boundary(observability, "可观测性") {
+        Container(prom_grafana, "Prometheus/Grafana", "监控")
+        Container(otel, "OpenTelemetry", "追踪")
+    }
+    Container_Boundary(ci_cd, "CI/CD") {
+        Container(github_actions, "GitHub Actions", "持续集成")
+        Container(helm, "Helm", "包管理")
+    }
 }
 
 ' ============================================================
-' RELATIONSHIPS - 依赖关系
+' 第三方服务 (Product - X轴右)
+' ============================================================
+Container_Boundary(third_party, "第三方服务 (Product)") {
+    Container(deepseek_llm, "DeepSeek API", "LLM + Embedding", "国内可用、低成本")
+    Container(dalle_api, "DALL-E API", "图像生成", "OpenAI")
+    Container(edge_tts_api, "Edge TTS", "语音合成", "微软")
+    Container(yolo_model, "YOLO11n", "目标检测", "Ultralytics")
+    Container(paddleocr_lib, "PaddleOCR", "文字识别", "百度")
+}
+
+' ============================================================
+' 框架层 (Product - X轴中右)
+' ============================================================
+Container_Boundary(frameworks, "开发框架 (Product)") {
+    Container(angular, "Angular 22", "前端框架", "响应式 UI")
+    Container(spring_boot, "Spring Boot 3.5", "后端框架", "企业级 Java")
+    Container(spring_ai, "Spring AI 2.0", "AI 集成", "多 Provider 适配")
+    Container(gradle_build, "Gradle", "构建工具", "依赖管理")
+}
+
+' ============================================================
+' 内部定制 (Custom Built - X轴中间)
+' ============================================================
+Container_Boundary(custom_built, "内部定制 (Custom Built)") {
+    Container_Boundary(frontend_custom, "前端定制") {
+        Container(fe_components, "Angular 组件库", "UI 组件", "AI 专用组件")
+        Container(fe_services, "前端服务层", "业务逻辑", "API 封装")
+    }
+    Container_Boundary(backend_custom, "后端定制") {
+        Container(be_controllers, "REST Controllers", "API 网关", "请求路由")
+        Container(be_usecases, "Use Cases", "用例编排", "业务逻辑")
+        Container(be_domain, "Domain Layer", "DDD 领域", "聚合根、值对象")
+        Container(be_adapters, "Adapters", "适配器", "Spring AI、Pgvector")
+    }
+}
+
+' ============================================================
+' 创新探索 (Genesis - X轴最左)
+' ============================================================
+Container_Boundary(genesis, "创新探索 (Genesis)") {
+    Container(gen_agent, "Agent 编排算法", "探索", "新型路由策略")
+    Container(gen_rag, "RAG 增强检索", "探索", "混合检索、重排序")
+    Container(gen_vision, "视觉理解流水线", "探索", "多模型协同")
+    Container(gen_mcp, "MCP 生态集成", "探索", "新协议适配")
+    Container(gen_aiops, "AIOps 智能分析", "探索", "异常预测、根因")
+}
+
+' ============================================================
+' 战略标注
+' ============================================================
+note as STRATEGY_NOTE
+**战略决策指引:**
+• Genesis/Custom Built: **差异化竞争** - 投入研发资源
+• Product: **优化选择** - 评估供应商、避免锁定
+• Commodity: **标准化采购** - 成本优先、自动化
+end note
+
+note as INERTIA_NOTE
+**演化惯性标注:**
+• 基础设施迁移困难 (Kubernetes)
+• 大语言模型切换成本高 (LLM)
+• 前端框架绑定 (Angular)
+end note
+
+' ============================================================
+' 依赖关系
 ' ============================================================
 
-' 用户 -> Frontend
-Rel(user, fe_infra, "查看监控")
-Rel(user, fe_rag_chat, "RAG 对话")
-Rel(user, fe_vision, "图像分析")
-Rel(user, fe_agent, "Agent 对话")
+' 用户 -> 用户可感知能力
+Rel(user, agent_chat, "对话")
+Rel(user, rag_chat, "知识问答")
+Rel(user, vision_analysis, "图像分析")
+Rel(user, image_generation, "图像创建")
+Rel(user, speech_synthesis, "语音交互")
+Rel(user, aiops_dashboard, "运维监控")
 
-' Frontend 内部
-Rel(fe_app, fe_ai_service, "调用")
-Rel(fe_infra, fe_agent, "Agent 入口")
-Rel(fe_ai_service, fe_api, "HTTP 请求")
+' 用户可感知 -> 业务能力
+Rel(agent_chat, multi_agent, "编排")
+Rel(agent_chat, session_management, "状态")
+Rel(agent_chat, llm_inference, "LLM")
+Rel(rag_chat, vector_search, "检索")
+Rel(rag_chat, embedding_service, "向量化")
+Rel(rag_chat, document_processor, "文档")
+Rel(vision_analysis, vision_model, "模型")
+Rel(image_generation, image_gen_service, "生成")
+Rel(speech_synthesis, tts_service, "合成")
+Rel(aiops_dashboard, multi_agent, "分析")
 
-' Frontend -> Backend
-Rel(fe_api, chat_ctrl, "聊天请求")
-Rel(fe_api, rag_ctrl, "RAG 请求")
-Rel(fe_ai_service, rag_emb, "Embedding")
-Rel(fe_ai_service, yolo, "目标检测")
-Rel(fe_ai_service, dalle, "图像生成")
-Rel(fe_ai_service, edge_tts, "语音合成")
+' 业务能力 -> 基础设施
+Rel(multi_agent, mcp_protocol, "扩展")
+Rel(vector_search, vector_db, "存储")
+Rel(embedding_service, llm_inference, "调用")
+Rel(document_processor, doc_storage, "存储")
+Rel(session_management, cache, "缓存")
 
-' Chat Backend
-Rel(chat_ctrl, chat_app, "应用服务")
-Rel(chat_app, chat_session, "会话管理")
-Rel(chat_app, chat_adapter, "AI 调用")
-Rel(chat_adapter, deepseek, "LLM 请求")
+' 基础设施 -> 第三方服务
+Rel(llm_inference, deepseek_llm, "API")
+Rel(image_gen_service, dalle_api, "API")
+Rel(tts_service, edge_tts_api, "API")
+Rel(vision_model, yolo_model, "模型")
+Rel(vision_model, paddleocr_lib, "库")
 
-' RAG Backend
-Rel(rag_ctrl, rag_app, "应用服务")
-Rel(rag_app, rag_emb, "嵌入生成")
-Rel(rag_app, rag_vec, "向量检索")
-Rel(rag_app, rag_doc_repo, "文档存储")
-Rel(rag_emb, deepseek, "Embedding")
-Rel(rag_vec, postgres, "向量查询")
+' 基础设施 -> 标准化技术
+Rel(vector_db, postgres, "存储")
+Rel(cache, redis_cache, "缓存")
+Rel(doc_storage, postgres, "存储")
+Rel(be_controllers, http_proto, "通信")
+Rel(fe_services, http_proto, "通信")
 
-' MCP Backend
-Rel(mcp_ctrl, mcp_client, "客户端服务")
-Rel(mcp_client, spring_ai, "AI 集成")
+' 第三方服务 -> 框架
+Rel(deepseek_llm, spring_ai, "集成")
+Rel(dalle_api, spring_ai, "集成")
+Rel(edge_tts_api, spring_ai, "集成")
 
-' Domain Layer
-Rel(chat_session, vo, "值对象")
-Rel(chat_app, domain_evt, "事件发布")
-Rel(chat_app, domain_exc, "异常处理")
+' 框架 -> 内部定制
+Rel(angular, fe_components, "构建")
+Rel(spring_boot, be_controllers, "构建")
+Rel(spring_ai, be_adapters, "使用")
+Rel(gradle_build, java_runtime, "构建")
 
-' Genesis -> Custom Built
-Rel(multi_agent, fe_agent, "编排")
-Rel(multi_agent, chat_app, "编排")
-Rel(rag, fe_rag_chat, "检索")
-Rel(rag, rag_app, "检索")
-Rel(vision_ai, fe_vision, "分析")
-Rel(tts, fe_ai_service, "合成")
-Rel(image_gen, fe_ai_service, "生成")
-Rel(aiops, fe_infra, "监控")
-Rel(mcp, mcp_ctrl, "协议")
-
-' Product -> Commodity
-Rel(angular, nodejs, "运行时")
-Rel(spring_boot, java, "运行时")
-Rel(spring_ai, spring_boot, "集成")
-Rel(deepseek, http, "API 调用")
-Rel(dalle, http, "API 调用")
-Rel(yolo, docker, "容器")
-Rel(paddleocr, docker, "容器")
-Rel(blip, docker, "容器")
-Rel(edge_tts, http, "API 调用")
-
-' Commodity 内部
-Rel(java, k8s, "部署")
-Rel(gradle, java, "构建")
-Rel(postgres, docker, "容器")
-Rel(redis, docker, "容器")
-Rel(prom, k8s, "监控")
+' 内部定制 -> 标准化技术
+Rel(java_runtime, k8s, "部署")
+Rel(node_runtime, k8s, "部署")
+Rel(fe_services, node_runtime, "运行")
+Rel(be_usecases, java_runtime, "运行")
+Rel(prom_grafana, k8s, "监控")
 Rel(otel, k8s, "追踪")
-Rel(http, k8s, "服务")
-Rel(gha, k8s, "部署")
+Rel(github_actions, helm, "部署")
+
+' Genesis -> Custom Built (创新驱动)
+Rel(gen_agent, multi_agent, "探索")
+Rel(gen_rag, vector_search, "探索")
+Rel(gen_vision, vision_analysis, "探索")
+Rel(gen_mcp, mcp_protocol, "探索")
+Rel(gen_aiops, aiops_dashboard, "探索")
 
 SHOW_LEGEND()
 @enduml

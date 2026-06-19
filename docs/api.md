@@ -2,9 +2,8 @@
 
 ## Base URL
 
-```
-@baseUrl = http://localhost:9000
-@contentType = application/json
+```bash
+BASE_URL="http://localhost:9000"
 ```
 
 ---
@@ -12,10 +11,10 @@
 ## Table of Contents
 
 1. [Health Check](#health-check)
-2. [Chat APIs](#chat-apis)
-3. [Session APIs](#session-apis)
-4. [RAG APIs](#rag-apis)
-5. [Tool Calling APIs](#tool-calling-apis)
+2. [Chat API](#chat-api)
+3. [Session API](#session-api)
+4. [RAG API](#rag-api)
+5. [Tool Calling API](#tool-calling-api)
 6. [Error Codes](#error-codes)
 
 ---
@@ -24,13 +23,13 @@
 
 ### Health Check
 
-Check if the service is running.
+Check if the service is running properly.
 
-```http
-GET {{baseUrl}}/api/health
+```bash
+curl -X GET "${BASE_URL}/api/health"
 ```
 
-**Response**
+**Response Example**
 
 ```json
 {
@@ -40,33 +39,32 @@ GET {{baseUrl}}/api/health
 
 ---
 
-## Chat APIs
+## Chat API
 
 ### Chat with AI
 
 Send a chat message and receive an AI response. Supports session context for multi-turn conversations.
 
-```http
-POST {{baseUrl}}/api/chat
-Content-Type: {{contentType}}
-
-{
-  "message": "Hello, how are you?"
-}
+```bash
+curl -X POST "${BASE_URL}/api/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Hello, please introduce the history of Beijing"
+  }'
 ```
 
 **Request Body**
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `message` | string | Yes | The chat message (max 10000 characters) |
+|------|------|----------|-------------|
+| `message` | string | Yes | Chat message (max 10,000 characters) |
 | `sessionId` | string | No | Session ID for multi-turn conversations |
 
-**Response**
+**Response Example**
 
 ```json
 {
-  "response": "Hello! I'm doing great, thank you for asking. How can I help you today?",
+  "response": "Beijing is the capital of China with over 3,000 years of history. It served as the capital for multiple dynasties and is home to world cultural heritage sites like the Forbidden City, Temple of Heaven, and Great Wall.",
   "sessionId": "abc123",
   "messageId": "msg-uuid",
   "timestamp": "2026-06-19T03:30:00Z"
@@ -75,40 +73,38 @@ Content-Type: {{contentType}}
 
 ---
 
-### Chat with AI (with Session)
+### Continue Session Chat
 
-Continue a conversation using a session ID.
+Continue a previous conversation using a session ID.
 
-```http
-POST {{baseUrl}}/api/chat
-Content-Type: {{contentType}}
-
-{
-  "message": "Continue our conversation about AI",
-  "sessionId": "your-session-id"
-}
+```bash
+curl -X POST "${BASE_URL}/api/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Please tell me more about the history of the Forbidden City",
+    "sessionId": "abc123"
+  }'
 ```
 
 ---
 
-### Simple Chat (Legacy)
+### Simple Chat (Legacy Endpoint)
 
-Simple chat without session support (legacy API).
+Simple chat without session context (legacy API).
 
-```http
-POST {{baseUrl}}/api/chat/simple
-Content-Type: {{contentType}}
-
-{
-  "message": "Hello!"
-}
+```bash
+curl -X POST "${BASE_URL}/api/chat/simple" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Hello!"
+  }'
 ```
 
-**Response**
+**Response Example**
 
 ```json
 {
-  "response": "Hello! How can I assist you?"
+  "response": "Hello! I'm happy to assist you. How can I help you today?"
 }
 ```
 
@@ -116,38 +112,37 @@ Content-Type: {{contentType}}
 
 ### Text Analysis
 
-Analyze text and return structured results including summary, sentiment, key points, and entities.
+Analyze text and return structured results including summary, sentiment, key points, and entity recognition.
 
-```http
-POST {{baseUrl}}/api/chat/analyze
-Content-Type: {{contentType}}
-
-{
-  "text": "This is a sample text that needs analysis.",
-  "language": "en"
-}
+```bash
+curl -X POST "${BASE_URL}/api/chat/analyze" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "The food at this restaurant was delicious, the service was excellent, and the atmosphere was elegant. It was a very enjoyable dining experience.",
+    "language": "en"
+  }'
 ```
 
 **Request Body**
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `text` | string | Yes | The text to analyze |
-| `language` | string | No | Target language for analysis (e.g., "en", "zh") |
+|------|------|----------|-------------|
+| `text` | string | Yes | Text to analyze |
+| `language` | string | No | Analysis language (e.g., "en", "zh") |
 
-**Response**
+**Response Example**
 
 ```json
 {
-  "summary": "A brief summary of the text...",
-  "sentiment": "NEUTRAL",
+  "summary": "This is a positive review about a restaurant dining experience.",
+  "sentiment": "POSITIVE",
   "keyPoints": [
-    "First key point",
-    "Second key point"
+    "Delicious food",
+    "Excellent service",
+    "Elegant atmosphere"
   ],
   "entities": [
-    "Entity 1",
-    "Entity 2"
+    "restaurant"
   ],
   "language": "en"
 }
@@ -163,33 +158,32 @@ Content-Type: {{contentType}}
 
 ---
 
-## Session APIs
+## Session API
 
 ### Create Session
 
 Create a new chat session.
 
-```http
-POST {{baseUrl}}/api/sessions
-Content-Type: {{contentType}}
-
-{
-  "title": "My Chat Session"
-}
+```bash
+curl -X POST "${BASE_URL}/api/sessions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Travel Consultation"
+  }'
 ```
 
 **Request Body**
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | No | Session title (defaults to "New Chat") |
+|------|------|----------|-------------|
+| `title` | string | No | Session title (default: "New Session") |
 
-**Response**
+**Response Example**
 
 ```json
 {
   "sessionId": "abc123",
-  "title": "My Chat Session",
+  "title": "Travel Consultation",
   "messageCount": 0,
   "createdAt": "2026-06-19T03:30:00Z",
   "lastActivityAt": "2026-06-19T03:30:00Z"
@@ -198,21 +192,21 @@ Content-Type: {{contentType}}
 
 ---
 
-### List All Sessions
+### Get All Sessions
 
-Retrieve all chat sessions.
+Get a list of all chat sessions.
 
-```http
-GET {{baseUrl}}/api/sessions
+```bash
+curl -X GET "${BASE_URL}/api/sessions"
 ```
 
-**Response**
+**Response Example**
 
 ```json
 [
   {
     "sessionId": "abc123",
-    "title": "My Chat Session",
+    "title": "Travel Consultation",
     "messageCount": 5,
     "createdAt": "2026-06-19T03:30:00Z",
     "lastActivityAt": "2026-06-19T04:00:00Z"
@@ -224,19 +218,19 @@ GET {{baseUrl}}/api/sessions
 
 ### Get Session Messages
 
-Retrieve message history for a specific session.
+Get message history for a specific session.
 
-```http
-GET {{baseUrl}}/api/sessions/{sessionId}/messages
+```bash
+curl -X GET "${BASE_URL}/api/sessions/{sessionId}/messages"
 ```
 
 **Path Parameters**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `sessionId` | string | The session ID |
+| `sessionId` | string | Session ID |
 
-**Response**
+**Response Example**
 
 ```json
 {
@@ -244,13 +238,13 @@ GET {{baseUrl}}/api/sessions/{sessionId}/messages
   "messages": [
     {
       "id": "msg-uuid-1",
-      "text": "Hello!",
+      "text": "Hello, please introduce the attractions in Hangzhou",
       "role": "user",
       "timestamp": "2026-06-19T03:30:00Z"
     },
     {
       "id": "msg-uuid-2",
-      "text": "Hi there! How can I help?",
+      "text": "Hangzhou is the capital of Zhejiang Province. West Lake is the most famous attraction, along with Lingyin Temple, Songcheng, and other notable tourist destinations.",
       "role": "assistant",
       "timestamp": "2026-06-19T03:30:01Z"
     }
@@ -265,15 +259,15 @@ GET {{baseUrl}}/api/sessions/{sessionId}/messages
 
 Delete a chat session and all its messages.
 
-```http
-DELETE {{baseUrl}}/api/sessions/{sessionId}
+```bash
+curl -X DELETE "${BASE_URL}/api/sessions/{sessionId}"
 ```
 
 **Path Parameters**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `sessionId` | string | The session ID |
+| `sessionId` | string | Session ID |
 
 **Response**
 
@@ -281,27 +275,27 @@ DELETE {{baseUrl}}/api/sessions/{sessionId}
 
 ---
 
-## RAG APIs
+## RAG API
 
-### List Documents
+### Get Document List
 
-List all documents in the knowledge base.
+Get all documents in the knowledge base.
 
-```http
-GET {{baseUrl}}/api/rag/documents/
+```bash
+curl -X GET "${BASE_URL}/api/rag/documents/"
 ```
 
-**Response**
+**Response Example**
 
 ```json
 {
   "documents": [
     {
       "id": "550e8400-e29b-41d4-a716-446655440000",
-      "title": "Sample Document",
+      "title": "Product User Manual",
       "status": "PROCESSED",
       "createdAt": "2026-06-19T03:30:00Z",
-      "chunkCount": 5
+      "chunkCount": 15
     }
   ]
 }
@@ -313,29 +307,27 @@ GET {{baseUrl}}/api/rag/documents/
 
 Upload a document to the knowledge base. Supports TXT and PDF files.
 
-```http
-POST {{baseUrl}}/api/rag/documents/upload
-Content-Type: multipart/form-data
-
-file: sample.txt
-title: Sample Document
+```bash
+curl -X POST "${BASE_URL}/api/rag/documents/upload" \
+  -F "file=@user_manual.txt" \
+  -F "title=Product User Manual"
 ```
 
 **Form Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `file` | file | Yes | The file to upload (TXT or PDF) |
-| `title` | string | No | Document title (defaults to filename) |
+| `file` | file | Yes | File to upload (TXT or PDF) |
+| `title` | string | No | Document title (default: filename) |
 
-**Response**
+**Response Example**
 
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Sample Document",
+  "title": "Product User Manual",
   "status": "PROCESSED",
-  "chunkCount": 5,
+  "chunkCount": 15,
   "createdAt": "2026-06-19T03:30:00Z"
 }
 ```
@@ -344,12 +336,10 @@ title: Sample Document
 
 ### Upload PDF Document
 
-```http
-POST {{baseUrl}}/api/rag/documents/upload
-Content-Type: multipart/form-data
-
-file: document.pdf
-title: PDF Document
+```bash
+curl -X POST "${BASE_URL}/api/rag/documents/upload" \
+  -F "file=@technical_document.pdf" \
+  -F "title=Technical Documentation"
 ```
 
 ---
@@ -358,15 +348,15 @@ title: PDF Document
 
 Delete a document from the knowledge base.
 
-```http
-DELETE {{baseUrl}}/api/rag/documents/{id}
+```bash
+curl -X DELETE "${BASE_URL}/api/rag/documents/{id}"
 ```
 
 **Path Parameters**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `id` | UUID | The document ID |
+| `id` | UUID | Document ID |
 
 **Response**
 
@@ -376,71 +366,69 @@ DELETE {{baseUrl}}/api/rag/documents/{id}
 
 ### RAG Chat (Streaming)
 
-Chat with AI using document retrieval (streaming response).
+AI chat based on document retrieval (streaming response).
 
-```http
-POST {{baseUrl}}/api/rag/chat/stream
-Content-Type: {{contentType}}
-Accept: text/event-stream
-
-{
-  "question": "What is the content about?",
-  "docIds": [],
-  "topK": 5
-}
+```bash
+curl -X POST "${BASE_URL}/api/rag/chat/stream" \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "question": "What is the warranty period for this product?",
+    "docIds": [],
+    "topK": 5
+  }'
 ```
 
 **Request Body**
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `question` | string | Yes | The question to ask |
-| `docIds` | array | No | Specific document IDs to search (empty = all) |
-| `topK` | integer | No | Number of chunks to retrieve (default: 5) |
-| `temperature` | number | No | AI temperature (default: 0.7) |
-| `sessionId` | string | No | Session ID for context |
+|------|------|----------|-------------|
+| `question` | string | Yes | Question text |
+| `docIds` | array | No | Document IDs to search (empty = all) |
+| `topK` | integer | No | Number of document chunks to retrieve (default: 5) |
+| `temperature` | number | No | AI temperature parameter (default: 0.7) |
+| `sessionId` | string | No | Session ID |
 
-**Response (SSE)**
+**Response Example (SSE)**
 
 ```
 event: message
-data: The 
-data: content 
-data: is 
-data: about 
+data: According to the product user manual,
+data: this product is covered by
+data: a two-year
+data: full warranty.
 
 event: sources
-data: [{"text":"...","score":0.95,"metadata":{"source":"doc.pdf"}}]
+data: [{"text":"...warranty period is two years...","score":0.95,"metadata":{"source":"user_manual.pdf"}}]
 ```
 
 ---
 
 ### RAG Chat with Specific Documents
 
-Ask a question about specific documents only.
+Q&A only for specific documents.
 
-```http
-POST {{baseUrl}}/api/rag/chat/stream
-Content-Type: {{contentType}}
-Accept: text/event-stream
-
-{
-  "question": "Summarize the key points",
-  "docIds": ["550e8400-e29b-41d4-a716-446655440000", "660e8400-e29b-41d4-a716-446655440001"],
-  "topK": 3
-}
+```bash
+curl -X POST "${BASE_URL}/api/rag/chat/stream" \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "question": "Summarize the main content of this document",
+    "docIds": ["550e8400-e29b-41d4-a716-446655440000", "660e8400-e29b-41d4-a716-446655440001"],
+    "topK": 3
+  }'
 ```
 
 ---
 
-## Tool Calling APIs
+## Tool Calling API
 
 ### Get Weather
 
-Get current weather for a city.
+Get current weather for a specified city.
 
-```http
-GET {{baseUrl}}/api/tools/weather?city=Beijing
+```bash
+curl -X GET "${BASE_URL}/api/tools/weather?city=Beijing"
 ```
 
 **Query Parameters**
@@ -449,7 +437,7 @@ GET {{baseUrl}}/api/tools/weather?city=Beijing
 |-----------|------|----------|-------------|
 | `city` | string | Yes | City name |
 
-**Response**
+**Response Example**
 
 ```json
 {
@@ -464,10 +452,10 @@ GET {{baseUrl}}/api/tools/weather?city=Beijing
 
 ### Get Weather Forecast
 
-Get weather forecast for a city.
+Get weather forecast for a specified city.
 
-```http
-GET {{baseUrl}}/api/tools/weather/forecast?city=Shanghai&days=7
+```bash
+curl -X GET "${BASE_URL}/api/tools/weather/forecast?city=Shanghai&days=7"
 ```
 
 **Query Parameters**
@@ -475,16 +463,17 @@ GET {{baseUrl}}/api/tools/weather/forecast?city=Shanghai&days=7
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `city` | string | Yes | City name |
-| `days` | integer | No | Number of days (default: varies) |
+| `days` | integer | No | Number of forecast days |
 
-**Response**
+**Response Example**
 
 ```json
 {
   "city": "Shanghai",
   "forecast": [
     {"day": 1, "condition": "Sunny", "high": "28°C", "low": "22°C"},
-    {"day": 2, "condition": "Cloudy", "high": "26°C", "low": "20°C"}
+    {"day": 2, "condition": "Cloudy", "high": "26°C", "low": "20°C"},
+    {"day": 3, "condition": "Light Rain", "high": "24°C", "low": "19°C"}
   ]
 }
 ```
@@ -493,28 +482,28 @@ GET {{baseUrl}}/api/tools/weather/forecast?city=Shanghai&days=7
 
 ### Search Documents
 
-Search for documents in the knowledge base.
+Search documents in the knowledge base.
 
-```http
-GET {{baseUrl}}/api/tools/documents/search?query=artificial%20intelligence
+```bash
+curl -X GET "${BASE_URL}/api/tools/documents/search?query=product features"
 ```
 
 **Query Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `query` | string | Yes | Search query |
-| `docIds` | string | No | Comma-separated document IDs to filter |
+| `query` | string | Yes | Search keyword |
+| `docIds` | string | No | Comma-separated document IDs to limit scope |
 
-**Response**
+**Response Example**
 
 ```json
 {
   "results": [
     {
-      "text": "Document content snippet...",
+      "text": "This product has the following core features: smart recognition, automatic backup, multi-platform sync...",
       "score": 0.95,
-      "source": "doc-title"
+      "source": "Product Features"
     }
   ]
 }
@@ -524,30 +513,30 @@ GET {{baseUrl}}/api/tools/documents/search?query=artificial%20intelligence
 
 ### Search in Specific Documents
 
-Search within specific documents only.
+Search only within specific documents.
 
-```http
-GET {{baseUrl}}/api/tools/documents/search?query=AI&docIds=uuid1,uuid2
+```bash
+curl -X GET "${BASE_URL}/api/tools/documents/search?query=warranty&docIds=uuid1,uuid2"
 ```
 
 ---
 
-### List Documents in Knowledge Base
+### List Knowledge Base Documents
 
 List all documents available for search.
 
-```http
-GET {{baseUrl}}/api/tools/documents/list
+```bash
+curl -X GET "${BASE_URL}/api/tools/documents/list"
 ```
 
-**Response**
+**Response Example**
 
 ```json
 {
   "documents": [
     {
       "id": "550e8400-e29b-41d4-a716-446655440000",
-      "title": "Document Title",
+      "title": "Product User Manual",
       "status": "AVAILABLE"
     }
   ]
@@ -556,78 +545,71 @@ GET {{baseUrl}}/api/tools/documents/list
 
 ---
 
-### Chat with Function Calling
+### Tool Calling Chat (Non-Streaming)
 
-Chat with AI using function calling (non-streaming).
+AI chat with function calling (non-streaming response).
 
-```http
-POST {{baseUrl}}/api/tools/chat
-Content-Type: {{contentType}}
-
-{
-  "question": "What's the weather in Beijing?"
-}
+```bash
+curl -X POST "${BASE_URL}/api/tools/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "How is the weather in Beijing today?"
+  }'
 ```
 
 **Request Body**
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `question` | string | Yes | The question to ask |
-| `docIds` | array | No | Specific document IDs for RAG |
+|------|------|----------|-------------|
+| `question` | string | Yes | Question text |
+| `docIds` | array | No | Document IDs for RAG retrieval |
 
-**Response**
+**Response Example**
 
 ```json
 {
-  "answer": "The weather in Beijing is currently sunny with a temperature of 25°C.",
+  "answer": "The weather in Beijing today is sunny with a temperature of 25 degrees Celsius, perfect for outdoor activities.",
   "toolCalls": ["getWeather"]
 }
 ```
 
 ---
 
-### Chat with Function Calling (Streaming)
+### Tool Calling Chat (Streaming)
 
-Chat with AI using function calling (streaming response).
+AI chat with function calling (streaming response).
 
-```http
-POST {{baseUrl}}/api/tools/chat/stream
-Content-Type: {{contentType}}
-Accept: text/event-stream
-
-{
-  "question": "What's the weather in Beijing?",
-  "docIds": []
-}
+```bash
+curl -X POST "${BASE_URL}/api/tools/chat/stream" \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "question": "How is the weather in Beijing today?",
+    "docIds": []
+  }'
 ```
 
-**Response (SSE)**
+**Response Example (SSE)**
 
 ```
-data: The 
-data: weather 
-data: in 
-data: Beijing 
-data: is 
-data: 25°C 
-data: and 
-data: sunny.
+data: Based on the query,
+data: the weather in Beijing today is
+data: sunny,
+data: with a temperature of 25 degrees Celsius.
 ```
 
 ---
 
-### Chat with Document Search
+### Document Search Chat
 
-Ask a question that triggers document search.
+Chat that triggers document search functionality.
 
-```http
-POST {{baseUrl}}/api/tools/chat
-Content-Type: {{contentType}}
-
-{
-  "question": "Search for information about machine learning"
-}
+```bash
+curl -X POST "${BASE_URL}/api/tools/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Find documents about artificial intelligence"
+  }'
 ```
 
 ---
@@ -636,12 +618,12 @@ Content-Type: {{contentType}}
 
 ### Error Response Format
 
-All errors return a standard response format:
+All errors return the following standard format:
 
 ```json
 {
   "error": "ERROR_CODE",
-  "message": "Human-readable error message",
+  "message": "Error message description",
   "errorCode": "ERROR_CODE",
   "timestamp": "2026-06-19T03:30:00Z",
   "path": "/api/endpoint"
@@ -654,21 +636,21 @@ All errors return a standard response format:
 |-------------|------------|-------------|
 | `400` | `VALIDATION_ERROR` | Request validation failed |
 | `400` | `BAD_REQUEST` | Invalid request parameters |
-| `404` | `SESSION_NOT_FOUND` | Chat session not found |
-| `404` | `DOCUMENT_NOT_FOUND` | Document not found |
+| `404` | `SESSION_NOT_FOUND` | Chat session does not exist |
+| `404` | `DOCUMENT_NOT_FOUND` | Document does not exist |
 | `413` | `FILE_TOO_LARGE` | Uploaded file exceeds 50MB limit |
 | `503` | `AI_SERVICE_ERROR` | AI service unavailable or error |
 | `500` | `RAG_SERVICE_ERROR` | RAG service error |
-| `500` | `INTERNAL_ERROR` | Unexpected server error |
+| `500` | `INTERNAL_ERROR` | Internal server error |
 
-### Example Error Responses
+### Error Response Examples
 
-**Validation Error (400)**
+**Validation Failed (400)**
 
 ```json
 {
   "error": "VALIDATION_ERROR",
-  "message": "message: Message cannot exceed 10000 characters",
+  "message": "message: Message content exceeds 10,000 characters",
   "errorCode": "VALIDATION_ERROR",
   "timestamp": "2026-06-19T03:30:00Z"
 }
@@ -700,7 +682,7 @@ All errors return a standard response format:
 
 ## Notes
 
-- All timestamps are in ISO 8601 format (UTC)
-- Streaming responses use Server-Sent Events (SSE)
+- All timestamps use ISO 8601 format (UTC timezone)
+- Streaming responses use Server-Sent Events (SSE) protocol
 - Maximum upload file size: 50MB
-- Chat message max length: 10,000 characters
+- Maximum chat message length: 10,000 characters

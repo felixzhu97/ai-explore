@@ -89,6 +89,17 @@ class AiControllerTest {
             assertThat(response.getBody().response()).isEqualTo("Response with context");
             verify(chatService).processChatMessage("session-123", "Hello");
         }
+
+        @Test
+        @DisplayName("should handle long message without error")
+        void shouldHandleLongMessageWithoutError() {
+            String longMessage = "A".repeat(100);
+            when(chatService.processChatMessage(longMessage)).thenReturn("Response to long message");
+
+            var response = controller.chat(new ChatRequest(longMessage, null));
+
+            assertThat(response.getStatusCode().value()).isEqualTo(200);
+        }
     }
 
     @Nested

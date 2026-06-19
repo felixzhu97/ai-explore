@@ -543,6 +543,256 @@ class ChatSessionTest {
     }
 
     @Nested
+    @DisplayName("validateTitle")
+    class ValidateTitle {
+
+        @Test
+        @DisplayName("should return New Chat when null")
+        void shouldReturnNewChatWhenNull() {
+            // Arrange
+            String nullTitle = null;
+
+            // Act
+            ChatSession session = ChatSession.create(nullTitle);
+
+            // Assert
+            assertThat(session.getTitle()).isEqualTo("New Chat");
+        }
+
+        @Test
+        @DisplayName("should trim whitespace")
+        void shouldTrimWhitespace() {
+            // Arrange
+            String whitespaceTitle = "  Whitespace Title  ";
+
+            // Act
+            ChatSession session = ChatSession.create(whitespaceTitle);
+
+            // Assert
+            assertThat(session.getTitle()).isEqualTo("Whitespace Title");
+        }
+
+        @Test
+        @DisplayName("should truncate over 100 chars")
+        void shouldTruncateOver100Chars() {
+            // Arrange
+            String longTitle = "A".repeat(150);
+
+            // Act
+            ChatSession session = ChatSession.create(longTitle);
+
+            // Assert
+            assertThat(session.getTitle()).hasSize(100);
+        }
+
+        @Test
+        @DisplayName("should return New Chat when blank")
+        void shouldReturnNewChatWhenBlank() {
+            // Act
+            ChatSession session = ChatSession.create("   ");
+
+            // Assert
+            assertThat(session.getTitle()).isEqualTo("New Chat");
+        }
+    }
+
+    @Nested
+    @DisplayName("message counting")
+    class MessageCounting {
+
+        @Test
+        @DisplayName("should count user messages")
+        void shouldCountUserMessages() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("Hello");
+            session.addAssistantMessage("Hi");
+            session.addUserMessage("How are you?");
+            session.addAssistantMessage("Fine");
+
+            // Act
+            int count = session.getUserMessageCount();
+
+            // Assert
+            assertThat(count).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("should count assistant messages")
+        void shouldCountAssistantMessages() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("Hello");
+            session.addAssistantMessage("Hi");
+            session.addAssistantMessage("How can I help?");
+
+            // Act
+            int count = session.getAssistantMessageCount();
+
+            // Assert
+            assertThat(count).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("should return zero when no messages")
+        void shouldReturnZeroWhenNoMessages() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+
+            // Act & Assert
+            assertThat(session.getUserMessageCount()).isZero();
+            assertThat(session.getAssistantMessageCount()).isZero();
+            assertThat(session.getMessageCount()).isZero();
+        }
+    }
+
+    @Nested
+    @DisplayName("getLastMessage")
+    class GetLastMessageTests {
+
+        @Test
+        @DisplayName("should return last user message")
+        void shouldReturnLastUserMessage() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("First");
+            session.addAssistantMessage("Response");
+            ChatMessage lastUserMsg = session.addUserMessage("Second Question");
+
+            // Act
+            ChatMessage result = session.getLastUserMessage();
+
+            // Assert
+            assertThat(result).isEqualTo(lastUserMsg);
+        }
+
+        @Test
+        @DisplayName("should return last assistant message")
+        void shouldReturnLastAssistantMessage() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("Question");
+            ChatMessage lastAssistantMsg = session.addAssistantMessage("Last Response");
+            session.addUserMessage("Another Question");
+
+            // Act
+            ChatMessage result = session.getLastAssistantMessage();
+
+            // Assert
+            assertThat(result).isEqualTo(lastAssistantMsg);
+        }
+
+        @Test
+        @DisplayName("should return null when no messages")
+        void shouldReturnNullWhenNoMessages() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+
+            // Act & Assert
+            assertThat(session.getLastUserMessage()).isNull();
+            assertThat(session.getLastAssistantMessage()).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("getRecentMessages")
+    class GetRecentMessagesTests {
+
+        @Test
+        @DisplayName("should return recent messages")
+        void shouldReturnRecentMessages() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("First");
+            session.addUserMessage("Second");
+            session.addUserMessage("Third");
+
+            // Act
+            List<ChatMessage> recent = session.getRecentMessages(2);
+
+            // Assert
+            assertThat(recent).hasSize(2);
+            assertThat(recent.get(0).getText()).isEqualTo("Second");
+            assertThat(recent.get(1).getText()).isEqualTo("Third");
+        }
+
+        @Test
+        @DisplayName("should return all when count exceeds size")
+        void shouldReturnAllWhenCountExceedsSize() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("One");
+            session.addUserMessage("Two");
+
+            // Act
+            List<ChatMessage> recent = session.getRecentMessages(10);
+
+            // Assert
+            assertThat(recent).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("should return empty when count is zero or negative")
+        void shouldReturnEmptyWhenCountIsZeroOrNegative() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("Hello");
+
+            // Act
+            List<ChatMessage> zeroResult = session.getRecentMessages(0);
+            List<ChatMessage> negativeResult = session.getRecentMessages(-1);
+
+            // Assert
+            assertThat(zeroResult).isEmpty();
+            assertThat(negativeResult).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("isEmpty and clearMessages")
+    class IsEmptyAndClear {
+
+        @Test
+        @DisplayName("should return true when empty")
+        void shouldReturnTrueWhenEmpty() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+
+            // Act & Assert
+            assertThat(session.isEmpty()).isTrue();
+        }
+
+        @Test
+        @DisplayName("should return false when not empty")
+        void shouldReturnFalseWhenNotEmpty() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("Hello");
+
+            // Act & Assert
+            assertThat(session.isEmpty()).isFalse();
+        }
+
+        @Test
+        @DisplayName("should clear all messages")
+        void shouldClearAllMessages() {
+            // Arrange
+            ChatSession session = ChatSession.create("Test");
+            session.addUserMessage("Hello");
+            session.addAssistantMessage("Hi");
+            session.addUserMessage("How are you?");
+
+            // Act
+            session.clearMessages();
+
+            // Assert
+            assertThat(session.getMessages()).isEmpty();
+            assertThat(session.getMessageCount()).isZero();
+            assertThat(session.isEmpty()).isTrue();
+        }
+    }
+
+    @Nested
     @DisplayName("ChatMessage")
     class ChatMessageTests {
 

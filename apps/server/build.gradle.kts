@@ -53,6 +53,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.ai:spring-ai-test")
     testImplementation("org.hamcrest:hamcrest:2.2")
+    testImplementation("io.projectreactor:reactor-test")
     testRuntimeOnly("com.h2database:h2")
     testImplementation("org.testcontainers:testcontainers:1.20.4")
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")

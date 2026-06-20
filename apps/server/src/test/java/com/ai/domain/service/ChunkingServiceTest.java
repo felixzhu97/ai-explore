@@ -1,5 +1,6 @@
 package com.ai.domain.service;
 
+import com.ai.modules.rag.application.usecase.ChunkingUserCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,13 +14,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ChunkingService")
-class ChunkingServiceTest {
+class ChunkingUserCaseTest {
 
-    private ChunkingService chunkingService;
+    private ChunkingUserCase chunkingUserCase;
 
     @BeforeEach
     void setUp() {
-        chunkingService = new ChunkingService(100, 20);
+        chunkingUserCase = new ChunkingUserCase(100, 20);
     }
 
     @Nested
@@ -29,14 +30,14 @@ class ChunkingServiceTest {
         @Test
         @DisplayName("should return empty list for null input")
         void shouldReturnEmptyListForNullInput() {
-            List<String> chunks = chunkingService.chunk(null);
+            List<String> chunks = chunkingUserCase.chunk(null);
             assertThat(chunks).isEmpty();
         }
 
         @Test
         @DisplayName("should return empty list for blank input")
         void shouldReturnEmptyListForBlankInput() {
-            List<String> chunks = chunkingService.chunk("   ");
+            List<String> chunks = chunkingUserCase.chunk("   ");
             assertThat(chunks).isEmpty();
         }
 
@@ -44,7 +45,7 @@ class ChunkingServiceTest {
         @DisplayName("should return single chunk for text smaller than chunk size")
         void shouldReturnSingleChunkForSmallText() {
             String text = "This is a short text.";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).hasSize(1);
             assertThat(chunks.get(0)).isEqualTo(text);
         }
@@ -53,7 +54,7 @@ class ChunkingServiceTest {
         @DisplayName("should split text by paragraphs")
         void shouldSplitTextByParagraphs() {
             String text = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).hasSize(3);
             assertThat(chunks).contains("First paragraph.", "Second paragraph.", "Third paragraph.");
         }
@@ -67,7 +68,7 @@ class ChunkingServiceTest {
             }
             String text = sb.toString();
 
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isNotEmpty();
             for (String chunk : chunks) {
                 assertThat(chunk.length()).isLessThanOrEqualTo(150);
@@ -78,7 +79,7 @@ class ChunkingServiceTest {
         @DisplayName("should preserve sentence boundaries when possible")
         void shouldPreserveSentenceBoundaries() {
             String text = "First sentence. Second sentence. Third sentence. Fourth sentence.";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isNotEmpty();
             for (String chunk : chunks) {
                 assertThat(chunk.length()).isLessThanOrEqualTo(110);
@@ -94,7 +95,7 @@ class ChunkingServiceTest {
             }
             String text = sb.toString();
 
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isNotEmpty();
         }
 
@@ -102,7 +103,7 @@ class ChunkingServiceTest {
         @DisplayName("should filter out empty chunks")
         void shouldFilterEmptyChunks() {
             String text = "   \n\n\n   ";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isEmpty();
         }
 
@@ -110,7 +111,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle single character text")
         void shouldHandleSingleCharacterText() {
             String text = "A";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).hasSize(1);
             assertThat(chunks.get(0)).isEqualTo("A");
         }
@@ -119,7 +120,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle text with only spaces")
         void shouldHandleTextWithOnlySpaces() {
             String text = "     ";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isEmpty();
         }
 
@@ -127,7 +128,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle text without any spaces")
         void shouldHandleTextWithoutAnySpaces() {
             String text = "ThisIsAVeryLongTextWithoutSpaces1234567890";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isNotEmpty();
             for (String chunk : chunks) {
                 assertThat(chunk.length()).isLessThanOrEqualTo(110);
@@ -142,7 +143,7 @@ class ChunkingServiceTest {
         })
         @DisplayName("should chunk text with various sizes")
         void shouldChunkTextWithVariousSizes(String text, int expectedMinChunks) {
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).hasSizeGreaterThanOrEqualTo(expectedMinChunks);
         }
     }
@@ -157,7 +158,7 @@ class ChunkingServiceTest {
             String text = "Part1---Part2---Part3";
             String[] separators = {"---", "-"};
 
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
             assertThat(chunks).contains("Part1", "Part2", "Part3");
         }
 
@@ -166,7 +167,7 @@ class ChunkingServiceTest {
         void shouldHandleNullSeparatorInArray() {
             String text = "First\n\nSecond";
             String[] separators = {null, "\n"};
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
             assertThat(chunks).isNotEmpty();
         }
 
@@ -175,7 +176,7 @@ class ChunkingServiceTest {
         void shouldHandleEmptyStringSeparator() {
             String text = "First\n\nSecond";
             String[] separators = {""};
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
             assertThat(chunks).hasSize(1);
         }
 
@@ -184,7 +185,7 @@ class ChunkingServiceTest {
         void shouldHandleSingleSpaceSeparator() {
             String text = "First Second Third";
             String[] separators = {" "};
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
             assertThat(chunks).hasSize(1);
         }
 
@@ -195,7 +196,7 @@ class ChunkingServiceTest {
             String longText = "Long ".repeat(30); // Very long text
             String[] separators = {"---", ", ", " "};
 
-            List<String> chunks = chunkingService.chunk(longText, separators);
+            List<String> chunks = chunkingUserCase.chunk(longText, separators);
 
             // Should split into multiple chunks
             assertThat(chunks).isNotEmpty();
@@ -210,7 +211,7 @@ class ChunkingServiceTest {
             String longText = "A".repeat(150) + "---" + "B".repeat(150);
             String[] separators = {"---"};
 
-            List<String> chunks = chunkingService.chunk(longText, separators);
+            List<String> chunks = chunkingUserCase.chunk(longText, separators);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -221,7 +222,7 @@ class ChunkingServiceTest {
             String text = "Part1||Part2||Part3";
             String[] separators = {"||", "|", ","};
 
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -231,7 +232,7 @@ class ChunkingServiceTest {
         void shouldFilterEmptyChunksWithCustomSeparators() {
             String text = "   \n\n\n   ";
             String[] separators = {"\n"};
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
             assertThat(chunks).isEmpty();
         }
 
@@ -241,7 +242,7 @@ class ChunkingServiceTest {
             String text = "FirstSecondThird";
             String[] separators = {"X"};
 
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
 
             // No "X" found, should return single chunk
             assertThat(chunks).hasSize(1);
@@ -255,7 +256,7 @@ class ChunkingServiceTest {
         @Test
         @DisplayName("should use default chunk size and overlap")
         void shouldUseDefaultValues() {
-            ChunkingService service = new ChunkingService(500, 50);
+            ChunkingUserCase service = new ChunkingUserCase(500, 50);
             String text = "A".repeat(1000);
             List<String> chunks = service.chunk(text);
 
@@ -267,7 +268,7 @@ class ChunkingServiceTest {
         @Test
         @DisplayName("should handle zero overlap")
         void shouldHandleZeroOverlap() {
-            ChunkingService service = new ChunkingService(100, 0);
+            ChunkingUserCase service = new ChunkingUserCase(100, 0);
             String text = "A".repeat(300);
             List<String> chunks = service.chunk(text);
 
@@ -277,7 +278,7 @@ class ChunkingServiceTest {
         @Test
         @DisplayName("should handle large chunk size")
         void shouldHandleLargeChunkSize() {
-            ChunkingService service = new ChunkingService(1000, 0);
+            ChunkingUserCase service = new ChunkingUserCase(1000, 0);
             String text = "A".repeat(500);
             List<String> chunks = service.chunk(text);
 
@@ -293,7 +294,7 @@ class ChunkingServiceTest {
         @DisplayName("should recursively split very long text")
         void shouldRecursivelySplitVeryLongText() {
             String text = "Word ".repeat(500);
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
 
             assertThat(chunks).isNotEmpty();
             for (String chunk : chunks) {
@@ -310,7 +311,7 @@ class ChunkingServiceTest {
             }
             String text = sb.toString();
 
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isNotEmpty();
         }
 
@@ -318,7 +319,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle text exactly at chunk size boundary")
         void shouldHandleTextExactlyAtChunkSizeBoundary() {
             // Use a service with chunk size of 100
-            ChunkingService service100 = new ChunkingService(100, 0);
+            ChunkingUserCase service100 = new ChunkingUserCase(100, 0);
             String text = "A".repeat(100);
 
             List<String> chunks = service100.chunk(text);
@@ -328,7 +329,7 @@ class ChunkingServiceTest {
         @Test
         @DisplayName("should handle text one character over chunk size")
         void shouldHandleTextOneCharOverChunkSize() {
-            ChunkingService service100 = new ChunkingService(100, 0);
+            ChunkingUserCase service100 = new ChunkingUserCase(100, 0);
             String text = "A".repeat(101);
 
             List<String> chunks = service100.chunk(text);
@@ -344,7 +345,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle separator at boundaries")
         void shouldHandleSeparatorAtBoundaries() {
             String text = "\n\nText\n\n";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -354,7 +355,7 @@ class ChunkingServiceTest {
         void shouldHandleConsecutiveSeparators() {
             String text = "Word1,,,Word2";
             String[] separators = {","};
-            List<String> chunks = chunkingService.chunk(text, separators);
+            List<String> chunks = chunkingUserCase.chunk(text, separators);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -363,7 +364,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle edge case in splitBySize - chunk at end of text")
         void shouldHandleChunkAtEndOfText() {
             // Test the else branch in splitBySize when end >= text.length()
-            ChunkingService service = new ChunkingService(50, 0);
+            ChunkingUserCase service = new ChunkingUserCase(50, 0);
             String text = "Short";
 
             List<String> chunks = service.chunk(text);
@@ -379,7 +380,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle newline characters without paragraph breaks")
         void shouldHandleNewlineCharactersWithoutParagraphBreaks() {
             String text = "Line1\nLine2\nLine3";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -388,7 +389,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle various punctuation marks")
         void shouldHandleVariousPunctuationMarks() {
             String text = "Question? Answer! Statement. Comma, here; and there.";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -397,7 +398,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle unicode text")
         void shouldHandleUnicodeText() {
             String text = "日本語のテキストと English mixed together";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -406,7 +407,7 @@ class ChunkingServiceTest {
         @DisplayName("should handle emoji characters")
         void shouldHandleEmojiCharacters() {
             String text = "Hello! 🎉🎊🎈 Celebration time! 🎁🎀🎄";
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
 
             assertThat(chunks).isNotEmpty();
         }
@@ -420,7 +421,7 @@ class ChunkingServiceTest {
         })
         @DisplayName("should handle various whitespace characters")
         void shouldHandleVariousWhitespaceCharacters(String text) {
-            List<String> chunks = chunkingService.chunk(text);
+            List<String> chunks = chunkingUserCase.chunk(text);
             assertThat(chunks).isNotEmpty();
         }
     }

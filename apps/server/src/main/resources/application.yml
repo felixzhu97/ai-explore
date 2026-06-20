@@ -2,6 +2,16 @@ spring:
   application:
     name: server-springai
   ai:
+    mcp:
+      server:
+        type: SYNC
+        stdio: false
+        protocol: STREAMABLE
+        name: ai-explore-mcp-server
+        version: "1.0.0"
+        description: AI Explore MCP Server with RAG, Weather, and Chat tools
+        annotation-scanner:
+          enabled: true
     ollama:
       base-url: http://localhost:11434
     openai:

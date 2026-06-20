@@ -72,8 +72,8 @@ Use this testing strategy as the foundation for any project's test suite. Apply 
 
 ## Real Implementation Reference
 
-- Unit tests: `apps/server/src/test/java/com/ai/`
-- Integration tests: `apps/server/src/test/java/com/ai/integration/`
+- Unit tests: `src/test/java/com/ai/`
+- Integration tests: `src/test/java/com/ai/integration/`
 - E2E tests: `apps/admin-ui/e2e/` or `apps/web/e2e/`
 
 ## Related References

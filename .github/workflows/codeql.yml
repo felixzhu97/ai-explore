@@ -87,15 +87,14 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: java-build-outputs
-        path: apps/server/build
+        path: build
       continue-on-error: true
 
     - name: Build Java/Kotlin (fallback if artifact missing)
-      if: matrix.language == 'java-kotlin' && hashFiles('apps/server/build/classes/java/main') == ''
+      if: matrix.language == 'java-kotlin' && hashFiles('build/classes/java/main') == ''
       shell: bash
       run: |
-        cd apps/server
-        chmod +x ./gradlew
+                chmod +x ./gradlew
         ./gradlew build -x test --no-daemon
 
     - name: Perform CodeQL Analysis

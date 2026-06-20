@@ -1,18 +1,7 @@
-# Python
-__pycache__/
-*.py[cod]
-*.so
-.Python
-*.egg-info/
-
 # Node.js
 node_modules/
 dist/
 *.local
-
-# Virtual environments
-.venv/
-venv/
 
 # IDE
 .DS_Store
@@ -89,13 +78,13 @@ playwright/.cache/
 services/data/
 
 # Java/Gradle build artifacts
-apps/server/.gradle/
-apps/server/**/build/
-apps/server/**/.gradle/
+.gradle/
+**/build/
+**/.gradle/
 
 # Spring Boot
-apps/server/src/main/resources/application-local.yml
-apps/server/src/main/resources/application-local*.yml
+src/main/resources/application-local.yml
+src/main/resources/application-local*.yml
 
 # Legacy merged services (migrated to monolith)
 apps/server-java/services/ai-agents/

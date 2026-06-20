@@ -140,8 +140,8 @@ Scenario: Call discount service to calculate 10% off
 
 ## Real Implementation Reference
 
-- BDD feature files: `apps/server/src/test/resources/features/`
-- Step definitions: `apps/server/src/test/java/com/ai/steps/`
+- BDD feature files: `src/test/resources/features/`
+- Step definitions: `src/test/java/com/ai/steps/`
 
 ## Related References
 

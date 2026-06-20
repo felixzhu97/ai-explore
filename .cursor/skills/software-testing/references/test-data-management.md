@@ -129,9 +129,9 @@ void test2() {
 
 ## Real Implementation Reference
 
-- Builders: `apps/server/src/test/java/com/ai/test/builder/`
-- Fixtures: `apps/server/src/test/java/com/ai/test/fixture/`
-- Containerized tests: `apps/server/src/test/java/com/ai/integration/`
+- Builders: `src/test/java/com/ai/test/builder/`
+- Fixtures: `src/test/java/com/ai/test/fixture/`
+- Containerized tests: `src/test/java/com/ai/integration/`
 
 ## Related References
 

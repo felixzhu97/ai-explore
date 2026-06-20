@@ -195,9 +195,9 @@ class BadRepositoryTest {
 
 ## Real Implementation Reference
 
-- Repository tests: `apps/server/src/test/java/com/ai/infrastructure/persistence/`
-- Controller tests: `apps/server/src/test/java/com/ai/interface/controller/`
-- Message tests: `apps/server/src/test/java/com/ai/integration/`
+- Repository tests: `src/test/java/com/ai/infrastructure/persistence/`
+- Controller tests: `src/test/java/com/ai/interface/controller/`
+- Message tests: `src/test/java/com/ai/integration/`
 
 ## Related References
 

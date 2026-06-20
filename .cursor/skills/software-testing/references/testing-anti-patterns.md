@@ -119,7 +119,7 @@ void shouldFindOrder() {
 
 ## Real Implementation Reference
 
-- Use as diagnostic reference when refactoring tests in: `apps/server/src/test/java/com/ai/`
+- Use as diagnostic reference when refactoring tests in: `src/test/java/com/ai/`
 
 ## Related References
 

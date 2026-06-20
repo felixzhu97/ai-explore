@@ -154,8 +154,8 @@ class OrderTest {
 
 ## Real Implementation Reference
 
-- `apps/server/src/test/java/com/ai/domain/model/`
-- `apps/server/src/test/java/com/ai/application/usecase/`
+- `src/test/java/com/ai/domain/model/`
+- `src/test/java/com/ai/application/usecase/`
 
 ## Related References
 

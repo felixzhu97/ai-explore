@@ -59,7 +59,6 @@ pnpm list --depth 0
 ### Step 1: Create Backend Environment File | 步骤 1: 创建后端环境文件
 
 ```bash
-cd apps/server
 
 # Copy example env file
 cp .env.example .env
@@ -67,10 +66,10 @@ cp .env.example .env
 
 ### Step 2: Configure DeepSeek API Key | 步骤 2: 配置 DeepSeek API Key
 
-Edit the `.env` file in `apps/server/`:
+Edit the `.env` file in ``:
 
 ```bash
-# apps/server/.env
+# .env
 
 # DeepSeek API Configuration
 DEEPSEEK_API_KEY=your-deepseek-api-key-here
@@ -106,7 +105,6 @@ This will start both backend and frontend in parallel mode.
 
 ```bash
 # Terminal 1: Start Spring Boot backend
-cd apps/server
 ./gradlew bootRun
 ```
 
@@ -175,7 +173,7 @@ Open your browser and navigate to:
 | ----------------------------------- | ------------------ | ----- |
 | `pnpm build`                        | Build all packages | 构建所有包 |
 | `cd apps/web && pnpm build`         | Build frontend     | 构建前端  |
-| `cd apps/server && ./gradlew build` | Build backend      | 构建后端  |
+| `./gradlew build` | Build backend      | 构建后端  |
 
 
 ### Test Commands | 测试命令
@@ -186,7 +184,7 @@ Open your browser and navigate to:
 | `pnpm test`                        | Run all tests           | 运行所有测试   |
 | `pnpm test:watch`                  | Run tests in watch mode | 监听模式运行测试 |
 | `cd apps/web && pnpm test`         | Run frontend tests      | 运行前端测试   |
-| `cd apps/server && ./gradlew test` | Run backend tests       | 运行后端测试   |
+| `./gradlew test` | Run backend tests       | 运行后端测试   |
 
 
 ### Lint Commands | 代码检查命令
@@ -204,7 +202,7 @@ Open your browser and navigate to:
 | Command                             | Description               | 说明       |
 | ----------------------------------- | ------------------------- | -------- |
 | `pnpm clean`                        | Clean all build artifacts | 清理所有构建产物 |
-| `cd apps/server && ./gradlew clean` | Clean backend             | 清理后端构建   |
+| `./gradlew clean` | Clean backend             | 清理后端构建   |
 
 
 ---
@@ -227,7 +225,7 @@ ps aux | grep java | grep -v grep
 curl http://localhost:9000/actuator/health
 
 # 3. Restart backend
-cd apps/server && ./gradlew bootRun
+./gradlew bootRun
 ```
 
 #### Issue 2: "API Key not configured" or "Invalid API Key"
@@ -238,10 +236,10 @@ cd apps/server && ./gradlew bootRun
 
 ```bash
 # 1. Check .env file exists
-cat apps/server/.env
+cat .env
 
 # 2. Verify API key format (should start with sk-)
-grep DEEPSEEK_API_KEY apps/server/.env
+grep DEEPSEEK_API_KEY .env
 
 # 3. Restart backend after configuring
 ./gradlew bootRun
@@ -287,7 +285,6 @@ pnpm install && pnpm build
 
 ```bash
 # 1. Clean and rebuild
-cd apps/server
 ./gradlew clean build
 
 # 2. Check Java version
@@ -317,7 +314,7 @@ java --version  # Must be 25+
 
 ### Need More Help? | 需要更多帮助？
 
-- **Backend Issues**: Check logs in `apps/server/build.gradle.kts`
+- **Backend Issues**: Check logs in `build.gradle.kts`
 - **Frontend Issues**: Check `apps/web/package.json`
 - **Architecture Docs**: See [ARCHITECTURE.md](./ARCHITECTURE.md)
 
@@ -332,7 +329,7 @@ java --version  # Must be 25+
 │                                                              │
 │  1. Install:     pnpm install                               │
 │                                                              │
-│  2. Configure:   apps/server/.env                           │
+│  2. Configure:   .env                           │
 │                   └─ DEEPSEEK_API_KEY=sk-xxx               │
 │                                                              │
 │  3. Start:       pnpm dev                                   │

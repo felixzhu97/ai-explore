@@ -15,13 +15,13 @@
 
 ```bash
 # 配置
-echo "DEEPSEEK_API_KEY=your-key" > apps/server/.env
+echo "DEEPSEEK_API_KEY=your-key" > .env
 
 # Docker 启动
-cd apps/server && docker-compose up -d
+docker-compose up -d
 
 # 本地开发
-cd apps/server && docker-compose up postgres -d && ./gradlew bootRun
+docker-compose up postgres -d && ./gradlew bootRun
 ```
 
 - 应用: http://localhost:9000

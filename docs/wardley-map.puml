@@ -1,255 +1,222 @@
 @startuml AI-Test-Wardley-Map
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontSize 10
 skinparam dpi 150
-skinparam linetype ortho
-skinparam rectangleRoundCorner 8
 
-title AI-Test Platform - Wardley Map 技术演进地图
+title AI-Test Platform 战略演进地图
 
-' ==================== EVOLUTION AXIS ====================
-top to bottom direction
+' ============================================================
+' ANCHOR - 用户需求 (最高可见度)
+' ============================================================
+Person(user, "用户", "ML工程师/运维/数据科学家")
+Person_Ext(external_user, "外部用户", "API 消费者")
 
-' 顶层：用户需求
-package "用户需求 (Anchor)" <<anchor>> #FFFFFF {
-    rectangle "ML 工程师 / 运维工程师 / 数据科学家" as user
+' ============================================================
+' 用户可见能力 (Y轴顶部)
+' ============================================================
+Container_Boundary(user_facing, "用户可感知能力") {
+    Container(agent_chat, "Agent 对话", "对话式 AI 交互", "多轮对话、上下文理解")
+    Container(rag_chat, "RAG 对话", "知识库问答", "文档检索、精准回答")
+    Container(vision_analysis, "视觉分析", "图像内容理解", "目标检测、OCR识别")
+    Container(image_generation, "图像生成", "AI 图像创建", "文本转图像")
+    Container(speech_synthesis, "语音合成", "文本转语音", "多语言、多种音色")
+    Container(aiops_dashboard, "AIOps 面板", "智能运维监控", "异常检测、告警")
 }
 
-' ==================== GENESIS 层 ====================
-package "Genesis\n(创新阶段)" <<genesis>> #90EE90 {
-    rectangle "Multi-Agent\nOrchestration" as gen_multi_agent
-    rectangle "动态任务路由" as gen_routing
-    rectangle "RAG + Vector\nSearch" as gen_rag
-    rectangle "Vision AI\nPipeline" as gen_vision
-    rectangle "TTS\n语音合成" as gen_tts
-    rectangle "Image Gen\n图像生成" as gen_image
-    rectangle "AIOps\n智能分析" as gen_aiops
+' ============================================================
+' 业务能力层 (Y轴中部)
+' ============================================================
+Container_Boundary(business_capabilities, "业务能力") {
+    Container(multi_agent, "Multi-Agent 编排", "多 Agent 协同", "任务分解、路由调度")
+    Container(mcp_protocol, "MCP 协议", "Model Context Protocol", "工具扩展、标准接口")
+    Container(session_management, "会话管理", "上下文保持", "状态追踪、历史记录")
+    Container(document_processor, "文档处理", "上传解析分块", "PDF/Word/OCR")
+    Container(vector_search, "向量检索", "语义搜索", "相似度匹配、Rerank")
+    Container(embedding_service, "Embedding 生成", "文本向量化", "语义表示、高维向量")
 }
 
-' ==================== CUSTOM BUILT 层 ====================
-package "Custom Built\n(定制开发)" <<custom-built>> #FFFACD {
+' ============================================================
+' 基础设施能力 (Y轴底部)
+' ============================================================
+Container_Boundary(infrastructure, "基础设施能力") {
+    Container(llm_inference, "LLM 推理", "大语言模型调用", "DeepSeek API")
+    Container(image_gen_service, "图像生成服务", "DALL-E/SD", "图像生成 API")
+    Container(tts_service, "TTS 服务", "语音合成 API", "Edge TTS/DeepSeek TTS")
+    Container(vision_model, "视觉模型", "YOLO/BLIP/PaddleOCR", "目标检测/图像描述/OCR")
+    Container(vector_db, "向量数据库", "pgvector", "向量存储与检索")
+    Container(doc_storage, "文档存储", "PostgreSQL", "结构化数据存储")
+    Container(cache, "缓存服务", "Redis", "会话缓存、热点数据")
+}
 
-    ' ==================== Frontend (Angular 22) ====================
-    package "Frontend\n(Angular 22)" #F5F5DC {
-        rectangle "AppComponent\n根组件" as fe_app
-        rectangle "AIInfraPanelComponent\nAI 基础设施面板" as fe_infra
-        rectangle "RagChatComponent\nRAG 对话" as fe_rag_chat
-        rectangle "VisionPanelComponent\n视觉分析" as fe_vision
-        rectangle "AiHubComponent\nAI Hub 中心" as fe_aihub
-        rectangle "AgentChatComponent\nAgent 对话 (SSE)" as fe_agent
-        rectangle "ChatMessageComponent\n消息展示 (MD)" as fe_chat_msg
-        rectangle "ToolResultComponent\n工具结果" as fe_tool
-        rectangle "ApiService\nAPI 服务" as fe_api
-        rectangle "AiService\nAI 能力服务" as fe_ai_svc
-        rectangle "I18nService\n国际化 (5语言)" as fe_i18n
-        rectangle "ThemeService\n主题服务" as fe_theme
+' ============================================================
+' 支撑技术层 (Commodity - X轴最右)
+' ============================================================
+Container_Boundary(commodity, "标准化技术 (Commodity)") {
+    Container_Boundary(runtime, "运行时") {
+        Container(node_runtime, "Node.js", "前端运行时")
+        Container(java_runtime, "Java 25", "后端运行时")
     }
-
-    ' ==================== Chat Backend (Java/Spring Boot) ====================
-    package "Chat Backend\n(Java 25 / Spring Boot 3.5)" #E6E6FA {
-        rectangle "ChatController\nREST API" as chat_ctrl
-        rectangle "ChatApplicationService\n应用服务" as chat_app
-        rectangle "SendChatMessageUseCase\n发送消息用例" as chat_usecase
-        rectangle "ChatSession\n聚合根" as chat_session
-        rectangle "ChatMessage\n消息实体" as chat_msg
-        rectangle "AiChatService\n领域服务" as chat_domain
-        rectangle "AiChatPort\nAI 端口接口" as chat_port
-        rectangle "SpringAiChatAdapter\nSpring AI 适配器" as chat_adapter
-        rectangle "InMemoryChatSessionRepository\n内存仓储" as chat_repo
+    Container_Boundary(platform, "平台") {
+        Container(k8s, "Kubernetes", "容器编排")
+        Container(docker, "Docker", "容器化")
     }
-
-    ' ==================== RAG Backend (Java/Spring Boot) ====================
-    package "RAG Backend\n(Java 25 / Spring Boot 3.5)" #E6E6FA {
-        rectangle "RagController\nREST/SSE API" as rag_ctrl
-        rectangle "RagApplicationService\n应用服务" as rag_app
-        rectangle "RagChatUseCase\nRAG 问答用例" as rag_usecase
-        rectangle "Document\n文档实体" as rag_doc
-        rectangle "DocumentChunk\n分块实体" as rag_chunk
-        rectangle "EmbeddingPort\n嵌入端口接口" as rag_emb_port
-        rectangle "VectorSearchPort\n向量检索端口" as rag_vec_port
-        rectangle "DeepSeekEmbeddingAdapter\nDeepSeek 嵌入" as rag_emb_adapter
-        rectangle "PgVectorAdapter\npgvector 适配器" as rag_vec_adapter
-        rectangle "JpaDocumentRepository\nJPA 文档仓储" as rag_doc_repo
+    Container_Boundary(data, "数据") {
+        Container(postgres, "PostgreSQL 17", "关系数据库")
+        Container(redis_cache, "Redis", "缓存")
     }
-
-    ' ==================== Domain & Shared ====================
-    package "Domain Layer\n(DDD)" #FFEFD5 {
-        rectangle "ChatSessionId\n值对象" as vo_session_id
-        rectangle "MessageId\n值对象" as vo_msg_id
-        rectangle "MessageContent\n值对象" as vo_content
-        rectangle "DocumentId\n值对象" as vo_doc_id
-        rectangle "ChunkId\n值对象" as vo_chunk_id
-        rectangle "EmbeddingVector\n值对象" as vo_emb
-        rectangle "ChatMessageReceivedEvent\n领域事件" as evt_msg_received
-        rectangle "ChatResponseGeneratedEvent\n领域事件" as evt_resp_generated
-        rectangle "AiServiceException\n异常" as exc_ai
-        rectangle "ChatSessionNotFoundException\n异常" as exc_not_found
-        rectangle "DocumentNotFoundException\n异常" as exc_doc_not_found
+    Container_Boundary(protocols, "协议") {
+        Container(http_proto, "HTTP/WebSocket", "通信协议")
+        Container(sse, "SSE", "服务端推送")
+    }
+    Container_Boundary(observability, "可观测性") {
+        Container(prom_grafana, "Prometheus/Grafana", "监控")
+        Container(otel, "OpenTelemetry", "追踪")
+    }
+    Container_Boundary(ci_cd, "CI/CD") {
+        Container(github_actions, "GitHub Actions", "持续集成")
+        Container(helm, "Helm", "包管理")
     }
 }
 
-' ==================== PRODUCT 层 ====================
-package "Product\n(商业/开源产品)" <<product>> #ADD8E6 {
-    ' Frontend
-    rectangle "Angular 22" as prod_angular
-    rectangle "Angular CLI" as prod_angular_cli
-    rectangle "RxJS 7" as prod_rxjs
-    rectangle "SCSS" as prod_scss
-
-    ' Backend Framework
-    rectangle "Spring Boot 3.5" as prod_spring_boot
-    rectangle "Spring AI 1.0" as prod_spring_ai
-
-    ' AI/LLM
-    rectangle "DeepSeek API\n(Chat + Embedding)" as prod_deepseek
-    rectangle "DeepSeekChatModel" as prod_deepseek_chat
-    rectangle "DeepSeekEmbeddingModel" as prod_deepseek_emb
-
-    ' Vision
-    rectangle "YOLO11n" as prod_yolo
-    rectangle "PaddleOCR" as prod_paddleocr
-    rectangle "BLIP" as prod_blip
-    rectangle "Stable Diffusion" as prod_sd
-
-    ' TTS
-    rectangle "Edge TTS" as prod_edge_tts
-
-    ' Image
-    rectangle "Flux AI" as prod_flux
+' ============================================================
+' 第三方服务 (Product - X轴右)
+' ============================================================
+Container_Boundary(third_party, "第三方服务 (Product)") {
+    Container(deepseek_llm, "DeepSeek API", "LLM + Embedding", "国内可用、低成本")
+    Container(dalle_api, "DALL-E API", "图像生成", "OpenAI")
+    Container(edge_tts_api, "Edge TTS", "语音合成", "微软")
+    Container(yolo_model, "YOLO11n", "目标检测", "Ultralytics")
+    Container(paddleocr_lib, "PaddleOCR", "文字识别", "百度")
 }
 
-' ==================== COMMODITY 层 ====================
-package "Commodity\n(标准化基础设施)" <<commodity>> #D3D3D3 {
-    ' Frontend
-    rectangle "Node.js" as com_nodejs
-    rectangle "Browser APIs\n(HttpClient)" as com_browser
-
-    ' Backend
-    rectangle "Java 25" as com_java
-    rectangle "Gradle" as com_gradle
-    rectangle "Spring Data JPA" as com_spring_jpa
-    rectangle "gRPC" as com_grpc
-    rectangle "HTTP\n/WebSocket/SSE" as com_http
-
-    ' Database
-    rectangle "PostgreSQL 17\n+ pgvector" as com_postgres
-    rectangle "Redis" as com_redis
-
-    ' Infrastructure
-    rectangle "Kubernetes" as com_k8s
-    rectangle "Docker" as com_docker
-    rectangle "GitHub\nActions" as com_git
-    rectangle "Helm" as com_helm
-
-    ' Observability
-    rectangle "Prometheus\n/Grafana" as com_prom
-    rectangle "OpenTelemetry" as com_otel
+' ============================================================
+' 框架层 (Product - X轴中右)
+' ============================================================
+Container_Boundary(frameworks, "开发框架 (Product)") {
+    Container(angular, "Angular 22", "前端框架", "响应式 UI")
+    Container(spring_boot, "Spring Boot 3.5", "后端框架", "企业级 Java")
+    Container(spring_ai, "Spring AI 2.0", "AI 集成", "多 Provider 适配")
+    Container(gradle_build, "Gradle", "构建工具", "依赖管理")
 }
 
-' ==================== 依赖关系 ====================
+' ============================================================
+' 内部定制 (Custom Built - X轴中间)
+' ============================================================
+Container_Boundary(custom_built, "内部定制 (Custom Built)") {
+    Container_Boundary(frontend_custom, "前端定制") {
+        Container(fe_components, "Angular 组件库", "UI 组件", "AI 专用组件")
+        Container(fe_services, "前端服务层", "业务逻辑", "API 封装")
+    }
+    Container_Boundary(backend_custom, "后端定制") {
+        Container(be_controllers, "REST Controllers", "API 网关", "请求路由")
+        Container(be_usecases, "Use Cases", "用例编排", "业务逻辑")
+        Container(be_domain, "Domain Layer", "DDD 领域", "聚合根、值对象")
+        Container(be_adapters, "Adapters", "适配器", "Spring AI、Pgvector")
+    }
+}
 
-' User → Frontend
-user -down-> fe_infra
-user -down-> fe_rag_chat
-user -down-> fe_vision
-user -down-> fe_aihub
+' ============================================================
+' 创新探索 (Genesis - X轴最左)
+' ============================================================
+Container_Boundary(genesis, "创新探索 (Genesis)") {
+    Container(gen_agent, "Agent 编排算法", "探索", "新型路由策略")
+    Container(gen_rag, "RAG 增强检索", "探索", "混合检索、重排序")
+    Container(gen_vision, "视觉理解流水线", "探索", "多模型协同")
+    Container(gen_mcp, "MCP 生态集成", "探索", "新协议适配")
+    Container(gen_aiops, "AIOps 智能分析", "探索", "异常预测、根因")
+}
 
-' Frontend 内部
-fe_app -down-> fe_routes
-fe_infra -down-> fe_agent
-fe_infra -down-> fe_panels
-fe_aihub -down-> fe_agent
-fe_agent -down-> fe_chat_msg
-fe_agent -down-> fe_tool
-fe_agent -down-> fe_ai_svc
-fe_agent -down-> fe_api
-fe_agent -down-> fe_i18n
-fe_rag_chat -down-> fe_ai_svc
-fe_rag_chat -down-> fe_i18n
-fe_vision -down-> fe_ai_svc
-fe_vision -down-> fe_i18n
+' ============================================================
+' 战略标注
+' ============================================================
+note as STRATEGY_NOTE
+**战略决策指引:**
+• Genesis/Custom Built: **差异化竞争** - 投入研发资源
+• Product: **优化选择** - 评估供应商、避免锁定
+• Commodity: **标准化采购** - 成本优先、自动化
+end note
 
-' Frontend → Backend
-fe_api -right-> chat_ctrl
-fe_ai_svc -right-> rag_ctrl
+note as INERTIA_NOTE
+**演化惯性标注:**
+• 基础设施迁移困难 (Kubernetes)
+• 大语言模型切换成本高 (LLM)
+• 前端框架绑定 (Angular)
+end note
 
-' Chat Backend 内部
-chat_ctrl -down-> chat_usecase
-chat_usecase -down-> chat_app
-chat_app -down-> chat_port
-chat_app -down-> chat_session_repo
-chat_port -down-> chat_adapter
-chat_adapter -down-> prod_spring_ai
-chat_app -down-> chat_session
-chat_session -down-> chat_msg
+' ============================================================
+' 依赖关系
+' ============================================================
 
-' RAG Backend 内部
-rag_ctrl -down-> rag_app
-rag_app -down-> rag_usecase
-rag_app -down-> rag_emb_port
-rag_app -down-> rag_vec_port
-rag_app -down-> rag_doc_repo
-rag_emb_port -down-> rag_emb_adapter
-rag_vec_port -down-> rag_vec_adapter
-rag_emb_adapter -down-> prod_deepseek_emb
-rag_usecase -down-> rag_doc
-rag_doc -down-> rag_chunk
+' 用户 -> 用户可感知能力
+Rel(user, agent_chat, "对话")
+Rel(user, rag_chat, "知识问答")
+Rel(user, vision_analysis, "图像分析")
+Rel(user, image_generation, "图像创建")
+Rel(user, speech_synthesis, "语音交互")
+Rel(user, aiops_dashboard, "运维监控")
 
-' Backend → External
-chat_adapter -right-> prod_deepseek_chat
-rag_emb_adapter -right-> prod_deepseek_emb
+' 用户可感知 -> 业务能力
+Rel(agent_chat, multi_agent, "编排")
+Rel(agent_chat, session_management, "状态")
+Rel(agent_chat, llm_inference, "LLM")
+Rel(rag_chat, vector_search, "检索")
+Rel(rag_chat, embedding_service, "向量化")
+Rel(rag_chat, document_processor, "文档")
+Rel(vision_analysis, vision_model, "模型")
+Rel(image_generation, image_gen_service, "生成")
+Rel(speech_synthesis, tts_service, "合成")
+Rel(aiops_dashboard, multi_agent, "分析")
 
-' Vision/TTS/Image → External
-fe_ai_svc -right-> prod_yolo
-fe_ai_svc -right-> prod_paddleocr
-fe_ai_svc -right-> prod_blip
-fe_ai_svc -right-> prod_sd
-fe_ai_svc -right-> prod_edge_tts
-fe_ai_svc -right-> prod_flux
+' 业务能力 -> 基础设施
+Rel(multi_agent, mcp_protocol, "扩展")
+Rel(vector_search, vector_db, "存储")
+Rel(embedding_service, llm_inference, "调用")
+Rel(document_processor, doc_storage, "存储")
+Rel(session_management, cache, "缓存")
 
-' Product → Commodity
-prod_angular -right-> prod_angular_cli
-prod_angular_cli -right-> com_nodejs
-prod_scss -right-> com_nodejs
-prod_rxjs -right-> com_nodejs
+' 基础设施 -> 第三方服务
+Rel(llm_inference, deepseek_llm, "API")
+Rel(image_gen_service, dalle_api, "API")
+Rel(tts_service, edge_tts_api, "API")
+Rel(vision_model, yolo_model, "模型")
+Rel(vision_model, paddleocr_lib, "库")
 
-prod_spring_boot -right-> com_java
-prod_spring_ai -right-> prod_spring_boot
-prod_spring_ai -right-> prod_deepseek
+' 基础设施 -> 标准化技术
+Rel(vector_db, postgres, "存储")
+Rel(cache, redis_cache, "缓存")
+Rel(doc_storage, postgres, "存储")
+Rel(be_controllers, http_proto, "通信")
+Rel(fe_services, http_proto, "通信")
 
-prod_deepseek -right-> com_http
-prod_yolo -right-> com_docker
-prod_paddleocr -right-> com_docker
-prod_blip -right-> com_docker
-prod_sd -right-> com_docker
-prod_flux -right-> com_http
+' 第三方服务 -> 框架
+Rel(deepseek_llm, spring_ai, "集成")
+Rel(dalle_api, spring_ai, "集成")
+Rel(edge_tts_api, spring_ai, "集成")
 
-' Commodity 内部
-com_java -right-> com_k8s
-com_gradle -right-> com_java
-com_spring_jpa -right-> prod_spring_boot
-com_postgres -right-> com_docker
-com_redis -right-> com_docker
-com_prom -right-> com_k8s
-com_otel -right-> com_k8s
-com_git -right-> com_k8s
-com_http -right-> com_k8s
+' 框架 -> 内部定制
+Rel(angular, fe_components, "构建")
+Rel(spring_boot, be_controllers, "构建")
+Rel(spring_ai, be_adapters, "使用")
+Rel(gradle_build, java_runtime, "构建")
 
-' Genesis → Custom Built
-gen_rag -right-> fe_rag_chat
-gen_rag -right-> rag_app
-gen_vision -right-> fe_vision
-gen_tts -right-> fe_ai_svc
-gen_image -right-> fe_ai_svc
-gen_aiops -right-> fe_infra
+' 内部定制 -> 标准化技术
+Rel(java_runtime, k8s, "部署")
+Rel(node_runtime, k8s, "部署")
+Rel(fe_services, node_runtime, "运行")
+Rel(be_usecases, java_runtime, "运行")
+Rel(prom_grafana, k8s, "监控")
+Rel(otel, k8s, "追踪")
+Rel(github_actions, helm, "部署")
 
-' ==================== 图例 ====================
-legend right
-||= 颜色 |= 阶段 |= 特点 |
-{<back:#90EE90>绿色</back>}| Genesis | 创新、独特能力 |
-{<back:#FFFACD>黄色</back>}| Custom Built | 差异化定制 |
-{<back:#ADD8E6>蓝色</back>}| Product | 采购/开源组件 |
-{<back:#D3D3D3>灰色</back>}| Commodity | 标准化基础设施 |
-endlegend
+' Genesis -> Custom Built (创新驱动)
+Rel(gen_agent, multi_agent, "探索")
+Rel(gen_rag, vector_search, "探索")
+Rel(gen_vision, vision_analysis, "探索")
+Rel(gen_mcp, mcp_protocol, "探索")
+Rel(gen_aiops, aiops_dashboard, "探索")
 
+SHOW_LEGEND()
 @enduml

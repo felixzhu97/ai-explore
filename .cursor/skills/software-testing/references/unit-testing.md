@@ -226,9 +226,9 @@ void testPrivateHelper() throws Exception {
 
 ## Real Implementation Reference
 
-- `apps/server/src/test/java/com/ai/domain/model/`
-- `apps/server/src/test/java/com/ai/application/usecase/`
-- `apps/server/src/test/java/com/ai/domain/service/`
+- `src/test/java/com/ai/domain/model/`
+- `src/test/java/com/ai/application/usecase/`
+- `src/test/java/com/ai/domain/service/`
 
 ## Related References
 

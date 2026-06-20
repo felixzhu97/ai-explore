@@ -74,7 +74,7 @@ Branch coverage report:
 
 ## Real Implementation Reference
 
-- Coverage reports: `apps/server/build/reports/jacoco/test/html/index.html`
+- Coverage reports: `build/reports/jacoco/test/html/index.html`
 - CI coverage gates: `.github/workflows/ci.yml`
 
 ## Related References

@@ -96,7 +96,7 @@ void shouldRejectEmptyOrder() {
 
 ## Real Implementation Reference
 
-- Apply during code review of: `apps/server/src/test/java/com/ai/`
+- Apply during code review of: `src/test/java/com/ai/`
 - E2E review: `apps/admin-ui/e2e/`
 
 ## Related References

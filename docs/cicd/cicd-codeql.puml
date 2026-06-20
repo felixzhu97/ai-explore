@@ -49,7 +49,7 @@ fork
     note right
     `./gradlew build -x test --no-daemon`
     (triggered when
-    `hashFiles('apps/server/build/classes/java/main') == ''`)
+    `hashFiles('build/classes/java/main') == ''`)
     end note
   else (no)
   endif

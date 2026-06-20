@@ -12,7 +12,7 @@ echo "🧪 Running Angular tests (Vitest)..."
 
 # Java tests with JaCoCo coverage verification
 echo "🧪 Running Java tests with coverage (JUnit 5 + JaCoCo)..."
-chmod +x "$ROOT_DIR/apps/server/gradlew"
+chmod +x "$ROOT_DIR/gradlew"
 (cd "$ROOT_DIR/apps/server" && ./gradlew jacocoTestCoverageVerification --no-daemon)
 
 echo "✅ All pre-push checks passed!"

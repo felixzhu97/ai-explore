@@ -2,10 +2,10 @@ import { Component, signal, inject, ChangeDetectionStrategy, computed } from '@a
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../../core/services/api.service';
-import { I18nService } from '../../../core/i18n';
-import { SegmentedControlComponent } from '../../../shared/components/ui/segmented-control/segmented-control.component';
-import { VisionResult } from '../../../shared/models';
+import { ApiService } from '@core/services/api.service';
+import { I18nService } from '@i18n';
+import { SegmentedControlComponent } from '@shared/components/ui/segmented-control/segmented-control.component';
+import type { VisionResult } from './vision.model';
 
 type TaskType = 'caption' | 'detect' | 'ocr';
 
@@ -17,7 +17,7 @@ interface TabState {
 }
 
 @Component({
-  selector: 'app-vision-panel',
+  selector: 'app-vision-page',
   standalone: true,
   imports: [CommonModule, FormsModule, SegmentedControlComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -490,7 +490,7 @@ interface TabState {
     `,
   ],
 })
-export class VisionPanelComponent {
+export class VisionPageComponent {
   private readonly api = inject(ApiService);
   protected readonly i18n = inject(I18nService);
 

@@ -1,11 +1,11 @@
 package com.ai.domain.service;
 
-import com.ai.domain.model.ChatMessage;
-import com.ai.domain.model.ChatSession;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.model.ChatSession;
+import com.ai.modules.ai.application.usecase.SpringAiChatUseCase;
 import com.ai.modules.ai.domain.exception.ChatSessionNotFoundException;
 import com.ai.modules.ai.domain.repository.ChatSessionRepository;
-import com.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,12 +53,12 @@ class AiChatUseCaseTest {
     @Mock
     private ChatMemory chatMemory;
 
-    private AiChatUseCase aiChatService;
+    private SpringAiChatUseCase aiChatService;
 
     @BeforeEach
     void setUp() {
         lenient().when(chatClientBuilder.build()).thenReturn(chatClient);
-        aiChatService = new AiChatUseCase(chatClientBuilder, repository, retryTemplate, chatMemory);
+        aiChatService = new SpringAiChatUseCase(chatClientBuilder, repository, retryTemplate, chatMemory);
     }
 
     @Nested

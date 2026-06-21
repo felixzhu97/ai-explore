@@ -2,7 +2,7 @@ package com.ai.modules.mcp.server;
 
 import com.ai.modules.rag.infrastructure.tools.RagSearchTool;
 import com.ai.modules.ai.infrastructure.tools.WeatherTools;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
+import com.ai.modules.ai.application.usecase.ChatUseCase;
 import com.ai.modules.mcp.server.AiMcpServerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +28,7 @@ class AiMcpServerServiceTest {
     private RagSearchTool ragSearchTool;
 
     @Mock
-    private AiChatUseCase aiChatUseCase;
+    private ChatUseCase aiChatUseCase;
 
     private AiMcpServerService service;
 

@@ -1,6 +1,6 @@
 package com.ai.modules.ai.web.dto;
 
-import com.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.model.ChatSession;
 
 import java.time.Instant;
 

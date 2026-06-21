@@ -1,6 +1,8 @@
 package com.ai.domain.model;
 
-import com.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.vo.MessageRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,8 @@ class ChatMessageTest {
         void shouldBeEqualWhenSameId() {
             var id = MessageId.generate();
             Instant timestamp = Instant.now();
-            ChatMessage msg1 = ChatMessage.of(id, "Hello", "user", timestamp);
-            ChatMessage msg2 = ChatMessage.of(id, "Hello", "user", timestamp);
+            ChatMessage msg1 = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
+            ChatMessage msg2 = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
 
             assertThat(msg1).isEqualTo(msg2);
             assertThat(msg1.hashCode()).isEqualTo(msg2.hashCode());
@@ -61,7 +63,7 @@ class ChatMessageTest {
         void shouldContainIdAndRoleInToString() {
             var id = MessageId.of("fixed-id");
             Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
-            ChatMessage msg = ChatMessage.of(id, "Hello", "user", timestamp);
+            ChatMessage msg = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
 
             String str = msg.toString();
             assertThat(str).contains("fixed-id");

@@ -1,6 +1,6 @@
 package com.ai.domain.service;
 
-import com.ai.modules.ai.application.usecase.StructuredOutputUseCase;
+import com.ai.modules.ai.application.usecase.SpringAiStructuredOutputUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,13 +33,13 @@ class StructuredOutputUseCaseTest {
     @Mock
     private ChatClient.Builder chatClientBuilder;
 
-    private StructuredOutputUseCase service;
+    private SpringAiStructuredOutputUseCase service;
 
     @BeforeEach
     void setUp() {
         lenient().when(chatClientBuilder.build()).thenReturn(chatClient);
         lenient().when(chatClient.prompt()).thenReturn(mock(ChatClient.ChatClientRequestSpec.class, RETURNS_DEEP_STUBS));
-        service = new StructuredOutputUseCase(chatClientBuilder);
+        service = new SpringAiStructuredOutputUseCase(chatClientBuilder);
     }
 
     @Nested
@@ -222,7 +222,7 @@ class StructuredOutputUseCaseTest {
             when(chatClientBuilder.build()).thenReturn(chatClient);
 
             // Act
-            new StructuredOutputUseCase(chatClientBuilder);
+            new SpringAiStructuredOutputUseCase(chatClientBuilder);
 
             // Assert - verify build() was called once during setUp and once in constructor
             verify(chatClientBuilder, atLeastOnce()).build();

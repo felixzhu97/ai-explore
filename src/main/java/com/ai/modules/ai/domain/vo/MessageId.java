@@ -1,4 +1,4 @@
-package com.ai.domain.vo;
+package com.ai.modules.ai.domain.vo;
 
 import java.util.UUID;
 

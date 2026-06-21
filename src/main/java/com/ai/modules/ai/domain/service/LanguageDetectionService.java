@@ -1,4 +1,4 @@
-package com.ai.domain.service;
+package com.ai.modules.ai.domain.service;
 
 import java.util.regex.Pattern;
 

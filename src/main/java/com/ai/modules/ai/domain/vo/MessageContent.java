@@ -1,4 +1,4 @@
-package com.ai.domain.vo;
+package com.ai.modules.ai.domain.vo;
 
 import java.util.Objects;
 
@@ -9,18 +9,21 @@ import java.util.Objects;
 public final class MessageContent {
 
     private static final int MAX_LENGTH = 10000;
-    private static final int MIN_LENGTH = 1;
 
     private final String text;
-    private final String role;
+    private final MessageRole role;
 
     public MessageContent(String text) {
-        this(text, "user");
+        this(text, MessageRole.USER);
+    }
+
+    public MessageContent(String text, MessageRole role) {
+        this.text = validateText(text);
+        this.role = role != null ? role : MessageRole.USER;
     }
 
     public MessageContent(String text, String role) {
-        this.text = validateText(text);
-        this.role = validateRole(role);
+        this(text, MessageRole.from(role));
     }
 
     private static String validateText(String text) {
@@ -35,37 +38,32 @@ public final class MessageContent {
         return text.trim();
     }
 
-    private static String validateRole(String role) {
-        if (role == null || role.isBlank()) {
-            return "user";
-        }
-        String normalizedRole = role.toLowerCase().trim();
-        if (!normalizedRole.equals("user") && !normalizedRole.equals("assistant")) {
-            throw new IllegalArgumentException(
-                "Role must be either 'user' or 'assistant', got: " + role
-            );
-        }
-        return normalizedRole;
-    }
-
     public String text() {
         return text;
     }
 
-    public String role() {
+    public MessageRole role() {
         return role;
     }
 
+    public String roleValue() {
+        return role.value();
+    }
+
     public boolean isFromUser() {
-        return "user".equals(role);
+        return MessageRole.USER.equals(role);
     }
 
     public boolean isFromAssistant() {
-        return "assistant".equals(role);
+        return MessageRole.ASSISTANT.equals(role);
+    }
+
+    public MessageContent withRole(MessageRole newRole) {
+        return new MessageContent(this.text, newRole);
     }
 
     public MessageContent withRole(String newRole) {
-        return new MessageContent(this.text, newRole);
+        return new MessageContent(this.text, MessageRole.from(newRole));
     }
 
     @Override
@@ -83,7 +81,7 @@ public final class MessageContent {
 
     @Override
     public String toString() {
-        return "MessageContent{role='%s', text='%s...'}".formatted(role, 
+        return "MessageContent{role='%s', text='%s...'}".formatted(role.value(), 
             text.length() > 50 ? text.substring(0, 50) : text);
     }
 }

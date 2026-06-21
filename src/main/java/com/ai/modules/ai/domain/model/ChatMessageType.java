@@ -1,4 +1,4 @@
-package com.ai.domain.model;
+package com.ai.modules.ai.domain.model;
 
 /**
  * Chat message type enum.

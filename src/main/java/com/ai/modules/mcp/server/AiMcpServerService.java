@@ -2,7 +2,7 @@ package com.ai.modules.mcp.server;
 
 import com.ai.modules.rag.infrastructure.tools.RagSearchTool;
 import com.ai.modules.ai.infrastructure.tools.WeatherTools;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
+import com.ai.modules.ai.application.usecase.ChatUseCase;
 import org.springframework.ai.mcp.annotation.*;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -31,9 +31,9 @@ public class AiMcpServerService {
 
     private final WeatherTools weatherTools;
     private final RagSearchTool ragSearchTool;
-    private final AiChatUseCase aiChatUseCase;
+    private final ChatUseCase aiChatUseCase;
 
-    public AiMcpServerService(WeatherTools weatherTools, RagSearchTool ragSearchTool, AiChatUseCase aiChatUseCase) {
+    public AiMcpServerService(WeatherTools weatherTools, RagSearchTool ragSearchTool, ChatUseCase aiChatUseCase) {
         this.weatherTools = weatherTools;
         this.ragSearchTool = ragSearchTool;
         this.aiChatUseCase = aiChatUseCase;

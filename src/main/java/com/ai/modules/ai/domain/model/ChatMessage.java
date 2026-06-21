@@ -1,7 +1,8 @@
-package com.ai.domain.model;
+package com.ai.modules.ai.domain.model;
 
-import com.ai.domain.vo.MessageContent;
-import com.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.vo.MessageContent;
+import com.ai.modules.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.vo.MessageRole;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -25,7 +26,7 @@ public final class ChatMessage {
     public static ChatMessage createUserMessage(String text) {
         return new ChatMessage(
             MessageId.generate(),
-            new MessageContent(text, "user"),
+            new MessageContent(text, MessageRole.USER),
             Instant.now()
         );
     }
@@ -33,12 +34,12 @@ public final class ChatMessage {
     public static ChatMessage createAssistantMessage(String text) {
         return new ChatMessage(
             MessageId.generate(),
-            new MessageContent(text, "assistant"),
+            new MessageContent(text, MessageRole.ASSISTANT),
             Instant.now()
         );
     }
 
-    public static ChatMessage of(MessageId id, String text, String role, Instant timestamp) {
+    public static ChatMessage of(MessageId id, String text, MessageRole role, Instant timestamp) {
         return new ChatMessage(id, new MessageContent(text, role), timestamp);
     }
 
@@ -50,7 +51,7 @@ public final class ChatMessage {
         return content.text();
     }
 
-    public String getRole() {
+    public MessageRole getRole() {
         return content.role();
     }
 
@@ -85,6 +86,6 @@ public final class ChatMessage {
 
     @Override
     public String toString() {
-        return "ChatMessage{id=%s, role='%s', timestamp=%s}".formatted(id, content.role(), timestamp);
+        return "ChatMessage{id=%s, role='%s', timestamp=%s}".formatted(id, content.role().value(), timestamp);
     }
 }

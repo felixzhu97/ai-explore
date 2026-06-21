@@ -1,5 +1,6 @@
 package com.ai.modules.ai.application.usecase;
 
+import com.ai.modules.ai.application.usecase.SpringAiImageGenerationUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,11 +31,11 @@ class ImageGenerationUseCaseTest {
     @Mock
     private ImageModel imageModel;
 
-    private ImageGenerationUseCase useCase;
+    private SpringAiImageGenerationUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ImageGenerationUseCase(imageModel);
+        useCase = new SpringAiImageGenerationUseCase(imageModel);
     }
 
     @Nested
@@ -265,7 +266,7 @@ class ImageGenerationUseCaseTest {
         @Test
         @DisplayName("should return available models")
         void shouldReturnAvailableModels() {
-            String[] models = useCase.getAvailableModels();
+            List<String> models = useCase.getAvailableModels();
 
             assertThat(models).containsExactly("dall-e-3", "dall-e-2");
         }
@@ -278,7 +279,7 @@ class ImageGenerationUseCaseTest {
         @Test
         @DisplayName("should return available sizes")
         void shouldReturnAvailableSizes() {
-            String[] sizes = useCase.getAvailableSizes();
+            List<String> sizes = useCase.getAvailableSizes();
 
             assertThat(sizes).containsExactly("1024x1024", "1024x1792", "1792x1024");
         }
@@ -291,7 +292,7 @@ class ImageGenerationUseCaseTest {
         @Test
         @DisplayName("should return available qualities")
         void shouldReturnAvailableQualities() {
-            String[] qualities = useCase.getAvailableQualities();
+            List<String> qualities = useCase.getAvailableQualities();
 
             assertThat(qualities).containsExactly("standard", "hd");
         }

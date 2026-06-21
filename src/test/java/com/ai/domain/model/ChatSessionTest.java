@@ -1,6 +1,10 @@
 package com.ai.domain.model;
 
-import com.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.vo.MessageRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -169,7 +173,7 @@ class ChatSessionTest {
             ChatMessage message = session.addUserMessage("Hello!");
 
             // Assert
-            assertThat(message.getRole()).isEqualTo("user");
+            assertThat(message.getRole()).isEqualTo(MessageRole.USER);
             assertThat(message.isFromUser()).isTrue();
             assertThat(message.isFromAssistant()).isFalse();
         }
@@ -198,7 +202,7 @@ class ChatSessionTest {
             ChatMessage message = session.addAssistantMessage("Hello!");
 
             // Assert
-            assertThat(message.getRole()).isEqualTo("assistant");
+            assertThat(message.getRole()).isEqualTo(MessageRole.ASSISTANT);
             assertThat(message.isFromAssistant()).isTrue();
             assertThat(message.isFromUser()).isFalse();
         }
@@ -856,10 +860,10 @@ class ChatSessionTest {
         @DisplayName("should have correct equals and hashCode")
         void shouldHaveCorrectEqualsAndHashCode() {
             // Arrange
-            var id = com.ai.domain.vo.MessageId.generate();
+            var id = MessageId.generate();
             Instant timestamp = Instant.now();
-            ChatMessage msg1 = ChatMessage.of(id, "Hello", "user", timestamp);
-            ChatMessage msg2 = ChatMessage.of(id, "Hello", "user", timestamp);
+            ChatMessage msg1 = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
+            ChatMessage msg2 = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
 
             // Assert
             assertThat(msg1).isEqualTo(msg2);

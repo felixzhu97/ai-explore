@@ -1,8 +1,8 @@
 package com.ai.modules.ai.infrastructure.store;
 
 import com.ai.modules.ai.domain.repository.ChatSessionRepository;
-import com.ai.domain.model.ChatSession;
-import com.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
 
 import java.util.ArrayList;
 import java.util.List;

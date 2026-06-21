@@ -1,6 +1,6 @@
 package com.ai.domain;
 
-import com.ai.domain.model.ChatMessageType;
+import com.ai.modules.ai.domain.model.ChatMessageType;
 import com.ai.modules.ai.domain.model.ChatSessionStatus;
 import com.ai.modules.ai.domain.vo.DomainConstants;
 import org.junit.jupiter.api.DisplayName;

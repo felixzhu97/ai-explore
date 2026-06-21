@@ -1,9 +1,9 @@
 package com.ai.modules.rag.application.usecase;
 
 import com.ai.modules.rag.domain.model.SourceDocument;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
-import com.ai.domain.service.LanguageDetectionService;
-import com.ai.domain.service.PromptTemplates;
+import com.ai.modules.ai.application.usecase.ChatUseCase;
+import com.ai.modules.ai.domain.service.LanguageDetectionService;
+import com.ai.modules.ai.infrastructure.service.PromptTemplates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,13 +22,13 @@ public class RagChatUseCase {
     private static final int DEFAULT_TOP_K = 5;
 
     private final RagApplicationService ragApplicationService;
-    private final AiChatUseCase aiChatUseCase;
+    private final ChatUseCase aiChatUseCase;
     private final LanguageDetectionService languageDetectionService;
     private final PromptTemplates promptTemplates;
 
     public RagChatUseCase(
             RagApplicationService ragApplicationService,
-            AiChatUseCase aiChatUseCase,
+            ChatUseCase aiChatUseCase,
             LanguageDetectionService languageDetectionService,
             PromptTemplates promptTemplates) {
         this.ragApplicationService = ragApplicationService;

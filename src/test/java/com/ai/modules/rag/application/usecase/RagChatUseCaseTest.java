@@ -3,9 +3,9 @@ package com.ai.modules.rag.application.usecase;
 import com.ai.modules.rag.application.usecase.RagApplicationService;
 import com.ai.modules.rag.application.usecase.RagChatUseCase;
 import com.ai.modules.rag.domain.model.SourceDocument;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
-import com.ai.domain.service.LanguageDetectionService;
-import com.ai.domain.service.PromptTemplates;
+import com.ai.modules.ai.application.usecase.ChatUseCase;
+import com.ai.modules.ai.domain.service.LanguageDetectionService;
+import com.ai.modules.ai.infrastructure.service.PromptTemplates;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +31,7 @@ class RagChatUseCaseTest {
     private RagApplicationService ragApplicationService;
 
     @Mock
-    private AiChatUseCase aiChatUseCase;
+    private ChatUseCase aiChatUseCase;
 
     @Mock
     private LanguageDetectionService languageDetectionService;

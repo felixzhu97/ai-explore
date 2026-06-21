@@ -2,7 +2,7 @@ package com.ai.modules.ai.web;
 
 import com.ai.modules.ai.web.dto.ImageGenerationRequest;
 import com.ai.modules.ai.web.dto.ImageGenerationResponse;
-import com.ai.modules.ai.application.usecase.ImageGenerationUseCase;
+import com.ai.modules.ai.application.usecase.ImageGenerationUseCasePort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,9 +20,9 @@ import java.util.Map;
 @Tag(name = "Image Generation", description = "Generate images using DALL-E")
 public class ImageController {
 
-    private final ImageGenerationUseCase imageGenerationUseCase;
+    private final ImageGenerationUseCasePort imageGenerationUseCase;
 
-    public ImageController(ImageGenerationUseCase imageGenerationUseCase) {
+    public ImageController(ImageGenerationUseCasePort imageGenerationUseCase) {
         this.imageGenerationUseCase = imageGenerationUseCase;
     }
 

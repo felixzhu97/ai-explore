@@ -1,7 +1,7 @@
 package com.ai.modules.ai.web.dto;
 
-import com.ai.domain.model.ChatMessage;
-import com.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.model.ChatSession;
 
 import java.time.Instant;
 import java.util.List;
@@ -36,7 +36,7 @@ record MessageDto(
         return new MessageDto(
             message.getId().toString(),
             message.getText(),
-            message.getRole(),
+            message.getRole().value(),
             message.getTimestamp()
         );
     }

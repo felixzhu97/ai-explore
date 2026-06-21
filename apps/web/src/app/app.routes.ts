@@ -22,8 +22,8 @@ export const routes: Routes = [
       {
         path: 'vision',
         loadComponent: () =>
-          import('./features/ai/vision-panel/vision-panel.component').then(
-            (m) => m.VisionPanelComponent
+          import('./features/ai/vision/vision.page').then(
+            (m) => m.VisionPageComponent
           ),
       },
       {

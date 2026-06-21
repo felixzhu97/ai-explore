@@ -1,5 +1,6 @@
 package com.ai.modules.ai.infrastructure.config;
 
+import com.ai.modules.ai.infrastructure.service.PromptTemplates;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -39,5 +40,10 @@ public class ChatConfig {
     public org.springframework.ai.chat.model.ChatModel primaryChatModel(
             org.springframework.ai.openai.OpenAiChatModel openAiChatModel) {
         return openAiChatModel;
+    }
+
+    @Bean
+    public PromptTemplates promptTemplates() {
+        return new PromptTemplates();
     }
 }

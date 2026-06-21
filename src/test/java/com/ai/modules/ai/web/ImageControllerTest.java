@@ -1,6 +1,6 @@
 package com.ai.modules.ai.web;
 
-import com.ai.modules.ai.application.usecase.ImageGenerationUseCase;
+import com.ai.modules.ai.application.usecase.ImageGenerationUseCasePort;
 import com.ai.modules.ai.web.dto.ImageGenerationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.*;
 class ImageControllerTest {
 
     @Mock
-    private ImageGenerationUseCase imageGenerationUseCase;
+    private ImageGenerationUseCasePort imageGenerationUseCase;
 
     private ImageController controller;
 
@@ -104,7 +105,7 @@ class ImageControllerTest {
         @DisplayName("should return available models")
         void shouldReturnAvailableModels() {
             when(imageGenerationUseCase.getAvailableModels())
-                    .thenReturn(new String[]{"dall-e-2", "dall-e-3"});
+                    .thenReturn(List.of("dall-e-2", "dall-e-3"));
 
             var response = controller.getModels();
 
@@ -119,7 +120,7 @@ class ImageControllerTest {
         @DisplayName("should return empty array when no models available")
         void shouldReturnEmptyArrayWhenNoModelsAvailable() {
             when(imageGenerationUseCase.getAvailableModels())
-                    .thenReturn(new String[]{});
+                    .thenReturn(List.of());
 
             var response = controller.getModels();
 
@@ -136,7 +137,7 @@ class ImageControllerTest {
         @DisplayName("should return available sizes")
         void shouldReturnAvailableSizes() {
             when(imageGenerationUseCase.getAvailableSizes())
-                    .thenReturn(new String[]{"256x256", "512x512", "1024x1024"});
+                    .thenReturn(List.of("256x256", "512x512", "1024x1024"));
 
             var response = controller.getSizes();
 
@@ -156,7 +157,7 @@ class ImageControllerTest {
         @DisplayName("should return available quality options")
         void shouldReturnAvailableQualityOptions() {
             when(imageGenerationUseCase.getAvailableQualities())
-                    .thenReturn(new String[]{"standard", "hd"});
+                    .thenReturn(List.of("standard", "hd"));
 
             var response = controller.getQualities();
 

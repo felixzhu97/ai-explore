@@ -1,8 +1,8 @@
 package com.ai.modules.ai.web;
 
 import com.ai.modules.ai.web.dto.*;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
-import com.ai.modules.ai.application.usecase.StructuredOutputUseCase;
+import com.ai.modules.ai.application.usecase.ChatUseCase;
+import com.ai.modules.ai.application.usecase.StructuredOutputUseCasePort;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +17,11 @@ import java.util.Map;
 @RequestMapping("/api")
 public class AiController {
 
-    private final AiChatUseCase chatService;
-    private final StructuredOutputUseCase structuredOutputUseCase;
+    private final ChatUseCase chatUseCase;
+    private final StructuredOutputUseCasePort structuredOutputUseCase;
 
-    public AiController(AiChatUseCase chatService, StructuredOutputUseCase structuredOutputUseCase) {
-        this.chatService = chatService;
+    public AiController(ChatUseCase chatUseCase, StructuredOutputUseCasePort structuredOutputUseCase) {
+        this.chatUseCase = chatUseCase;
         this.structuredOutputUseCase = structuredOutputUseCase;
     }
 
@@ -37,9 +37,9 @@ public class AiController {
 
         String response;
         if (request.sessionId() != null && !request.sessionId().isBlank()) {
-            response = chatService.processChatMessage(request.sessionId(), request.message());
+            response = chatUseCase.processChatMessage(request.sessionId(), request.message());
         } else {
-            response = chatService.processChatMessage(request.message());
+            response = chatUseCase.processChatMessage(request.message());
         }
 
         return ResponseEntity.ok(ChatResponse.of(response));
@@ -56,7 +56,7 @@ public class AiController {
                 .body(Map.of("response", "Please provide a message."));
         }
 
-        String response = chatService.processChatMessage(message);
+        String response = chatUseCase.processChatMessage(message);
         return ResponseEntity.ok(Map.of("response", response));
     }
 
@@ -65,7 +65,7 @@ public class AiController {
      */
     @GetMapping("/sessions/{sessionId}/messages")
     public ResponseEntity<MessageHistoryResponse> getMessages(@PathVariable String sessionId) {
-        return chatService.getSession(sessionId)
+        return chatUseCase.getSession(sessionId)
             .map(session -> ResponseEntity.ok(MessageHistoryResponse.from(session)))
             .orElse(ResponseEntity.notFound().build());
     }
@@ -76,7 +76,7 @@ public class AiController {
     @PostMapping("/sessions")
     public ResponseEntity<SessionInfo> createSession(@RequestBody(required = false) Map<String, String> body) {
         String title = body != null ? body.get("title") : null;
-        var session = chatService.createSession(title != null ? title : "New Chat");
+        var session = chatUseCase.createSession(title != null ? title : "New Chat");
         return ResponseEntity.ok(SessionInfo.from(session));
     }
 
@@ -85,7 +85,7 @@ public class AiController {
      */
     @GetMapping("/sessions")
     public ResponseEntity<List<SessionInfo>> getAllSessions() {
-        List<SessionInfo> sessions = chatService.getAllSessions()
+        List<SessionInfo> sessions = chatUseCase.getAllSessions()
             .stream()
             .map(SessionInfo::from)
             .toList();
@@ -97,7 +97,7 @@ public class AiController {
      */
     @DeleteMapping("/sessions/{sessionId}")
     public ResponseEntity<Void> deleteSession(@PathVariable String sessionId) {
-        chatService.deleteSession(sessionId);
+        chatUseCase.deleteSession(sessionId);
         return ResponseEntity.noContent().build();
     }
 

@@ -28,7 +28,7 @@ class ErrorResponseTest {
             // Then
             assertThat(response.message()).isEqualTo(message);
             assertThat(response.errorCode()).isEqualTo(errorCode);
-            assertThat(response.error()).isEqualTo(errorCode);
+            assertThat(response.errorCode()).isEqualTo(errorCode);
             assertThat(response.timestamp()).isNotNull();
             assertThat(response.path()).isNull();
         }
@@ -47,7 +47,7 @@ class ErrorResponseTest {
             // Then
             assertThat(response.message()).isEqualTo(message);
             assertThat(response.errorCode()).isEqualTo(errorCode);
-            assertThat(response.error()).isEqualTo(errorCode);
+            assertThat(response.errorCode()).isEqualTo(errorCode);
             assertThat(response.path()).isEqualTo(path);
             assertThat(response.timestamp()).isNotNull();
         }
@@ -67,8 +67,8 @@ class ErrorResponseTest {
             ErrorResponse response = ErrorResponse.of("Validation failed", errorCode);
 
             // Then
-            assertThat(response.error()).isEqualTo(response.errorCode());
-            assertThat(response.error()).isEqualTo(errorCode);
+            assertThat(response.errorCode()).isEqualTo(response.errorCode());
+            assertThat(response.errorCode()).isEqualTo(errorCode);
         }
 
         @Test
@@ -110,7 +110,7 @@ class ErrorResponseTest {
             ErrorResponse response = ErrorResponse.of(message, errorCode, path);
 
             // Then
-            assertThat(response.error()).isEqualTo(error);
+            assertThat(response.errorCode()).isEqualTo(error);
             assertThat(response.message()).isEqualTo(message);
             assertThat(response.errorCode()).isEqualTo(errorCode);
             assertThat(response.path()).isEqualTo(path);

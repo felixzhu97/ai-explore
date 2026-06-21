@@ -1,4 +1,4 @@
-package com.ai.domain.service;
+package com.ai.modules.ai.infrastructure.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

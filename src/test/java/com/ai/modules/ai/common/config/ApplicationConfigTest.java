@@ -1,6 +1,6 @@
 package com.ai.modules.ai.common.config;
 
-import com.ai.domain.service.LanguageDetectionService;
+import com.ai.modules.ai.domain.service.LanguageDetectionService;
 import com.ai.modules.ai.domain.repository.ChatSessionRepository;
 import com.ai.modules.ai.infrastructure.store.InMemoryChatSessionRepository;
 import com.ai.shared.config.ApplicationConfig;
@@ -92,7 +92,7 @@ class ApplicationConfigTest {
         void shouldHaveWorkingRepository_fromBean() {
             // Given
             ChatSessionRepository repository = context.getBean(ChatSessionRepository.class);
-            var session = com.ai.domain.model.ChatSession.create("Test Session");
+            var session = com.ai.modules.ai.domain.model.ChatSession.create("Test Session");
 
             // When
             repository.save(session);
@@ -108,7 +108,7 @@ class ApplicationConfigTest {
         void shouldClearRepository_betweenUses() {
             // Given
             ChatSessionRepository repository = context.getBean(ChatSessionRepository.class);
-            var session = com.ai.domain.model.ChatSession.create("Test Session");
+            var session = com.ai.modules.ai.domain.model.ChatSession.create("Test Session");
             repository.save(session);
 
             // When

@@ -1,6 +1,6 @@
-package com.ai.domain.model;
+package com.ai.modules.ai.domain.model;
 
-import com.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,6 +41,18 @@ public class ChatSession {
 
     public static ChatSession of(ChatSessionId id, String title, Instant createdAt) {
         return new ChatSession(id, title, createdAt);
+    }
+
+    /**
+     * Reconstitutes a ChatSession from persisted data.
+     * Used for reconstructing sessions from storage.
+     */
+    public static ChatSession reconstitute(ChatSessionId id, String title, Instant createdAt,
+                                          Instant lastActivityAt, List<ChatMessage> messages) {
+        ChatSession session = new ChatSession(id, title, createdAt);
+        session.lastActivityAt = lastActivityAt != null ? lastActivityAt : createdAt;
+        session.messages.addAll(messages);
+        return session;
     }
 
     public ChatSessionId getId() {

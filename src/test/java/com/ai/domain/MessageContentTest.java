@@ -1,6 +1,7 @@
 package com.ai.domain;
 
-import com.ai.domain.vo.MessageContent;
+import com.ai.modules.ai.domain.vo.MessageContent;
+import com.ai.modules.ai.domain.vo.MessageRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class MessageContentTest {
 
             // Assert
             assertThat(content.text()).isEqualTo("Hello, world!");
-            assertThat(content.role()).isEqualTo("user");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
         }
 
         @Test
@@ -123,7 +124,7 @@ class MessageContentTest {
 
             // Assert
             assertThat(content.text()).isEqualTo("Hello");
-            assertThat(content.role()).isEqualTo("user");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
         }
 
         @Test
@@ -138,7 +139,7 @@ class MessageContentTest {
 
             // Assert
             assertThat(content.text()).isEqualTo("Hello");
-            assertThat(content.role()).isEqualTo("assistant");
+            assertThat(content.role()).isEqualTo(MessageRole.ASSISTANT);
         }
 
         @Test
@@ -152,7 +153,7 @@ class MessageContentTest {
             MessageContent content = new MessageContent(text, role);
 
             // Assert
-            assertThat(content.role()).isEqualTo("user");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
         }
 
         @Test
@@ -166,7 +167,7 @@ class MessageContentTest {
             MessageContent content = new MessageContent(text, role);
 
             // Assert
-            assertThat(content.role()).isEqualTo("assistant");
+            assertThat(content.role()).isEqualTo(MessageRole.ASSISTANT);
         }
 
         @Test
@@ -180,7 +181,7 @@ class MessageContentTest {
             MessageContent content = new MessageContent(text, role);
 
             // Assert
-            assertThat(content.role()).isEqualTo("user");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
         }
 
         @Test
@@ -190,10 +191,10 @@ class MessageContentTest {
             String text = "Hello";
 
             // Act
-            MessageContent content = new MessageContent(text, null);
+            MessageContent content = new MessageContent(text, (String) null);
 
             // Assert
-            assertThat(content.role()).isEqualTo("user");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
         }
 
         @Test
@@ -207,7 +208,7 @@ class MessageContentTest {
             MessageContent content = new MessageContent(text, role);
 
             // Assert
-            assertThat(content.role()).isEqualTo("user");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
         }
 
         @Test
@@ -288,8 +289,8 @@ class MessageContentTest {
             MessageContent newContent = content.withRole("assistant");
 
             // Assert
-            assertThat(content.role()).isEqualTo("user");
-            assertThat(newContent.role()).isEqualTo("assistant");
+            assertThat(content.role()).isEqualTo(MessageRole.USER);
+            assertThat(newContent.role()).isEqualTo(MessageRole.ASSISTANT);
             assertThat(content.text()).isEqualTo(newContent.text());
         }
 
@@ -327,8 +328,8 @@ class MessageContentTest {
         @DisplayName("should not be equal when text is different")
         void shouldNotBeEqualWhenTextIsDifferent() {
             // Arrange
-            MessageContent content1 = new MessageContent("Hello", "user");
-            MessageContent content2 = new MessageContent("World", "user");
+            MessageContent content1 = new MessageContent("Hello", MessageRole.USER);
+            MessageContent content2 = new MessageContent("World", MessageRole.USER);
 
             // Assert
             assertThat(content1).isNotEqualTo(content2);
@@ -338,8 +339,8 @@ class MessageContentTest {
         @DisplayName("should not be equal when role is different")
         void shouldNotBeEqualWhenRoleIsDifferent() {
             // Arrange
-            MessageContent content1 = new MessageContent("Hello", "user");
-            MessageContent content2 = new MessageContent("Hello", "assistant");
+            MessageContent content1 = new MessageContent("Hello", MessageRole.USER);
+            MessageContent content2 = new MessageContent("Hello", MessageRole.ASSISTANT);
 
             // Assert
             assertThat(content1).isNotEqualTo(content2);
@@ -368,7 +369,7 @@ class MessageContentTest {
         void shouldTruncateLongTextInToString() {
             // Arrange
             String longText = "a".repeat(100);
-            MessageContent content = new MessageContent(longText, "user");
+            MessageContent content = new MessageContent(longText, MessageRole.USER);
 
             // Act
             String result = content.toString();

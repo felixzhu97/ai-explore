@@ -3,12 +3,13 @@ package com.ai.modules.ai.web;
 import com.ai.modules.ai.web.dto.ChatRequest;
 import com.ai.modules.ai.web.dto.TextAnalysisRequest;
 import com.ai.modules.ai.web.AiController;
-import com.ai.modules.ai.application.usecase.AiChatUseCase;
-import com.ai.modules.ai.application.usecase.StructuredOutputUseCase;
-import com.ai.domain.model.ChatSession;
-import com.ai.domain.model.ChatMessage;
-import com.ai.domain.vo.ChatSessionId;
-import com.ai.domain.vo.MessageId;
+import com.ai.modules.ai.application.usecase.ChatUseCase;
+import com.ai.modules.ai.application.usecase.StructuredOutputUseCasePort;
+import com.ai.modules.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.vo.MessageRole;
 import com.ai.modules.ai.web.dto.TextAnalysisResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,10 +33,10 @@ import static org.mockito.Mockito.*;
 class AiControllerTest {
 
     @Mock
-    private AiChatUseCase chatService;
+    private ChatUseCase chatService;
 
     @Mock
-    private StructuredOutputUseCase structuredOutputUseCase;
+    private StructuredOutputUseCasePort structuredOutputUseCase;
 
     private AiController controller;
 
@@ -331,6 +332,6 @@ class AiControllerTest {
     }
 
     private ChatMessage createMessage(String text, String role) {
-        return ChatMessage.of(MessageId.generate(), text, role, Instant.now());
+        return ChatMessage.of(MessageId.generate(), text, MessageRole.from(role), Instant.now());
     }
 }

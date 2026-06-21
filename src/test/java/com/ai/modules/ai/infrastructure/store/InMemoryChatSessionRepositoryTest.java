@@ -1,7 +1,7 @@
 package com.ai.modules.ai.infrastructure.store;
 
-import com.ai.domain.model.ChatSession;
-import com.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

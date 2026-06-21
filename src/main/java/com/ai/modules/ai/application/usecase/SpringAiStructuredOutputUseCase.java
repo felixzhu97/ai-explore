@@ -6,10 +6,10 @@ import org.springframework.ai.chat.client.AdvisorParams;
 import org.springframework.stereotype.Service;
 
 /**
- * Domain service for structured output using Spring AI 2.0 .entity() method.
+ * Spring AI implementation of structured output use case using .entity() method.
  */
 @Service
-public class StructuredOutputUseCase {
+public class SpringAiStructuredOutputUseCase implements StructuredOutputUseCasePort {
 
     private final ChatClient chatClient;
 
@@ -28,7 +28,7 @@ public class StructuredOutputUseCase {
             Be concise and accurate in your analysis.
             """;
 
-    public StructuredOutputUseCase(ChatClient.Builder chatClientBuilder) {
+    public SpringAiStructuredOutputUseCase(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
     }
 
@@ -39,6 +39,7 @@ public class StructuredOutputUseCase {
      * @param text The text to analyze
      * @return Structured analysis result
      */
+    @Override
     public TextAnalysisResult analyzeText(String text) {
         String prompt = ANALYSIS_PROMPT.replace("{text}", text);
 
@@ -56,6 +57,7 @@ public class StructuredOutputUseCase {
      * @param language The language of the text
      * @return Structured analysis result
      */
+    @Override
     public TextAnalysisResult analyzeTextWithLanguage(String text, String language) {
         String prompt = ANALYSIS_PROMPT.replace("{text}", text)
                 + "\n\nPlease respond in " + (language != null ? language : "English") + ".";

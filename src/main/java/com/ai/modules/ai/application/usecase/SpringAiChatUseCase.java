@@ -1,10 +1,11 @@
 package com.ai.modules.ai.application.usecase;
 
-import com.ai.domain.model.ChatMessage;
-import com.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.model.ChatSession;
 import com.ai.modules.ai.domain.exception.AiServiceException;
 import com.ai.modules.ai.domain.exception.ChatSessionNotFoundException;
 import com.ai.modules.ai.domain.repository.ChatSessionRepository;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -16,20 +17,19 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain service for AI chat operations using Spring AI ChatClient API.
- * Contains chat logic with retry and memory support.
+ * Spring AI implementation of ChatUseCase using ChatClient API.
  */
 @Service
-public class AiChatUseCase {
+public class SpringAiChatUseCase implements ChatUseCase {
 
-    private static final Logger log = LoggerFactory.getLogger(AiChatUseCase.class);
+    private static final Logger log = LoggerFactory.getLogger(SpringAiChatUseCase.class);
 
     private final ChatClient chatClient;
     private final ChatSessionRepository repository;
     private final RetryTemplate retryTemplate;
     private final ChatMemory chatMemory;
 
-    public AiChatUseCase(ChatClient.Builder chatClientBuilder, ChatSessionRepository repository,
+    public SpringAiChatUseCase(ChatClient.Builder chatClientBuilder, ChatSessionRepository repository,
                          RetryTemplate retryTemplate, ChatMemory chatMemory) {
         this.chatClient = chatClientBuilder.build();
         this.repository = repository;
@@ -40,6 +40,7 @@ public class AiChatUseCase {
     /**
      * Sends a message to AI with retry support and returns the response.
      */
+    @Override
     public String chat(String userMessage) {
         log.info("Chat request with retry: {}", truncateForLog(userMessage));
 
@@ -87,10 +88,11 @@ public class AiChatUseCase {
     /**
      * Processes a chat message in a session.
      */
+    @Override
     public String processChatMessage(String sessionId, String userMessage) {
         try {
             ChatSession session = repository.findById(
-                    com.ai.domain.vo.ChatSessionId.of(sessionId))
+                    ChatSessionId.of(sessionId))
                     .orElseThrow(() -> new ChatSessionNotFoundException(sessionId));
 
             session.addUserMessage(userMessage);
@@ -111,6 +113,7 @@ public class AiChatUseCase {
     /**
      * Processes a chat message in the default session.
      */
+    @Override
     public String processChatMessage(String userMessage) {
         ChatSession session = repository.getOrCreateDefaultSession();
         session.addUserMessage(userMessage);
@@ -126,6 +129,7 @@ public class AiChatUseCase {
     /**
      * Creates a new session.
      */
+    @Override
     public ChatSession createSession(String title) {
         ChatSession session = ChatSession.create(title);
         repository.save(session);
@@ -143,15 +147,17 @@ public class AiChatUseCase {
     /**
      * Retrieves a session by ID.
      */
+    @Override
     public Optional<ChatSession> getSession(String sessionId) {
-        return repository.findById(com.ai.domain.vo.ChatSessionId.of(sessionId));
+        return repository.findById(ChatSessionId.of(sessionId));
     }
 
     /**
      * Retrieves message history for a session.
      */
+    @Override
     public List<ChatMessage> getSessionHistory(String sessionId) {
-        return repository.findById(com.ai.domain.vo.ChatSessionId.of(sessionId))
+        return repository.findById(ChatSessionId.of(sessionId))
                 .map(ChatSession::getMessages)
                 .orElseThrow(() -> new ChatSessionNotFoundException(sessionId));
     }
@@ -160,7 +166,7 @@ public class AiChatUseCase {
      * Retrieves the most recent messages.
      */
     public List<ChatMessage> getRecentMessages(String sessionId, int count) {
-        return repository.findById(com.ai.domain.vo.ChatSessionId.of(sessionId))
+        return repository.findById(ChatSessionId.of(sessionId))
                 .map(session -> session.getRecentMessages(count))
                 .orElseThrow(() -> new ChatSessionNotFoundException(sessionId));
     }
@@ -168,14 +174,16 @@ public class AiChatUseCase {
     /**
      * Deletes a session.
      */
+    @Override
     public void deleteSession(String sessionId) {
-        repository.delete(com.ai.domain.vo.ChatSessionId.of(sessionId));
+        repository.delete(ChatSessionId.of(sessionId));
         log.info("Deleted session: {}", sessionId);
     }
 
     /**
      * Retrieves all sessions.
      */
+    @Override
     public List<ChatSession> getAllSessions() {
         return repository.findAll();
     }

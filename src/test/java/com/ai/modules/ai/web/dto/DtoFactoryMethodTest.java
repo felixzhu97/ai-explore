@@ -1,9 +1,10 @@
 package com.ai.modules.ai.web.dto;
 
-import com.ai.domain.model.ChatMessage;
-import com.ai.domain.model.ChatSession;
-import com.ai.domain.vo.ChatSessionId;
-import com.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.model.ChatMessage;
+import com.ai.modules.ai.domain.model.ChatSession;
+import com.ai.modules.ai.domain.vo.ChatSessionId;
+import com.ai.modules.ai.domain.vo.MessageId;
+import com.ai.modules.ai.domain.vo.MessageRole;
 import com.ai.modules.ai.web.dto.ChatRequest;
 import com.ai.modules.ai.web.dto.ChatResponse;
 import com.ai.modules.ai.web.dto.MessageHistoryResponse;
@@ -71,7 +72,7 @@ class DtoFactoryMethodTest {
             String sessionIdStr = "session-abc";
             MessageId messageId = MessageId.generate();
             Instant timestamp = Instant.parse("2024-01-15T10:30:00Z");
-            ChatMessage message = ChatMessage.of(messageId, messageText, "user", timestamp);
+            ChatMessage message = ChatMessage.of(messageId, messageText, MessageRole.USER, timestamp);
 
             // Act
             ChatResponse response = ChatResponse.fromMessage(message, sessionIdStr);
@@ -184,8 +185,8 @@ class DtoFactoryMethodTest {
             // Arrange
             ChatSession session = createTestSessionWithMessages("session-123", "Test Session",
                     List.of(
-                            ChatMessage.of(MessageId.generate(), "Hello", "user", Instant.now()),
-                            ChatMessage.of(MessageId.generate(), "Hi there!", "assistant", Instant.now())
+                            ChatMessage.of(MessageId.generate(), "Hello", MessageRole.USER, Instant.now()),
+                            ChatMessage.of(MessageId.generate(), "Hi there!", MessageRole.ASSISTANT, Instant.now())
                     ));
 
             // Act
@@ -240,8 +241,8 @@ class DtoFactoryMethodTest {
             // Arrange
             ChatSession session = createTestSessionWithMessages("session-msgs", "Chat with Messages",
                     List.of(
-                            ChatMessage.of(MessageId.generate(), "Q1", "user", Instant.now()),
-                            ChatMessage.of(MessageId.generate(), "A1", "assistant", Instant.now())
+                            ChatMessage.of(MessageId.generate(), "Q1", MessageRole.USER, Instant.now()),
+                            ChatMessage.of(MessageId.generate(), "A1", MessageRole.ASSISTANT, Instant.now())
                     ));
 
             // Act

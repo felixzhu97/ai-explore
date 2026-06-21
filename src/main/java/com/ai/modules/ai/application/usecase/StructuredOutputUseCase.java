@@ -57,8 +57,8 @@ public class StructuredOutputUseCase {
      * @return Structured analysis result
      */
     public TextAnalysisResult analyzeTextWithLanguage(String text, String language) {
-        String prompt = ANALYSIS_PROMPT.replace("{text}", text);
-
+        String prompt = ANALYSIS_PROMPT.replace("{text}", text)
+                + "\n\nPlease respond in " + (language != null ? language : "English") + ".";
         return chatClient.prompt()
                 .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
                 .user(prompt)

@@ -209,3 +209,13 @@ When referencing dependencies in commits or PRs, use the official documentation 
 | dev.to | [dev.to](https://dev.to) |
 | arXiv | [arxiv.org](https://arxiv.org) |
 | Hugging Face | [huggingface.co](https://huggingface.co) |
+
+### Design References
+
+| Resource | Official Docs |
+|----------|---------------|
+| Apple Human Interface Guidelines | [developer.apple.com/design](https://developer.apple.com/design/) |
+| Material Design | [m3.material.io](https://m3.material.io) |
+| Angular Material Design | [material.angular.io](https://material.angular.io) |
+| Tailwind CSS | [tailwindcss.com/docs](https://tailwindcss.com/docs) |
+| Figma Design Systems | [figma.com/community](https://www.figma.com/community/design-systems) |

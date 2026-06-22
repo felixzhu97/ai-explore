@@ -47,6 +47,20 @@
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-elevated: var(--shadow-elevated);
   --shadow-input: var(--shadow-input);
+
+  /* Custom Animations */
+  --animate-dropdown-fade-in: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 :root {

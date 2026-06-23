@@ -2,5 +2,11 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  lmdb: false
+  msgpackr-extract: false
+
 # https://pnpm.io/settings#minimumreleaseage
 minimumReleaseAge: 2880

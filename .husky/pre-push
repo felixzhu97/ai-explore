@@ -8,7 +8,7 @@ ROOT_DIR="$(git rev-parse --show-toplevel)"
 
 # Angular tests (Vitest)
 echo "🧪 Running Angular tests (Vitest)..."
-(cd "$ROOT_DIR/apps/web" && pnpm exec vitest run)
+(cd "$ROOT_DIR" && pnpm exec vitest run)
 
 # Java tests with JaCoCo coverage verification
 echo "🧪 Running Java tests with coverage (JUnit 5 + JaCoCo)..."

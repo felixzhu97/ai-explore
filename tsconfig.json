@@ -19,13 +19,13 @@
     "lib": ["ES2022", "dom"],
     "useDefineForClassFields": false,
     "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
+    "baseUrl": "./src/main/web",
     "paths": {
-      "@core/*": ["src/app/core/*"],
-      "@features/*": ["src/app/features/*"],
-      "@shared/*": ["src/app/shared/*"],
-      "@core/i18n": ["src/app/core/i18n"],
-      "@env/*": ["src/environments/*"]
+      "@core/*": ["app/core/*"],
+      "@features/*": ["app/features/*"],
+      "@shared/*": ["app/shared/*"],
+      "@core/i18n": ["app/core/i18n"],
+      "@env/*": ["environments/*"]
     }
   },
   "angularCompilerOptions": {

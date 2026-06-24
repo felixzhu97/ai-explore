@@ -12,29 +12,35 @@
           "changeDetection": "OnPush"
         }
       },
-      "root": "",
-      "sourceRoot": "src",
+      "root": "src/main/web",
+      "sourceRoot": "src/main/web",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/web",
-            "index": "src/index.html",
-            "browser": "src/main.ts",
+            "index": "src/main/web/index.html",
+            "browser": "src/main/web/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.css", "node_modules/ng-zorro-antd/ng-zorro-antd.min.css", "node_modules/ng-zorro-x/ng-zorro-x.min.css"],
+            "assets": [
+              "src/main/web/favicon.ico",
+              "src/main/web/assets"
+            ],
+            "styles": [
+              "src/main/web/styles.css",
+              "node_modules/ng-zorro-x/ng-zorro-x.min.css"
+            ],
             "scripts": []
           },
           "configurations": {
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "src/main/web/environments/environment.ts",
+                  "with": "src/main/web/environments/environment.prod.ts"
                 }
               ],
               "budgets": [
@@ -76,7 +82,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tsconfig.spec.json",
-            "setupFiles": ["src/test-setup.ts"]
+            "setupFiles": ["src/main/web/test-setup.ts"]
           },
           "configurations": {
             "ci": {

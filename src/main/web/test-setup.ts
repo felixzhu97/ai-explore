@@ -15,6 +15,22 @@ try {
   // Already initialized
 }
 
+// Mock URL global for JSDOM environment (not available in Node.js)
+if (typeof globalThis.URL.createObjectURL === 'undefined') {
+  Object.defineProperty(globalThis.URL, 'createObjectURL', {
+    value: () => 'blob:mock-url',
+    writable: true,
+    configurable: true,
+  });
+}
+if (typeof globalThis.URL.revokeObjectURL === 'undefined') {
+  Object.defineProperty(globalThis.URL, 'revokeObjectURL', {
+    value: () => {},
+    writable: true,
+    configurable: true,
+  });
+}
+
 // Suppress JSDOM CSS parsing errors for SCSS nesting
 const originalError = console.error;
 console.error = (...args: unknown[]) => {

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc/app"
+  },
+  "files": [
+    "src/main/web/main.ts"
+  ],
+  "include": [
+    "src/main/web/**/*.d.ts",
+    "src/main/web/**/*.ts"
+  ],
+  "exclude": [
+    "src/main/web/**/*.spec.ts"
+  ]
+}

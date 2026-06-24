@@ -1,4 +1,4 @@
-export * from './models/index';
+export * from './models';
 export * from './components/toast';
 export * from './components/image-zoom-modal';
 

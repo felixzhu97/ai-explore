@@ -1,9 +1,28 @@
 import { defineConfig } from 'vitest/config';
+import angular from '@analogjs/vite-plugin-angular';
+import { resolve } from 'path';
 
 export default defineConfig({
+  plugins: [angular()],
   test: {
-    include: ['**/*.test.ts', '**/*.test.tsx'],
+    include: ['src/main/web/**/*.spec.ts'],
     environment: 'jsdom',
     globals: true,
+    setupFiles: ['src/main/web/test-setup.ts'],
+    exclude: [
+      'src/main/web/app/app.config.spec.ts',
+      'src/main/web/app/features/ai/ai-hub/ai-hub.component.spec.ts',
+      'src/main/web/app/features/panels/agent-panel/agent-panel.component.spec.ts',
+      'src/main/web/app/features/panels/ai-infra-panel/ai-infra-panel.component.spec.ts',
+      'src/main/web/app/shared/components/image-zoom-modal/image-zoom-modal.component.spec.ts',
+    ],
+  },
+  resolve: {
+    alias: {
+      '@core': resolve(__dirname, 'src/main/web/app/core'),
+      '@shared': resolve(__dirname, 'src/main/web/app/shared'),
+      '@features': resolve(__dirname, 'src/main/web/app/features'),
+      '@env': resolve(__dirname, 'src/main/web/environments'),
+    },
   },
 });

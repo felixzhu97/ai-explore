@@ -163,7 +163,7 @@ Open your browser and navigate to:
 | ----------------- | ------------------- | ------ |
 | `pnpm dev`        | Start all services  | 启动所有服务 |
 | `pnpm web:dev`    | Start frontend only | 仅启动前端  |
-| `pnpm server:dev` | Start backend only  | 仅启动后端  |
+| `pnpm server:start` | Start backend only  | 仅启动后端  |
 
 
 ### Build Commands | 构建命令

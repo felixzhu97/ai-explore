@@ -116,7 +116,7 @@ class AiControllerTest {
             var response = controller.chatSimple(new SimpleChatRequest("Simple message", "user-123"));
 
             assertThat(response.getStatusCode().value()).isEqualTo(200);
-            assertThat(response.getBody().response()).isEqualTo("Simple response");
+            assertThat(response.getBody().message()).isEqualTo("Simple response");
         }
 
         @Test

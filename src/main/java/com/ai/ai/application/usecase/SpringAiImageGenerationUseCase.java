@@ -14,7 +14,7 @@ import java.util.List;
  * Spring AI implementation of image generation use case using DALL-E via ImageModel API.
  */
 @Service
-public class SpringAiImageGenerationUseCase implements ImageGenerationUseCasePort {
+public class SpringAiImageGenerationUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(SpringAiImageGenerationUseCase.class);
 
@@ -30,7 +30,6 @@ public class SpringAiImageGenerationUseCase implements ImageGenerationUseCasePor
      * @param prompt The text prompt describing the image
      * @return URL of the generated image
      */
-    @Override
     public String generateImage(String prompt) {
         log.info("Generating image for prompt: {}", truncate(prompt, 50));
 
@@ -57,7 +56,6 @@ public class SpringAiImageGenerationUseCase implements ImageGenerationUseCasePor
      * @param n Number of images to generate
      * @return URL of the generated image
      */
-    @Override
     public String generateImage(String prompt, String model, String quality, int width, int height, int n) {
         log.info("Generating image with options - model: {}, quality: {}, size: {}x{}", model, quality, width, height);
 
@@ -84,7 +82,6 @@ public class SpringAiImageGenerationUseCase implements ImageGenerationUseCasePor
     /**
      * Get available image models.
      */
-    @Override
     public List<String> getAvailableModels() {
         return List.of("dall-e-3", "dall-e-2");
     }
@@ -92,7 +89,6 @@ public class SpringAiImageGenerationUseCase implements ImageGenerationUseCasePor
     /**
      * Get available image sizes.
      */
-    @Override
     public List<String> getAvailableSizes() {
         return List.of("1024x1024", "1024x1792", "1792x1024");
     }
@@ -100,7 +96,6 @@ public class SpringAiImageGenerationUseCase implements ImageGenerationUseCasePor
     /**
      * Get available quality options.
      */
-    @Override
     public List<String> getAvailableQualities() {
         return List.of("standard", "hd");
     }

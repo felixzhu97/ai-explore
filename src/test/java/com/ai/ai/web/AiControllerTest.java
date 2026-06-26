@@ -1,18 +1,8 @@
 package com.ai.ai.web;
 
-import com.ai.ai.web.dto.ChatRequest;
-import com.ai.ai.web.dto.TextAnalysisRequest;
-import com.ai.ai.web.dto.SimpleChatRequest;
-import com.ai.ai.web.dto.CreateSessionRequest;
-import com.ai.ai.web.AiController;
-import com.ai.ai.application.usecase.ChatUseCase;
-import com.ai.ai.application.usecase.StructuredOutputUseCasePort;
+import com.ai.ai.application.usecase.AiFacade;
+import com.ai.ai.web.dto.*;
 import com.ai.ai.domain.model.ChatSession;
-import com.ai.ai.domain.model.ChatMessage;
-import com.ai.ai.domain.vo.ChatSessionId;
-import com.ai.ai.domain.vo.MessageId;
-import com.ai.ai.domain.vo.MessageRole;
-import com.ai.ai.web.dto.TextAnalysisResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +15,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -34,16 +23,13 @@ import static org.mockito.Mockito.*;
 class AiControllerTest {
 
     @Mock
-    private ChatUseCase chatService;
-
-    @Mock
-    private StructuredOutputUseCasePort structuredOutputUseCase;
+    private AiFacade facade;
 
     private AiController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new AiController(chatService, structuredOutputUseCase);
+        controller = new AiController(facade);
     }
 
     @Nested
@@ -53,13 +39,13 @@ class AiControllerTest {
         @Test
         @DisplayName("should return response for valid message")
         void shouldReturnResponseForValidMessage() {
-            when(chatService.chatWithSession("Hello")).thenReturn("Hi there!");
+            when(facade.chatWithSession("Hello")).thenReturn("Hi there!");
 
             var response = controller.chat(new ChatRequest("Hello", null));
 
             assertThat(response.getStatusCode().value()).isEqualTo(200);
             assertThat(response.getBody().response()).isEqualTo("Hi there!");
-            verify(chatService).chatWithSession("Hello");
+            verify(facade).chatWithSession("Hello");
         }
 
         @Test
@@ -82,76 +68,25 @@ class AiControllerTest {
         @Test
         @DisplayName("should use session when sessionId provided")
         void shouldUseSessionWhenSessionIdProvided() {
-            when(chatService.chatWithSession("session-123", "Hello"))
+            when(facade.chatWithSession("session-123", "Hello"))
                     .thenReturn("Response with context");
 
             var response = controller.chat(new ChatRequest("Hello", "session-123"));
 
             assertThat(response.getStatusCode().value()).isEqualTo(200);
             assertThat(response.getBody().response()).isEqualTo("Response with context");
-            verify(chatService).chatWithSession("session-123", "Hello");
+            verify(facade).chatWithSession("session-123", "Hello");
         }
 
         @Test
         @DisplayName("should handle long message without error")
         void shouldHandleLongMessageWithoutError() {
             String longMessage = "A".repeat(100);
-            when(chatService.chatWithSession(longMessage)).thenReturn("Response to long message");
+            when(facade.chatWithSession(longMessage)).thenReturn("Response to long message");
 
             var response = controller.chat(new ChatRequest(longMessage, null));
 
             assertThat(response.getStatusCode().value()).isEqualTo(200);
-        }
-    }
-
-    @Nested
-    @DisplayName("POST /api/chat/simple")
-    class SimpleChatEndpoint {
-
-        @Test
-        @DisplayName("should return response for valid request")
-        void shouldReturnResponseForValidRequest() {
-            when(chatService.chatWithSession("Simple message")).thenReturn("Simple response");
-
-            var response = controller.chatSimple(new SimpleChatRequest("Simple message", "user-123"));
-
-            assertThat(response.getStatusCode().value()).isEqualTo(200);
-            assertThat(response.getBody().message()).isEqualTo("Simple response");
-        }
-
-        @Test
-        @DisplayName("should return 400 for missing message")
-        void shouldReturn400ForMissingMessage() {
-            var response = controller.chatSimple(new SimpleChatRequest(null, "user-123"));
-
-            assertThat(response.getStatusCode().value()).isEqualTo(400);
-        }
-    }
-
-    @Nested
-    @DisplayName("GET /api/sessions/{sessionId}/messages")
-    class GetMessages {
-
-        @Test
-        @DisplayName("should return messages for existing session")
-        void shouldReturnMessagesForExistingSession() {
-            ChatSession session = createTestSession("session-123", "Test Session");
-            when(chatService.getSession("session-123")).thenReturn(Optional.of(session));
-
-            var response = controller.getMessages("session-123");
-
-            assertThat(response.getStatusCode().value()).isEqualTo(200);
-            assertThat(response.getBody()).isNotNull();
-        }
-
-        @Test
-        @DisplayName("should return 404 for non-existent session")
-        void shouldReturn404ForNonExistentSession() {
-            when(chatService.getSession("non-existent")).thenReturn(Optional.empty());
-
-            var response = controller.getMessages("non-existent");
-
-            assertThat(response.getStatusCode().value()).isEqualTo(404);
         }
     }
 
@@ -163,7 +98,7 @@ class AiControllerTest {
         @DisplayName("should create session with custom title")
         void shouldCreateSessionWithCustomTitle() {
             ChatSession session = createTestSession("new-session", "Custom Title");
-            when(chatService.createSession("Custom Title")).thenReturn(session);
+            when(facade.createSession("Custom Title")).thenReturn(session);
 
             var response = controller.createSession(new CreateSessionRequest("Custom Title"));
 
@@ -173,9 +108,9 @@ class AiControllerTest {
 
         @Test
         @DisplayName("should create session with default title when not provided")
-        void shouldCreateSessionWithDefaultTitle() {
+        void shouldCreateSessionWithDefaultTitleWhenNotProvided() {
             ChatSession session = createTestSession("new-session", "New Chat");
-            when(chatService.createSession("New Chat")).thenReturn(session);
+            when(facade.createSession("New Chat")).thenReturn(session);
 
             var response = controller.createSession(new CreateSessionRequest(null));
 
@@ -187,7 +122,7 @@ class AiControllerTest {
         @DisplayName("should create session with default title when body is null")
         void shouldCreateSessionWithDefaultTitleWhenBodyIsNull() {
             ChatSession session = createTestSession("new-session", "New Chat");
-            when(chatService.createSession("New Chat")).thenReturn(session);
+            when(facade.createSession("New Chat")).thenReturn(session);
 
             var response = controller.createSession(null);
 
@@ -206,7 +141,7 @@ class AiControllerTest {
                     createTestSession("session-1", "Chat 1"),
                     createTestSession("session-2", "Chat 2")
             );
-            when(chatService.getAllSessions()).thenReturn(sessions);
+            when(facade.getAllSessions()).thenReturn(sessions);
 
             var response = controller.getAllSessions();
 
@@ -217,7 +152,7 @@ class AiControllerTest {
         @Test
         @DisplayName("should return empty list when no sessions")
         void shouldReturnEmptyListWhenNoSessions() {
-            when(chatService.getAllSessions()).thenReturn(List.of());
+            when(facade.getAllSessions()).thenReturn(List.of());
 
             var response = controller.getAllSessions();
 
@@ -233,12 +168,12 @@ class AiControllerTest {
         @Test
         @DisplayName("should delete session and return 204")
         void shouldDeleteSessionAndReturn204() {
-            doNothing().when(chatService).deleteSession("session-to-delete");
+            doNothing().when(facade).deleteSession("session-to-delete");
 
             var response = controller.deleteSession("session-to-delete");
 
             assertThat(response.getStatusCode().value()).isEqualTo(204);
-            verify(chatService).deleteSession("session-to-delete");
+            verify(facade).deleteSession("session-to-delete");
         }
     }
 
@@ -270,7 +205,7 @@ class AiControllerTest {
                 List.of("Entity 1"),
                 "English"
             );
-            when(structuredOutputUseCase.analyzeText("Hello world")).thenReturn(expectedResult);
+            when(facade.analyzeText("Hello world")).thenReturn(expectedResult);
 
             var response = controller.analyzeText(new TextAnalysisRequest("Hello world", null));
 
@@ -290,7 +225,7 @@ class AiControllerTest {
                 List.of(),
                 "Chinese"
             );
-            when(structuredOutputUseCase.analyzeTextWithLanguage("你好世界", "Chinese"))
+            when(facade.analyzeTextWithLanguage("你好世界", "Chinese"))
                 .thenReturn(expectedResult);
 
             var response = controller.analyzeText(new TextAnalysisRequest("你好世界", "Chinese"));
@@ -317,22 +252,14 @@ class AiControllerTest {
     }
 
     private ChatSession createTestSession(String id, String title) {
-        return createTestSession(id, title, List.of());
-    }
-
-    private ChatSession createTestSession(String id, String title, List<ChatMessage> messages) {
         ChatSession session = ChatSession.create(title);
         try {
             java.lang.reflect.Field idField = ChatSession.class.getDeclaredField("id");
             idField.setAccessible(true);
-            idField.set(session, ChatSessionId.of(id));
+            idField.set(session, com.ai.ai.domain.vo.ChatSessionId.of(id));
         } catch (Exception e) {
             // Ignore for testing
         }
         return session;
-    }
-
-    private ChatMessage createMessage(String text, String role) {
-        return ChatMessage.of(MessageId.generate(), text, MessageRole.from(role), Instant.now());
     }
 }

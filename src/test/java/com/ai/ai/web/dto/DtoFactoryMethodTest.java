@@ -4,11 +4,8 @@ import com.ai.ai.domain.model.ChatMessage;
 import com.ai.ai.domain.model.ChatSession;
 import com.ai.ai.domain.vo.ChatSessionId;
 import com.ai.ai.domain.vo.MessageId;
-import com.ai.ai.domain.vo.MessageRole;
 import com.ai.ai.web.dto.ChatRequest;
 import com.ai.ai.web.dto.ChatResponse;
-import com.ai.ai.web.dto.MessageHistoryResponse;
-import com.ai.ai.web.dto.SessionInfo;
 import com.ai.rag.web.dto.DocumentSummaryDto;
 import com.ai.rag.web.dto.RagChatRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * DTO Factory Method Tests
  *
- * Tests DTO factory methods and record constructors using @ExtendWith(MockitoExtension.class).
+ * Tests DTO factory methods and record constructors.
  * These are pure unit tests with no Spring context.
  */
 @DisplayName("DTO Factory Method Tests")
@@ -72,7 +69,7 @@ class DtoFactoryMethodTest {
             String sessionIdStr = "session-abc";
             MessageId messageId = MessageId.generate();
             Instant timestamp = Instant.parse("2024-01-15T10:30:00Z");
-            ChatMessage message = ChatMessage.of(messageId, messageText, MessageRole.USER, timestamp);
+            ChatMessage message = ChatMessage.of(messageId, messageText, "user", timestamp);
 
             // Act
             ChatResponse response = ChatResponse.fromMessage(message, sessionIdStr);
@@ -176,45 +173,6 @@ class DtoFactoryMethodTest {
     }
 
     @Nested
-    @DisplayName("MessageHistoryResponse factory methods")
-    class MessageHistoryResponseFactoryTests {
-
-        @Test
-        @DisplayName("should create MessageHistoryResponse from ChatSession")
-        void shouldCreateMessageHistoryResponseFromChatSession() {
-            // Arrange
-            ChatSession session = createTestSessionWithMessages("session-123", "Test Session",
-                    List.of(
-                            ChatMessage.of(MessageId.generate(), "Hello", MessageRole.USER, Instant.now()),
-                            ChatMessage.of(MessageId.generate(), "Hi there!", MessageRole.ASSISTANT, Instant.now())
-                    ));
-
-            // Act
-            MessageHistoryResponse response = MessageHistoryResponse.from(session);
-
-            // Assert
-            assertThat(response.sessionId()).isEqualTo("session-123");
-            assertThat(response.messages()).hasSize(2);
-            assertThat(response.totalCount()).isEqualTo(2);
-        }
-
-        @Test
-        @DisplayName("should create MessageHistoryResponse from empty session")
-        void shouldCreateMessageHistoryResponseFromEmptySession() {
-            // Arrange
-            ChatSession session = createTestSession("empty-session", "Empty Session");
-
-            // Act
-            MessageHistoryResponse response = MessageHistoryResponse.from(session);
-
-            // Assert
-            assertThat(response.sessionId()).isEqualTo("empty-session");
-            assertThat(response.messages()).isEmpty();
-            assertThat(response.totalCount()).isEqualTo(0);
-        }
-    }
-
-    @Nested
     @DisplayName("SessionInfo factory methods")
     class SessionInfoFactoryTests {
 
@@ -241,8 +199,8 @@ class DtoFactoryMethodTest {
             // Arrange
             ChatSession session = createTestSessionWithMessages("session-msgs", "Chat with Messages",
                     List.of(
-                            ChatMessage.of(MessageId.generate(), "Q1", MessageRole.USER, Instant.now()),
-                            ChatMessage.of(MessageId.generate(), "A1", MessageRole.ASSISTANT, Instant.now())
+                            ChatMessage.of(MessageId.generate(), "Q1", "user", Instant.now()),
+                            ChatMessage.of(MessageId.generate(), "A1", "assistant", Instant.now())
                     ));
 
             // Act

@@ -3,8 +3,7 @@ package com.ai.domain.model;
 import com.ai.ai.domain.vo.ChatSessionId;
 import com.ai.ai.domain.model.ChatMessage;
 import com.ai.ai.domain.model.ChatSession;
-import com.ai.ai.domain.vo.MessageId;
-import com.ai.ai.domain.vo.MessageRole;
+import com.ai.ai.vo.MessageId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -173,7 +172,7 @@ class ChatSessionTest {
             ChatMessage message = session.addUserMessage("Hello!");
 
             // Assert
-            assertThat(message.getRole()).isEqualTo(MessageRole.USER);
+            assertThat(message.role()).isEqualTo("user");
             assertThat(message.isFromUser()).isTrue();
             assertThat(message.isFromAssistant()).isFalse();
         }
@@ -202,7 +201,7 @@ class ChatSessionTest {
             ChatMessage message = session.addAssistantMessage("Hello!");
 
             // Assert
-            assertThat(message.getRole()).isEqualTo(MessageRole.ASSISTANT);
+            assertThat(message.role()).isEqualTo("assistant");
             assertThat(message.isFromAssistant()).isTrue();
             assertThat(message.isFromUser()).isFalse();
         }
@@ -853,7 +852,7 @@ class ChatSessionTest {
             // Assert
             assertThat(updated.getText()).isEqualTo("Updated");
             assertThat(updated.getId()).isEqualTo(original.getId());
-            assertThat(updated.getRole()).isEqualTo(original.getRole());
+            assertThat(updated.role()).isEqualTo(original.role());
         }
 
         @Test
@@ -862,8 +861,8 @@ class ChatSessionTest {
             // Arrange
             var id = MessageId.generate();
             Instant timestamp = Instant.now();
-            ChatMessage msg1 = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
-            ChatMessage msg2 = ChatMessage.of(id, "Hello", MessageRole.USER, timestamp);
+            ChatMessage msg1 = ChatMessage.of(id, "Hello", "user", timestamp);
+            ChatMessage msg2 = ChatMessage.of(id, "Hello", "user", timestamp);
 
             // Assert
             assertThat(msg1).isEqualTo(msg2);

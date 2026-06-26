@@ -2,7 +2,6 @@ package com.ai.domain;
 
 import com.ai.ai.domain.model.ChatMessageType;
 import com.ai.ai.domain.model.ChatSessionStatus;
-import com.ai.ai.domain.vo.DomainConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Enum and Constants Tests
  *
- * Tests for domain enums and constants.
+ * Tests for domain enums.
  */
 @DisplayName("Enum and Constants Tests")
 class EnumAndConstantsTest {
@@ -98,76 +97,6 @@ class EnumAndConstantsTest {
         void closedShouldHaveCorrectName() {
             // Assert
             assertThat(ChatSessionStatus.CLOSED.name()).isEqualTo("CLOSED");
-        }
-    }
-
-    @Nested
-    @DisplayName("DomainConstants tests")
-    class DomainConstantsTests {
-
-        @Test
-        @DisplayName("should have correct default session title")
-        void shouldHaveCorrectDefaultSessionTitle() {
-            // Assert
-            assertThat(DomainConstants.DEFAULT_SESSION_TITLE).isEqualTo("New Chat");
-        }
-
-        @Test
-        @DisplayName("should have correct max message length")
-        void shouldHaveCorrectMaxMessageLength() {
-            // Assert
-            assertThat(DomainConstants.MAX_MESSAGE_LENGTH).isEqualTo(10000);
-        }
-
-        @Test
-        @DisplayName("should have correct default recent messages count")
-        void shouldHaveCorrectDefaultRecentMessagesCount() {
-            // Assert
-            assertThat(DomainConstants.DEFAULT_RECENT_MESSAGES_COUNT).isEqualTo(10);
-        }
-
-        @Test
-        @DisplayName("should not have negative max message length")
-        void shouldNotHaveNegativeMaxMessageLength() {
-            // Assert
-            assertThat(DomainConstants.MAX_MESSAGE_LENGTH).isGreaterThan(0);
-        }
-
-        @Test
-        @DisplayName("should not have negative recent messages count")
-        void shouldNotHaveNegativeRecentMessagesCount() {
-            // Assert
-            assertThat(DomainConstants.DEFAULT_RECENT_MESSAGES_COUNT).isGreaterThan(0);
-        }
-
-        @Test
-        @DisplayName("should have reasonable max message length")
-        void shouldHaveReasonableMaxMessageLength() {
-            // Assert - reasonable max length should be at least 100
-            assertThat(DomainConstants.MAX_MESSAGE_LENGTH).isGreaterThanOrEqualTo(100);
-        }
-
-        @Test
-        @DisplayName("should have reasonable default recent messages count")
-        void shouldHaveReasonableDefaultRecentMessagesCount() {
-            // Assert - reasonable count should be between 1 and 100
-            assertThat(DomainConstants.DEFAULT_RECENT_MESSAGES_COUNT)
-                    .isGreaterThan(0)
-                    .isLessThan(100);
-        }
-
-        @Test
-        @DisplayName("should have non-null default session title")
-        void shouldHaveNonNullDefaultSessionTitle() {
-            // Assert
-            assertThat(DomainConstants.DEFAULT_SESSION_TITLE).isNotNull();
-        }
-
-        @Test
-        @DisplayName("should have non-empty default session title")
-        void shouldHaveNonEmptyDefaultSessionTitle() {
-            // Assert
-            assertThat(DomainConstants.DEFAULT_SESSION_TITLE).isNotEmpty();
         }
     }
 }

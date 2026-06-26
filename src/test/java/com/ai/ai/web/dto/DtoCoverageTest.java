@@ -2,7 +2,6 @@ package com.ai.ai.web.dto;
 
 import com.ai.rag.web.dto.RagChatResponse;
 import com.ai.rag.web.dto.SourceDocumentDto;
-import com.ai.rag.web.dto.UploadDocumentRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,72 +81,6 @@ class DtoCoverageTest {
 
             // Assert
             assertThat(dto.score()).isEqualTo(1.0f);
-        }
-    }
-
-    @Nested
-    @DisplayName("UploadDocumentRequest")
-    class UploadDocumentRequestTests {
-
-        @Test
-        @DisplayName("should create UploadDocumentRequest with all fields")
-        void shouldCreateUploadDocumentRequest() {
-            // Arrange
-            String title = "Test Document";
-            String content = "Document content here";
-            String fileName = "test.pdf";
-
-            // Act
-            UploadDocumentRequest request = new UploadDocumentRequest(title, content, fileName);
-
-            // Assert
-            assertThat(request.title()).isEqualTo(title);
-            assertThat(request.content()).isEqualTo(content);
-            assertThat(request.fileName()).isEqualTo(fileName);
-        }
-
-        @Test
-        @DisplayName("should create UploadDocumentRequest without fileName")
-        void shouldCreateUploadDocumentRequestWithoutFileName() {
-            // Act
-            UploadDocumentRequest request = new UploadDocumentRequest("Title", "Content", null);
-
-            // Assert
-            assertThat(request.title()).isEqualTo("Title");
-            assertThat(request.content()).isEqualTo("Content");
-            assertThat(request.fileName()).isNull();
-        }
-
-        @Test
-        @DisplayName("should handle empty title")
-        void shouldHandleEmptyTitle() {
-            // Act
-            UploadDocumentRequest request = new UploadDocumentRequest("", "Content", null);
-
-            // Assert
-            assertThat(request.title()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("should handle empty content")
-        void shouldHandleEmptyContent() {
-            // Act
-            UploadDocumentRequest request = new UploadDocumentRequest("Title", "", null);
-
-            // Assert
-            assertThat(request.content()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("should handle unicode characters in fields")
-        void shouldHandleUnicodeCharactersInFields() {
-            // Act
-            UploadDocumentRequest request = new UploadDocumentRequest("标题文档", "中文内容", "文件.pdf");
-
-            // Assert
-            assertThat(request.title()).isEqualTo("标题文档");
-            assertThat(request.content()).isEqualTo("中文内容");
-            assertThat(request.fileName()).isEqualTo("文件.pdf");
         }
     }
 
@@ -237,18 +170,6 @@ class DtoCoverageTest {
         }
 
         @Test
-        @DisplayName("should handle null values in UploadDocumentRequest")
-        void shouldHandleNullValuesInUploadDocumentRequest() {
-            // Act
-            UploadDocumentRequest request = new UploadDocumentRequest(null, null, null);
-
-            // Assert
-            assertThat(request.title()).isNull();
-            assertThat(request.content()).isNull();
-            assertThat(request.fileName()).isNull();
-        }
-
-        @Test
         @DisplayName("should handle null content in RagChatResponse")
         void shouldHandleNullContentInRagChatResponse() {
             // Act
@@ -275,19 +196,6 @@ class DtoCoverageTest {
             assertThat(dto1).isEqualTo(dto2);
             assertThat(dto1).isNotEqualTo(dto3);
             assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
-        }
-
-        @Test
-        @DisplayName("UploadDocumentRequest should have correct equals behavior")
-        void uploadDocumentRequestShouldHaveCorrectEqualsBehavior() {
-            // Arrange
-            UploadDocumentRequest req1 = new UploadDocumentRequest("Title", "Content", "file.pdf");
-            UploadDocumentRequest req2 = new UploadDocumentRequest("Title", "Content", "file.pdf");
-            UploadDocumentRequest req3 = new UploadDocumentRequest("Different", "Content", "file.pdf");
-
-            // Assert
-            assertThat(req1).isEqualTo(req2);
-            assertThat(req1).isNotEqualTo(req3);
         }
 
         @Test

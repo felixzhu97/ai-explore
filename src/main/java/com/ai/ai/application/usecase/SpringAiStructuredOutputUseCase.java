@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
  * Spring AI implementation of structured output use case using .entity() method.
  */
 @Service
-public class SpringAiStructuredOutputUseCase implements StructuredOutputUseCasePort {
+public class SpringAiStructuredOutputUseCase {
 
     private final ChatClient chatClient;
 
@@ -39,7 +39,6 @@ public class SpringAiStructuredOutputUseCase implements StructuredOutputUseCaseP
      * @param text The text to analyze
      * @return Structured analysis result
      */
-    @Override
     public TextAnalysisResult analyzeText(String text) {
         String prompt = ANALYSIS_PROMPT.replace("{text}", text);
 
@@ -57,7 +56,6 @@ public class SpringAiStructuredOutputUseCase implements StructuredOutputUseCaseP
      * @param language The language of the text
      * @return Structured analysis result
      */
-    @Override
     public TextAnalysisResult analyzeTextWithLanguage(String text, String language) {
         String prompt = ANALYSIS_PROMPT.replace("{text}", text)
                 + "\n\nPlease respond in " + (language != null ? language : "English") + ".";

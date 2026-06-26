@@ -42,14 +42,19 @@ describe('StatusBadgeComponent', () => {
 
   it('should apply correct CSS class for each status', () => {
     const statuses: BadgeStatus[] = ['online', 'offline', 'busy', 'error', 'pending'];
+    const expectedClasses: Record<BadgeStatus, string> = {
+      online: 'bg-success-light',
+      offline: 'bg-black/6',
+      busy: 'bg-warning-light',
+      error: 'bg-error-light',
+      pending: 'bg-primary-light',
+    };
 
     statuses.forEach((status) => {
       createFixture(status);
 
       const badge = fixture.nativeElement.querySelector('span');
-      // Check that the badge has the status-specific color class
-      const statusClass = component.statusClasses[status].split(' ')[0]; // e.g., 'bg-success-light'
-      expect(badge.classList).toContain(statusClass);
+      expect(badge.classList).toContain(expectedClasses[status]);
     });
   });
 

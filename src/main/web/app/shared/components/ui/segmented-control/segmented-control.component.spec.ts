@@ -115,8 +115,8 @@ describe('SegmentedControlComponent', () => {
   describe('snapshot tests', () => {
     it('should match snapshot of rendered options', () => {
       createFixture();
-      const buttons = fixture.nativeElement.querySelectorAll('button');
-      const snapshot = Array.from(buttons).map((btn) => ({
+      const buttons = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLElement>);
+      const snapshot = buttons.map((btn) => ({
         text: btn.textContent?.trim(),
         ariaSelected: btn.getAttribute('aria-selected'),
         ariaDisabled: btn.getAttribute('aria-disabled'),

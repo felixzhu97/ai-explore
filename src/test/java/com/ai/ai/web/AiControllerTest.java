@@ -113,7 +113,7 @@ class AiControllerTest {
         void shouldReturnResponseForValidRequest() {
             when(chatService.chatWithSession("Simple message")).thenReturn("Simple response");
 
-            var response = controller.chatSimple(new SimpleChatRequest("Simple message"));
+            var response = controller.chatSimple(new SimpleChatRequest("Simple message", "user-123"));
 
             assertThat(response.getStatusCode().value()).isEqualTo(200);
             assertThat(response.getBody().response()).isEqualTo("Simple response");
@@ -122,7 +122,7 @@ class AiControllerTest {
         @Test
         @DisplayName("should return 400 for missing message")
         void shouldReturn400ForMissingMessage() {
-            var response = controller.chatSimple(new SimpleChatRequest(null));
+            var response = controller.chatSimple(new SimpleChatRequest(null, "user-123"));
 
             assertThat(response.getStatusCode().value()).isEqualTo(400);
         }

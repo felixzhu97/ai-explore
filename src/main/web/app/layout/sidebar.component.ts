@@ -62,7 +62,6 @@ export class SidebarComponent {
   });
 
   readonly tabs: NavTab[] = [
-    { key: 'ai-infra', labelKey: 'aiinfra', path: '/ai-infra' },
     { key: 'rag', labelKey: 'documentQA', path: '/rag' },
     { key: 'vision', labelKey: 'visionAI', path: '/vision' },
     { key: 'ai-hubs', labelKey: 'aiHub', path: '/ai-hubs' },
@@ -113,7 +112,6 @@ export class SidebarComponent {
 
   getIcon(key: string): string {
     const icons: Record<string, string> = {
-      'ai-infra': '⚙️',
       rag: '📄',
       vision: '👁️',
       'ai-hubs': '🧠',

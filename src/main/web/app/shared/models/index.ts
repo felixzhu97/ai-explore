@@ -4,9 +4,6 @@
 // Chat types
 export type { ChatMessage, ChatMessageData, ChatRequest, ChatResponse, ModelInfo, ProviderInfo } from '../../ai-hub/chat/chat.model';
 
-// Agent types
-export type { Agent, AgentInfo, ToolCall, ToolCallStatus, ChatMessageData as AgentChatMessageData } from '../../ai-infra/agent/agent.model';
-
 // RAG types
 export type { RagQuery, SourceDocument, Document, DocumentListResponse, DocumentListItem, RAGSource } from '../../rag/rag.model';
 

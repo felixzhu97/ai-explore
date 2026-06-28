@@ -1,0 +1,98 @@
+---
+description: Jira ticket creation standards with BDD-style acceptance criteria
+alwaysApply: true
+---
+
+# Jira Ticket Creation Standards
+
+## User Story Format
+
+Every ticket must include a user story in the following format:
+
+```
+**As a** [role]
+**I want** [action/feature]
+**So that** [benefit/value]
+```
+
+## Acceptance Criteria Format
+
+Use **GIVEN-WHEN-THEN** (BDD) format for all acceptance criteria:
+
+```
+**GIVEN** [precondition/state]
+**WHEN** [trigger/action]
+**THEN** [expected outcome]
+```
+
+### Rules
+
+- Each GIVEN-WHEN-THEN block should cover one specific scenario
+- Cover both happy path and edge cases
+- Include at least 3-5 acceptance criteria per ticket
+- Focus on user interaction and observable behavior, not implementation details
+- Use present tense ("the user clicks" not "the user will click")
+
+### Good Examples
+
+```
+**GIVEN** a user is logged in
+**WHEN** they click the "Upload" button
+**THEN** a file picker dialog opens
+
+**GIVEN** an upload is in progress
+**WHEN** the network connection is lost
+**THEN** an error message is displayed and the upload can be retried
+```
+
+### Bad Examples (Avoid)
+
+```
+**WHEN** the button is clicked, call the upload API
+**THEN** save the result to database
+
+**GIVEN** the user wants to upload a file
+**WHEN** they click the button
+**THEN** the system works correctly
+```
+
+## OpenAI-Style Interaction Patterns
+
+When describing UI/UX acceptance criteria, reference these interaction patterns:
+
+| Pattern | Description |
+|---------|-------------|
+| Chat bubbles | User messages right-aligned, AI responses left-aligned with avatars |
+| Markdown rendering | Support for code blocks, lists, bold, italic |
+| Typing indicator | Animated dots during AI processing |
+| Copy button | One-click copy for code and text blocks |
+| Regenerate | Re-run the last query and replace the response |
+| Toast notifications | Non-blocking success/error feedback |
+| Skeleton loader | Pulsing placeholder during loading states |
+| Smooth transitions | Page/panel open/close animations |
+
+## Ticket Structure Template
+
+```
+## User Story
+
+**As a** [role]
+**I want** [action/feature]
+**So that** [benefit/value]
+
+## Acceptance Criteria
+
+**GIVEN** [precondition]
+**WHEN** [action]
+**THEN** [outcome]
+
+[Additional GIVEN-WHEN-THEN blocks...]
+```
+
+## Quick Checklist
+
+- [ ] User story follows As a / I want / So that format
+- [ ] At least 3 acceptance criteria with GIVEN-WHEN-THEN structure
+- [ ] Acceptance criteria focus on behavior, not implementation
+- [ ] Edge cases and error states are covered
+- [ ] OpenAI-style interaction patterns referenced where applicable

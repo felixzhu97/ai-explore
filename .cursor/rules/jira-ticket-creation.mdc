@@ -89,10 +89,39 @@ When describing UI/UX acceptance criteria, reference these interaction patterns:
 [Additional GIVEN-WHEN-THEN blocks...]
 ```
 
-## Quick Checklist
+## Story Points
+
+All **Story** and **Task** type tickets **must** have a Story Point estimate filled in before being added to a Sprint.
+
+### Story Point Field
+
+| Field | ID | Description |
+|-------|-----|-------------|
+| Story point estimate | `customfield_10016` | Numeric story point value (e.g., 1, 2, 3, 5, 8, 13) |
+
+### Story Point Guidelines
+
+| Points | Complexity | Description |
+|--------|------------|-------------|
+| 1 | Very Low | Trivial change, no research needed |
+| 2 | Low | Simple task, well understood |
+| 3 | Medium | Standard task, minor complexity |
+| 5 | Medium-High | Moderate complexity, some unknowns |
+| 8 | High | Complex task, multiple components |
+| 13 | Very High | High risk, needs decomposition |
+
+### Rules
+
+- **Every ticket must have SP** before entering Sprint planning
+- Use Fibonacci sequence (1, 2, 3, 5, 8, 13)
+- If a task exceeds 13 SP, consider splitting it
+- Completed tickets should be used to calibrate future estimates
+
+### Quick Checklist
 
 - [ ] User story follows As a / I want / So that format
 - [ ] At least 3 acceptance criteria with GIVEN-WHEN-THEN structure
 - [ ] Acceptance criteria focus on behavior, not implementation
 - [ ] Edge cases and error states are covered
 - [ ] OpenAI-style interaction patterns referenced where applicable
+- [ ] **Story Point is filled in** (`customfield_10016`)

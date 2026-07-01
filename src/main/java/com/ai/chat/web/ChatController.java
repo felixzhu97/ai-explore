@@ -79,4 +79,18 @@ public class ChatController {
         chatFacade.deleteSession(sessionId);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/sessions/{sessionId}/system-prompt")
+    public ResponseEntity<SessionInfo> updateSystemPrompt(@PathVariable String sessionId,
+                                                          @RequestBody String systemPrompt) {
+        chatFacade.updateSystemPrompt(sessionId, systemPrompt);
+        return chatFacade.getSession(sessionId)
+                .map(s -> ResponseEntity.ok(SessionInfo.from(s)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/token-stats")
+    public ResponseEntity<List<SessionInfo>> getTokenStats() {
+        return ResponseEntity.ok(chatFacade.getAllSessions().stream().map(SessionInfo::from).toList());
+    }
 }

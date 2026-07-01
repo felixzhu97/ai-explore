@@ -187,10 +187,16 @@ public class SpringAiChatUseCase implements ChatUseCase {
 
     @Override
     public Flux<String> chatStream(List<ChatMessage> messages) {
-        log.info("Streaming chat request with {} messages", messages.size());
+        return chatStreamWithSystemPrompt(messages, null);
+    }
 
-        return chatClient.prompt()
-                .messages(messages.stream().map(this::toSpringMessage).toList())
+    public Flux<String> chatStreamWithSystemPrompt(List<ChatMessage> messages, String systemPrompt) {
+        log.info("Streaming chat request with {} messages", messages.size());
+        var prompt = chatClient.prompt();
+        if (systemPrompt != null && !systemPrompt.isBlank()) {
+            prompt.system(systemPrompt);
+        }
+        return prompt.messages(messages.stream().map(this::toSpringMessage).toList())
                 .stream()
                 .content();
     }
@@ -215,10 +221,11 @@ public class SpringAiChatUseCase implements ChatUseCase {
     private Flux<String> exchangeStreamMessages(ChatSession session, List<ChatMessage> messages) {
         ChatMessage userMessage = getLastUserMessage(messages);
         session.addUserMessage(userMessage.getText());
+        session.addInputChars(userMessage.getText().length());
         repository.save(session);
 
         StringBuilder aiResponse = new StringBuilder();
-        return chatStream(messages)
+        return chatStreamWithSystemPrompt(messages, session.getSystemPrompt())
                 .doOnNext(aiResponse::append)
                 .doOnComplete(() -> saveStreamedAssistantMessage(session, aiResponse));
     }
@@ -237,7 +244,16 @@ public class SpringAiChatUseCase implements ChatUseCase {
             return;
         }
         session.addAssistantMessage(response);
+        session.addOutputChars(response.length());
         repository.save(session);
+    }
+
+    @Override
+    public void updateSystemPrompt(String sessionId, String systemPrompt) {
+        ChatSession session = loadOrCreateSession(sessionId);
+        session.setSystemPrompt(systemPrompt);
+        repository.save(session);
+        log.info("Updated system prompt for session {}", sessionId);
     }
 
     private Message toSpringMessage(ChatMessage msg) {

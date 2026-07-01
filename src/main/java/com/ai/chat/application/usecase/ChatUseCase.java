@@ -19,4 +19,5 @@ public interface ChatUseCase {
     List<ChatMessage> getSessionHistory(String sessionId);
     void deleteSession(String sessionId);
     List<ChatSession> getAllSessions();
+    void updateSystemPrompt(String sessionId, String systemPrompt);
 }

@@ -12,7 +12,10 @@ public record SessionInfo(
     String title,
     int messageCount,
     Instant createdAt,
-    Instant lastActivityAt
+    Instant lastActivityAt,
+    String systemPrompt,
+    long totalInputChars,
+    long totalOutputChars
 ) {
     public static SessionInfo from(ChatSession session) {
         return new SessionInfo(
@@ -20,7 +23,10 @@ public record SessionInfo(
             session.getTitle(),
             session.getMessageCount(),
             session.getCreatedAt(),
-            session.getLastActivityAt()
+            session.getLastActivityAt(),
+            session.getSystemPrompt(),
+            session.getTotalInputChars(),
+            session.getTotalOutputChars()
         );
     }
 }

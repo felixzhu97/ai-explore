@@ -87,6 +87,10 @@ public class ChatFacade {
         return chatUseCase.getAllSessions();
     }
 
+    public void updateSystemPrompt(String sessionId, String systemPrompt) {
+        chatUseCase.updateSystemPrompt(sessionId, systemPrompt);
+    }
+
     private String truncate(String text) {
         if (text == null) return "null";
         if (text.length() <= 50) return text;

@@ -16,6 +16,9 @@ public class ChatSession {
     private final List<ChatMessage> messages;
     private final Instant createdAt;
     private Instant lastActivityAt;
+    private String systemPrompt;
+    private long totalInputChars;
+    private long totalOutputChars;
 
     ChatSession(ChatSessionId id, String title, Instant createdAt) {
         this.id = Objects.requireNonNull(id, "ChatSessionId cannot be null");
@@ -133,6 +136,13 @@ public class ChatSession {
         messages.clear();
         updateLastActivity();
     }
+
+    public String getSystemPrompt() { return systemPrompt; }
+    public void setSystemPrompt(String systemPrompt) { this.systemPrompt = systemPrompt; }
+    public long getTotalInputChars() { return totalInputChars; }
+    public long getTotalOutputChars() { return totalOutputChars; }
+    public void addInputChars(long chars) { this.totalInputChars += chars; }
+    public void addOutputChars(long chars) { this.totalOutputChars += chars; }
 
     private void updateLastActivity() {
         this.lastActivityAt = Instant.now();

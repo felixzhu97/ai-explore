@@ -64,6 +64,11 @@ spring:
   liquibase:
     change-log: db/changelog-master.xml
 
+# Rate limiting
+app:
+  rate-limit:
+    max-requests-per-minute: ${RATE_LIMIT_RPM:30}
+
 # RAG configuration
 rag:
   mock:
